@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "cannacraft",
+  "version": "${version}",
+
+  "name": "Cannacraft",
+  "description": "Adds many different cannabis related items to minecraft!",
+  "authors": [
+    "Skilles"
+  ],
+  "contact": {
+    "homepage": "https://budco.shop/",
+    "sources": "https://github.com/Skilles/cannacraft"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/cannacraft/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.skilles.cannacraft.Cannacraft"
+    ],
+    "client": [
+      "com.skilles.cannacraft.CannacraftClient"
+    ]
+  },
+  "mixins": [
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.11.1",
+    "fabric": "*",
+    "minecraft": "1.16.x"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
