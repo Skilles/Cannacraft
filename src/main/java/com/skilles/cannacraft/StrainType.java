@@ -9,7 +9,7 @@ public class StrainType {
     int index = 0;
     String type;
     String strain;
-    static int strainCount = 3; // Amount of strains
+    public static int strainCount = 3; // Amount of strains
     Map<String, Integer> strainMap = new HashMap<>();
     public StrainType() {
         // Goes through and maps each strain string to index
@@ -24,16 +24,20 @@ public class StrainType {
             case 0:
                 strain = "OG Kush";
                 type = "Hybrid";
+                break;
             case 1:
                 strain = "Purple Punch";
                 type = "Indica";
+                break;
             case 2:
                 strain = "Chem Trix";
                 type = "Sativa";
+                break;
             default:
                 strain = "Unknown";
                 type = "Unknown";
         }
+
     }
     // Set strain using index
     public void setStrain(int index) {
