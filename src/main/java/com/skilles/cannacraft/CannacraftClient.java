@@ -1,6 +1,5 @@
 package com.skilles.cannacraft;
 
-import com.skilles.cannacraft.registry.ModBlocks;
 import com.skilles.cannacraft.registry.ModScreens;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -14,7 +13,5 @@ public class CannacraftClient implements ClientModInitializer {
     public void onInitializeClient() {
         ModScreens.registerScreens();
         System.out.println("Screens registered!");
-        ModBlocks.applyBlockRender();
-        System.out.println("Block entity textures applied!");
     }
 }
