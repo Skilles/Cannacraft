@@ -1,0 +1,13 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        maven {
+            name = 'Guava'
+            url = "https://mvnrepository.com/artifact/com.google.guava/guava"
+        }
+        gradlePluginPortal()
+    }
+}
