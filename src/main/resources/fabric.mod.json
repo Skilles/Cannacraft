@@ -23,6 +23,9 @@
     ],
     "client": [
       "com.skilles.cannacraft.CannacraftClient"
+    ],
+    "cardinal-components": [
+      "com.skilles.cannacraft.registry.ModComponents"
     ]
   },
   "mixins": [
@@ -35,5 +38,10 @@
   },
   "suggests": {
     "another-mod": "*"
+  },
+  "custom": {
+    "cardinal-components": [
+      "cannacraft:straincomponent"
+    ]
   }
 }

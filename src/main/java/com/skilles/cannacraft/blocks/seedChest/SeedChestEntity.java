@@ -2,6 +2,7 @@ package com.skilles.cannacraft.blocks.seedChest;
 
 import com.skilles.cannacraft.ImplementedInventory;
 import com.skilles.cannacraft.registry.ModEntities;
+import com.skilles.cannacraft.registry.ModItems;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;

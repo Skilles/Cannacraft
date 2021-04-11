@@ -3,21 +3,22 @@ package com.skilles.cannacraft;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.skilles.cannacraft.items.Seed;
-import com.skilles.cannacraft.registry.ModBlocks;
-import com.skilles.cannacraft.registry.ModEntities;
-import com.skilles.cannacraft.registry.ModItems;
-import com.skilles.cannacraft.registry.ModScreens;
+import com.skilles.cannacraft.items.StrainComponent;
+import com.skilles.cannacraft.items.StrainInterface;
+import com.skilles.cannacraft.registry.*;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static net.minecraft.server.command.CommandManager.argument;
@@ -28,18 +29,27 @@ public class Cannacraft implements ModInitializer {
     public static final String MOD_ID = "cannacraft";
 
     public static final ItemGroup ITEM_GROUP = FabricItemGroupBuilder.build(
-            new Identifier(MOD_ID, "general"),
+            id("general"),
             () -> new ItemStack(ModItems.SEED));
 
+    public static Identifier id(String path) {
+        return new Identifier(MOD_ID, path);
+    }
+
     public static int setSeed(CommandContext<ServerCommandSource> ctx, int strain) throws CommandSyntaxException {
-        final ServerCommandSource source = ctx.getSource();
-        final ServerPlayerEntity self = source.getPlayer();
+        final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack itemStack = self.getMainHandStack();
-        CompoundTag compoundTag = itemStack.getTag();
         if(itemStack.getItem().equals(ModItems.SEED)){
-            Seed seed = (Seed) itemStack.getItem();
-            Item seed1 = itemStack.getItem();
-            seed.strainType = strain;
+            /*CompoundTag newCompoundTag = new CompoundTag();
+            StrainType strainType = new StrainType();
+            strainType.setStrain(strain);
+            newCompoundTag.put("Strain", strainType.getStrainTag());
+            itemStack.setTag(newCompoundTag);*/
+            ModComponents.STRAIN.get(itemStack).setIndex(strain);
+            System.out.println("Index update! arg="+strain+" new="+ModComponents.STRAIN.get(itemStack).getStrain());
+            /*if(!self.inventory.insertStack(self.inventory.selectedSlot, itemStack)){
+                throw new SimpleCommandExceptionType(new TranslatableText("inventory.isfull")).create();
+            }*/
         }
 
         command = true;

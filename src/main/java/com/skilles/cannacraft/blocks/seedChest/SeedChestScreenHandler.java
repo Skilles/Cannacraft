@@ -1,13 +1,17 @@
 package com.skilles.cannacraft.blocks.seedChest;
 
+import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.registry.ModScreens;
+import com.sun.org.apache.xpath.internal.operations.Mod;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import org.jetbrains.annotations.Nullable;
 
 public class SeedChestScreenHandler extends ScreenHandler {
     private final Inventory inventory;
@@ -35,7 +39,12 @@ public class SeedChestScreenHandler extends ScreenHandler {
         //Our inventory
         for (m = 0; m < 3; ++m) {
             for (l = 0; l < 3; ++l) {
-                this.addSlot(new Slot(inventory, l + m * 3, 62 + l * 18, 17 + m * 18));
+                this.addSlot(new Slot(inventory, l + m * 3, 62 + l * 18, 17 + m * 18){
+                    public boolean canInsert(ItemStack stack) {
+                        // Only allow tagged seeds
+                        return stack.getItem() == ModItems.SEED && stack.hasTag();
+                    }
+                });
             }
         }
         //The player inventory
@@ -49,11 +58,15 @@ public class SeedChestScreenHandler extends ScreenHandler {
             this.addSlot(new Slot(playerInventory, m, 8 + m * 18, 142));
         }
 
-    }
 
+    }
     @Override
     public boolean canUse(PlayerEntity player) {
         return this.inventory.canPlayerUse(player);
+    }
+    @Override
+    public boolean canInsertIntoSlot(ItemStack stack, Slot slot) {
+        return false;
     }
 
     // Shift + Player Inv Slot
@@ -61,9 +74,11 @@ public class SeedChestScreenHandler extends ScreenHandler {
     public ItemStack transferSlot(PlayerEntity player, int invSlot) {
         ItemStack newStack = ItemStack.EMPTY;
         Slot slot = this.slots.get(invSlot);
+
         if (slot != null && slot.hasStack()) {
             ItemStack originalStack = slot.getStack();
             newStack = originalStack.copy();
+
             if (invSlot < this.inventory.size()) {
                 if (!this.insertItem(originalStack, this.inventory.size(), this.slots.size(), true)) {
                     return ItemStack.EMPTY;
