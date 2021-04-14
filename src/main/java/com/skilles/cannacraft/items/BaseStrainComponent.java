@@ -1,11 +1,12 @@
 package com.skilles.cannacraft.items;
 
 import dev.onyxstudios.cca.api.v3.component.ComponentV3;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 
 // Base to allow future separate block/item components
 @Deprecated
-public class BaseStrainComponent implements StrainInterface, ComponentV3 {
+public abstract class BaseStrainComponent implements StrainInterface, ComponentV3 {
     protected int index;
     protected String strain;
     protected String type;
@@ -32,7 +33,7 @@ public class BaseStrainComponent implements StrainInterface, ComponentV3 {
     }
 
     @Override
-    public String getStrain2() {
+    public String getStrainNBT() {
         return null;
     }
 

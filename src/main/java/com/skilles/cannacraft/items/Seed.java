@@ -1,14 +1,11 @@
 package com.skilles.cannacraft.items;
 
-import com.skilles.cannacraft.StrainType;
 import com.skilles.cannacraft.registry.ModComponents;
-import com.sun.org.apache.xpath.internal.operations.Mod;
 import net.minecraft.block.Block;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AliasedBlockItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.text.LiteralText;
@@ -38,48 +35,50 @@ public class Seed extends AliasedBlockItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
 
         if(world.isClient) {
-            String strain = ModComponents.STRAIN.get(playerEntity.getStackInHand(hand)).getStrain();
-            System.out.println("Strain of held seed: " + strain+" NBT: "+ModComponents.STRAIN.get(playerEntity.getStackInHand(hand)).getStrain2());
+            ItemStack clientStack = playerEntity.getStackInHand(hand);
+            StrainInterface clientStackInterface = ModComponents.STRAIN.get(clientStack);
+            System.out.println(ModComponents.STRAIN.get(clientStack).syncTest());
+            System.out.println("Strain of held seed: " + clientStackInterface.getStrain()+" NBT: "+clientStackInterface.getStrainNBT()+" Identified: "+clientStackInterface.identified());
         }
         return TypedActionResult.success(playerEntity.getStackInHand(hand));
     }
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        ModComponents.STRAIN.get(stack).readNbt();
+        ModComponents.STRAIN.get(stack).sync();
     }
     @Override
     public Text getName(ItemStack stack) {
-        ModComponents.STRAIN.get(stack).readNbt();
         CompoundTag tag = stack.getTag();
-        if(tag != null) {
-            String strain = ModComponents.STRAIN.get(stack).getStrain();
-            stack.setCustomName(new LiteralText(strain));
+        Text strainName = new TranslatableText(this.getTranslationKey(stack));
+        if(tag != null && tag.contains("Strain")) {
+            String strain = tag.getString("Strain");
+            strainName = new LiteralText(strain);
         }
-        return new TranslatableText(this.getTranslationKey(stack));
+        return strainName;
     }
     @Override
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
         //stack.setTag(strainTag);
         CompoundTag tag = stack.getTag();
-        if(tag != null){
+        if(tag != null && tag.contains("ID")){
 
-            //String strain2 = tag.getString("Strain");
-            ModComponents.STRAIN.get(stack).readNbt();
-            String strain = ModComponents.STRAIN.get(stack).getStrain();
+            StrainInterface stackInterface = ModComponents.STRAIN.get(stack);
+            //stackInterface.setTag();
+            //String strain = ModComponents.STRAIN.get(stack).getStrain();
             //ModComponents.STRAIN.get(stack).setStrain(strain);
-            String type = ModComponents.STRAIN.get(stack).getType();
-            int thc = ModComponents.STRAIN.get(stack).getTHC();
+            //String type = ModComponents.STRAIN.get(stack).getType();
+            //int thc = ModComponents.STRAIN.get(stack).getTHC();
 
-
-            //CompoundTag strainTag = ModComponents.STRAIN.get(stack).setTag(stack);
-            //String strain = strainTag.getString("Strain");
-            //int thc = strainTag.getInt("THC");
-            //String type = strainTag.getString("Type");
+            
+            String strain = tag.getString("Strain"); // TODO: string tag is null here
+            int thc = tag.getInt("THC");
+            String type = tag.getString("Type");
             tooltip.add(new LiteralText("Strain: " + strain));
             tooltip.add(new LiteralText("Type: " + type));
-            tooltip.add(new LiteralText("THC: " + thc + "%"));
-            stack.setCustomName(new LiteralText(strain));
+            if(stackInterface.identified()) {
+                tooltip.add(new LiteralText("THC: " + thc + "%"));
+            }
             //System.out.println("Tooltip updated! strain="+strain);
 
 

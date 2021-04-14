@@ -6,7 +6,7 @@ import net.minecraft.nbt.Tag;
 
 import java.util.HashMap;
 import java.util.Map;
-
+@Deprecated
 public class StrainType {
     int index = 0;
     String type;
