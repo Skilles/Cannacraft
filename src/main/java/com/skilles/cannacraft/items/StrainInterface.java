@@ -2,8 +2,6 @@ package com.skilles.cannacraft.items;
 
 import com.skilles.cannacraft.registry.ModComponents;
 import dev.onyxstudios.cca.api.v3.component.ComponentV3;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
 
 public interface StrainInterface extends ComponentV3 {
 
@@ -30,8 +28,10 @@ public interface StrainInterface extends ComponentV3 {
     void identify();
     boolean identified();
 
-    CompoundTag getTag();
-    String syncTest();
+    @Deprecated
+    default String syncTest() {
+        return null;
+    }
 
     @Deprecated
     default void transferTo(StrainInterface dest, int amount) {

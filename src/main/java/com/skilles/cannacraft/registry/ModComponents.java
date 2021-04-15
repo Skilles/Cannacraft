@@ -8,14 +8,17 @@ import dev.onyxstudios.cca.api.v3.component.ComponentRegistryV3;
 import dev.onyxstudios.cca.api.v3.item.ItemComponentFactoryRegistry;
 import dev.onyxstudios.cca.api.v3.item.ItemComponentInitializer;
 
-public final class ModComponents implements ItemComponentInitializer {
+public final class ModComponents implements ItemComponentInitializer, BlockComponentInitializer {
     public static final ComponentKey<StrainInterface> STRAIN = ComponentRegistryV3.INSTANCE.getOrCreate(Cannacraft.id("straincomponent"), StrainInterface.class);
-
-
 
     @Override
     public void registerItemComponentFactories(ItemComponentFactoryRegistry registry) {
+        registry.register(ModItems.SEED, STRAIN, ItemStrainComponent::new);
+    }
 
-        registry.register(ModItems.SEED, STRAIN, StrainComponent::new);
+    @Override
+    public void registerBlockComponentFactories(BlockComponentFactoryRegistry registry) {
+
+        registry.registerFor(WeedCropEntity.class, STRAIN, BlockStrainComponent::new);
     }
 }

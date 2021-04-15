@@ -32,12 +32,12 @@ public class SeedChest extends BlockWithEntity {
 
     public SeedChest(Settings settings) {
         super(settings);
-        this.setDefaultState((BlockState)((BlockState)((BlockState)this.stateManager.getDefaultState()).with(FACING, Direction.NORTH)));
+        this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.NORTH));
     }
 
     @Override
-    public BlockEntity createBlockEntity(BlockView blockView) {
-        return new SeedChestEntity();
+    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+        return new SeedChestEntity(pos, state);
     }
 
     @Override

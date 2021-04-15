@@ -2,27 +2,32 @@ package com.skilles.cannacraft.blocks.seedChest;
 
 import com.skilles.cannacraft.ImplementedInventory;
 import com.skilles.cannacraft.registry.ModEntities;
-import com.skilles.cannacraft.registry.ModItems;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.math.BlockPos;
 
 public class SeedChestEntity extends BlockEntity implements NamedScreenHandlerFactory, ImplementedInventory {
     private final DefaultedList<ItemStack> inventory = DefaultedList.ofSize(9, ItemStack.EMPTY);
 
-    public SeedChestEntity() {
-        super(ModEntities.SEED_CHEST_ENTITY);
+    /*public SeedChestEntity(BlockEntityType<? extends BlockEntity> type, BlockPos pos, BlockState state) {
+        super(ModEntities.SEED_CHEST_ENTITY, pos, state);
+    }*/
+
+    public SeedChestEntity(BlockPos pos, BlockState state) {
+        super(ModEntities.SEED_CHEST_ENTITY, pos, state);
     }
+
+
     //From the ImplementedInventory Interface
 
     @Override
@@ -48,15 +53,15 @@ public class SeedChestEntity extends BlockEntity implements NamedScreenHandlerFa
     }
 
     @Override
-    public void fromTag(BlockState state, CompoundTag tag) {
-        super.fromTag(state, tag);
-        Inventories.fromTag(tag, this.inventory);
+    public void readNbt(NbtCompound tag) {
+        super.readNbt(tag);
+        Inventories.readNbt(tag, this.inventory);
     }
 
     @Override
-    public CompoundTag toTag(CompoundTag tag) {
-        super.toTag(tag);
-        Inventories.toTag(tag, this.inventory);
+    public NbtCompound writeNbt(NbtCompound tag) {
+        super.writeNbt(tag);
+        Inventories.writeNbt(tag, this.inventory);
         return tag;
     }
 }

@@ -9,7 +9,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class SeedChestScreen extends HandledScreen<ScreenHandler> {
-    //A path to the gui texture. In this example we use the texture from the dispenser
+
     private static final Identifier TEXTURE = new Identifier("minecraft", "textures/gui/container/dispenser.png");
 
     public SeedChestScreen(ScreenHandler handler, PlayerInventory inventory, Text title) {
@@ -18,8 +18,9 @@ public class SeedChestScreen extends HandledScreen<ScreenHandler> {
 
     @Override
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        client.getTextureManager().bindTexture(TEXTURE);
+        assert client != null;
+        RenderSystem.setShaderTexture(0, TEXTURE);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         int x = (width - backgroundWidth) / 2;
         int y = (height - backgroundHeight) / 2;
         drawTexture(matrices, x, y, 0, 0, backgroundWidth, backgroundHeight);

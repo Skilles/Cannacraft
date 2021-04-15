@@ -1,14 +1,10 @@
 package com.skilles.cannacraft;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.ArgumentBuilder;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.skilles.cannacraft.items.StrainComponent;
+import com.skilles.cannacraft.items.ItemStrainComponent;
 import com.skilles.cannacraft.registry.*;
-import com.sun.org.apache.xpath.internal.operations.Mod;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
@@ -88,7 +84,7 @@ public class Cannacraft implements ModInitializer {
                                 return 1;
                     }))
                     .then(literal("set")
-                            .then(argument("strain", IntegerArgumentType.integer(0,StrainComponent.strainCount))
+                            .then(argument("strain", IntegerArgumentType.integer(0, ItemStrainComponent.strainCount))
                                 .executes(ctx -> {
                                     System.out.println("Seed strain set!");
                                     setSeed(ctx, getInteger(ctx, "strain"));

@@ -1,56 +1,44 @@
 package com.skilles.cannacraft.blocks.weedCrop;
 
+import com.skilles.cannacraft.items.StrainInterface;
+import com.skilles.cannacraft.registry.ModComponents;
 import com.skilles.cannacraft.registry.ModEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.nbt.CompoundTag;
-import com.skilles.cannacraft.StrainType;
-
-import java.util.HashMap;
-import java.util.Map;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.math.BlockPos;
 
 public class WeedCropEntity extends BlockEntity {
 
-    public WeedCropEntity(BlockEntityType<?> blockEntityType) {
-        super(ModEntities.WEED_CROP_ENTITY);
+    public WeedCropEntity(BlockPos pos, BlockState state) {
+        super(ModEntities.WEED_CROP_ENTITY, pos, state);
     }
-    public WeedCropEntity() {
+    /*public WeedCropEntity() {
         this(ModEntities.WEED_CROP_ENTITY);
-    }
+    }*/
 
 
     // Stores strain name and type. Contains setStrain() with either index or strainName parameters, getStrain(), and getType().
 
 
-    private int thc = 0;
 
+    private final StrainInterface strainInterface = ModComponents.STRAIN.get(this);
 
-    private StrainType strain = new StrainType();
-    public void setStrain(int strainIndex) {
-        this.strain.setStrain(strainIndex);
-    }
-    public void setStrain(String strainName) { this.strain.setStrain(strainName); }
-    public void setThc(int thc) {
-        this.thc = thc;
-    }
 
     @Override
-    public CompoundTag toTag(CompoundTag tag) {
-        super.toTag(tag);
-        tag.putString("Strain", strain.getStrain());
-        tag.putInt("THC", strain.getTHC());
-        tag.putString("Type", strain.getType());
+    public NbtCompound writeNbt(NbtCompound tag) {
+        super.writeNbt(tag);
+        tag.putString("Strain", strainInterface.getStrain());
+        tag.putInt("THC", strainInterface.getTHC());
+        tag.putString("Type", strainInterface.getType());
         return tag;
     }
 
     @Override
-    public void fromTag(BlockState state, CompoundTag compoundTag) {
-        super.fromTag(state, compoundTag);
-        if(compoundTag != null) {
-            setStrain(compoundTag.getString("Strain")); //  set strain based on nbt tag
-            thc = compoundTag.getInt("THC");
-            setThc(thc);
+    public void readNbt(NbtCompound compoundTag) {
+        super.readNbt(compoundTag);
+        if(compoundTag != null && compoundTag.contains("ID")) {
+            strainInterface.setIndex(compoundTag.getInt("ID"));
         }
     }
 }

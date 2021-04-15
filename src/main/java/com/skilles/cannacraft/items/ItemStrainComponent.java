@@ -1,11 +1,8 @@
 package com.skilles.cannacraft.items;
 
-import com.skilles.cannacraft.registry.ModComponents;
 import dev.onyxstudios.cca.api.v3.item.ItemComponent;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,9 +11,9 @@ import java.util.Random;
 // local variables are dependant on if server or client are setting them
 // NBT tags are two-way
 
-public class StrainComponent extends ItemComponent implements StrainInterface {
+public class ItemStrainComponent extends ItemComponent implements StrainInterface {
     private final ItemStack stack;
-    private CompoundTag tag;
+    private NbtCompound tag;
     private boolean identified = false;
     int UNKNOWN_INDEX = 3;
     int index = UNKNOWN_INDEX; // default index (unknown)
@@ -27,7 +24,7 @@ public class StrainComponent extends ItemComponent implements StrainInterface {
     public static int strainCount = 3; // Amount of strains
     Map<String, Integer> strainMap = new HashMap<>();
 
-    public StrainComponent(ItemStack stack) {
+    public ItemStrainComponent(ItemStack stack) {
         super(stack);
         // Goes through and maps each strain string to index
         for (int i = 0; strainCount - 1 > i; i++) {
@@ -162,7 +159,7 @@ public class StrainComponent extends ItemComponent implements StrainInterface {
     // Sets local variables according to NBT tags. Strain, type, and thc are assigned only when identified
     @Override
     public void readNbt() {
-    CompoundTag tag = stack.getOrCreateTag();
+    NbtCompound tag = stack.getOrCreateTag();
         this.identified = tag.getBoolean("Identified");
         this.index = tag.getInt("ID");
         if(identified) {
@@ -171,10 +168,7 @@ public class StrainComponent extends ItemComponent implements StrainInterface {
             this.thc = tag.getInt("THC");
         }
     }
-    @Override
-    public CompoundTag getTag() {
-        return tag;
-    }
+
     // Checks what is synced, returns unsycned items and their values
     @Override
     public String syncTest() {

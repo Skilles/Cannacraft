@@ -1,5 +1,6 @@
 package com.skilles.cannacraft.blocks.weedCrop;
 
+import com.skilles.cannacraft.registry.ModComponents;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
@@ -7,11 +8,9 @@ import net.minecraft.block.CropBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,7 +24,9 @@ public class WeedCrop extends CropBlock implements BlockEntityProvider {
     }
 
     @Override
-    public BlockEntity createBlockEntity(BlockView world) { return new WeedCropEntity(); }
+    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+        return new WeedCropEntity(pos, state);
+    }
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> stateManager) {
         stateManager.add(AGE);
@@ -34,12 +35,13 @@ public class WeedCrop extends CropBlock implements BlockEntityProvider {
 
     public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
         if (itemStack.hasTag()) {
-            CompoundTag tag =  itemStack.getTag();
+            NbtCompound tag =  itemStack.getTag();
             BlockEntity blockEntity = world.getBlockEntity(pos);
-            if (blockEntity instanceof WeedCropEntity && tag != null) {
-
-                ((WeedCropEntity)blockEntity).setStrain(tag.getString("Strain"));
-                ((WeedCropEntity)blockEntity).setThc(tag.getInt("THC"));
+            if (blockEntity instanceof WeedCropEntity && tag != null && tag.contains("ID")) {
+                ModComponents.STRAIN.get(blockEntity).setIndex(tag.getInt("ID"));
+                if(tag.getBoolean("Identified")){
+                    ModComponents.STRAIN.get(blockEntity).identify();
+                }
             }
         }
     }
