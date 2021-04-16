@@ -54,11 +54,12 @@ public class Seed extends AliasedBlockItem {
     public ActionResult useOnBlock(ItemUsageContext context) {
         Block block = context.getWorld().getBlockState(context.getBlockPos()).getBlock();
 
-        if(block instanceof WeedCrop && context.getPlayer().isSneaking()) {
+        if(block instanceof WeedCrop && context.getPlayer().isSneaking() && context.getWorld().isClient) {
                 BlockEntity blockEntity = context.getWorld().getBlockEntity(context.getBlockPos());
                 NbtCompound tag = blockEntity.toInitialChunkDataNbt();
                 blockEntity.writeNbt(tag);
-                System.out.println(tag);
+                //System.out.println(tag);
+                System.out.println("Max Age: "+context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.MAXAGE)+" Age: "+context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.AGE));
         }
         return super.useOnBlock(context);
     }
