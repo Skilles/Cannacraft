@@ -65,6 +65,8 @@ public class Cannacraft implements ModInitializer {
     }
     @Override
     public void onInitialize() {
+        LootTable.registerLoot();
+        System.out.println("LootTables registered!");
 
         ModItems.registerItems();
         System.out.println("Items registered!");

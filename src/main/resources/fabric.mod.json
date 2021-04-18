@@ -29,6 +29,7 @@
     ]
   },
   "mixins": [
+    "cannacraft.mixins.json"
   ],
 
   "depends": {
@@ -41,7 +42,7 @@
   },
   "custom": {
     "cardinal-components": [
-      "cannacraft:straincomponent"
+      "cannacraft:strain"
     ]
   }
 }
