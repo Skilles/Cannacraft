@@ -40,6 +40,16 @@ dependencies {
 	// Includes Cardinal Components API as a Jar-in-Jar dependency (optional but recommended)
 	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-item:${project.cca_version}"
 	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-block:${project.cca_version}"
+
+	modApi 'teamreborn:energy:0.1.1'
+	include 'teamreborn:energy:0.1.1'
+
+
+	// compile against the API
+	//modCompileOnly "mcp.mobius.waila:wthit-api:fabric-${project.wthit_api_version}"
+
+	// run against the full jar
+	//modRuntime "mcp.mobius.waila.wthit-fabric:wthit-fabric-${project.wthit_version}"
 }
 
 processResources {
