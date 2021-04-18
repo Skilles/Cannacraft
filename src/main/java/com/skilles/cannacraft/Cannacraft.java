@@ -34,22 +34,13 @@ public class Cannacraft implements ModInitializer {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack itemStack = self.getMainHandStack();
         if(itemStack.getItem().equals(ModItems.SEED)){
-            /*CompoundTag newCompoundTag = new CompoundTag();
-            StrainComponent strainType = new StrainComponent();
-            strainType.setStrain(strain);
-            newCompoundTag.put("Strain", strainType.getStrainTag());
-            itemStack.setTag(newCompoundTag);*/
-            ModComponents.STRAIN.get(itemStack).setIndex(strain);
-            System.out.println("Index update! arg="+strain+" new="+ModComponents.STRAIN.get(itemStack).getStrain());
-            /*if(!self.inventory.insertStack(self.inventory.selectedSlot, itemStack)){
-                throw new SimpleCommandExceptionType(new TranslatableText("inventory.isfull")).create();
-            }*/
+            //NbtCompound tag = itemStack.getOrCreateSubTag("cannacraft:strain");
+            ModComponents.STRAIN.get(itemStack).setIndex(strain); // BUG: index NBT is null when set to 0
+            //itemStack.putSubTag("cannacraft:strain", tag);
         }
-
-        command = true;
         return 1;
     }
-    public static int identify(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    public static int identify(CommandContext<ServerCommandSource> ctx, int flag) throws CommandSyntaxException {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack handStack = self.getMainHandStack();
         if(handStack.getItem().equals(ModItems.SEED)) {
@@ -72,7 +63,6 @@ public class Cannacraft implements ModInitializer {
         }
         return 1;
     }
-    public static boolean command = false;
     @Override
     public void onInitialize() {
 
@@ -100,7 +90,7 @@ public class Cannacraft implements ModInitializer {
                                     return 1;
                                     })))
                     .then(literal("set")
-                            .then(argument("strain", IntegerArgumentType.integer(0, ItemStrainComponent.strainCount))
+                            .then(argument("strain", IntegerArgumentType.integer(0, ItemStrainComponent.STRAIN_COUNT))
                                 .executes(ctx -> {
                                     System.out.println("Seed strain set!");
                                     setSeed(ctx, getInteger(ctx, "strain"));

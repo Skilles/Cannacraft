@@ -11,6 +11,7 @@ import net.minecraft.item.AliasedBlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -37,14 +38,14 @@ public class Seed extends AliasedBlockItem {
     }*/
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
-
         if(world.isClient) {
+            ItemStack clientStack = playerEntity.getStackInHand(hand);
+            StrainInterface clientStackInterface = ModComponents.STRAIN.get(clientStack);
             if(!playerEntity.isSneaking()) {
-                ItemStack clientStack = playerEntity.getStackInHand(hand);
-
-                StrainInterface clientStackInterface = ModComponents.STRAIN.get(clientStack);
-                System.out.println(ModComponents.STRAIN.get(clientStack).syncTest());
-                System.out.println("Strain of held seed: " + clientStackInterface.getStrain() + " NBT: " + clientStackInterface.getStrainNBT() + " Identified: " + clientStackInterface.identified());
+                //System.out.println(ModComponents.STRAIN.get(clientStack).syncTest());
+                System.out.println("Strain of held seed: " + clientStackInterface.getStrain() + " THC: " + clientStackInterface.getThc() + " Identified: " + clientStackInterface.identified());
+            } else {
+                System.out.println(clientStack.getTag());
             }
         }
         return TypedActionResult.success(playerEntity.getStackInHand(hand));
@@ -54,52 +55,38 @@ public class Seed extends AliasedBlockItem {
     public ActionResult useOnBlock(ItemUsageContext context) {
         Block block = context.getWorld().getBlockState(context.getBlockPos()).getBlock();
 
-        if(block instanceof WeedCrop && context.getPlayer().isSneaking() && context.getWorld().isClient) {
-                BlockEntity blockEntity = context.getWorld().getBlockEntity(context.getBlockPos());
-                NbtCompound tag = blockEntity.toInitialChunkDataNbt();
-                blockEntity.writeNbt(tag);
-                //System.out.println(tag);
-                System.out.println("Max Age: "+context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.MAXAGE)+" Age: "+context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.AGE));
+        if(block instanceof WeedCrop && context.getWorld().isClient) {
+            BlockEntity blockEntity = context.getWorld().getBlockEntity(context.getBlockPos());
+            NbtCompound tag = blockEntity.writeNbt(new NbtCompound());
+            if(context.getPlayer().isSneaking()) {
+                System.out.println("Strain of crop: " + tag.getString("Strain")
+                        + " Identified: " + tag.getBoolean("identified")
+                        + " THC: " + tag.getInt("THC"));
+                System.out.println(tag);
+            } else {
+                System.out.println("Max Age: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.MAXAGE) + " Age: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.AGE));
+            }
         }
         return super.useOnBlock(context);
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        ModComponents.STRAIN.get(stack).sync();
-    }
-    @Override
-    public Text getName(ItemStack stack) {
-        NbtCompound tag = stack.getTag();
-        Text strainName = new TranslatableText(this.getTranslationKey(stack));
-        if(tag != null && tag.contains("Strain")) {
-            String strain = tag.getString("Strain");
-            strainName = new LiteralText(strain);
-        }
-        return strainName;
-    }
-    @Override
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
-        //stack.setTag(strainTag);
-        NbtCompound tag = stack.getTag();
-        if(tag != null && tag.contains("ID")){
-
+        NbtCompound tag = stack.getSubTag("cannacraft:strain");
+        System.out.println(tag);
+        if(tag != null && tag.contains("ID") && !(tag.getInt("ID") == ItemStrainComponent.UNKNOWN_ID)){ // checks if ID is set to actual strain
             StrainInterface stackInterface = ModComponents.STRAIN.get(stack);
-            //stackInterface.setTag();
-            //String strain = ModComponents.STRAIN.get(stack).getStrain();
-            //ModComponents.STRAIN.get(stack).setStrain(strain);
-            //String type = ModComponents.STRAIN.get(stack).getType();
-            //int thc = ModComponents.STRAIN.get(stack).getTHC();
-
-            
-            String strain = tag.getString("Strain"); // TODO: string tag is null here
-            int thc = tag.getInt("THC");
-            String type = tag.getString("Type");
-            tooltip.add(new LiteralText("Strain: " + strain));
-            tooltip.add(new LiteralText("Type: " + type));
             if(stackInterface.identified()) {
+                String strain = stackInterface.getStrain();
+                String type = stackInterface.getType();
+                int thc = stackInterface.getThc();
+                tooltip.add(new LiteralText("Strain: " + strain));
+                tooltip.add(new LiteralText("Type: " + type));
                 tooltip.add(new LiteralText("THC: " + thc + "%"));
+            } else {
+                tooltip.add(new LiteralText("Strain: Unidentified"));
+                tooltip.add(new LiteralText("Type: Unknown"));
             }
             //System.out.println("Tooltip updated! strain="+strain);
 

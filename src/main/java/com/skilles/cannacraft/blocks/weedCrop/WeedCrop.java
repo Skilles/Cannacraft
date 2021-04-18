@@ -1,6 +1,7 @@
 package com.skilles.cannacraft.blocks.weedCrop;
 
-import com.skilles.cannacraft.registry.ModComponents;
+import com.skilles.cannacraft.items.Seed;
+import com.skilles.cannacraft.registry.ModBlocks;
 import com.skilles.cannacraft.registry.ModItems;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
@@ -56,7 +57,15 @@ public class WeedCrop extends CropBlock implements BlockEntityProvider {
     public void grow(ServerWorld world, Random random, BlockPos pos, BlockState state) {
         super.grow(world, random, pos, state);
         if(state.get(AGE) == state.get(MAXAGE)) {
-            dropStack(world, pos, new ItemStack(this));
+            Seed seedItem = (Seed) this.getSeedsItem().asItem();
+            NbtCompound tag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
+            tag.remove("id");
+            tag.remove("x");
+            tag.remove("y");
+            tag.remove("z");
+            ItemStack itemStack = new ItemStack(seedItem);
+            itemStack.putSubTag("cannacraft:strain", tag);
+            dropStack(world, pos, itemStack);
         }
     }
 
@@ -67,8 +76,7 @@ public class WeedCrop extends CropBlock implements BlockEntityProvider {
         if (i > j) {
             i = j;
         }
-        world.setBlockState(pos, this.withAge(i), 2);
-        System.out.println("Age: "+getAge(state));
+        world.setBlockState(pos, this.withAge(i).with(MAXAGE, getMaxAge(state)), 2);
     }
 
     @Override
@@ -89,13 +97,18 @@ public class WeedCrop extends CropBlock implements BlockEntityProvider {
             if (i < 3) {
                 int j = state.get(AGE);
                 if (j == getMaxAge(state) && i < 2) {
-                    world.setBlockState(pos.up(), withMaxAge(5), 2);
+                    if(world.isAir(pos.up())) {
+                        world.setBlockState(pos.up(), withMaxAge(5), 2);
+                        if(world.getBlockState(pos.up()).isOf(ModBlocks.WEED_CROP)) { // null check
+                            world.getBlockEntity(pos.up()).readNbt(world.getBlockEntity(pos).writeNbt(new NbtCompound()));
+                            world.markDirty(pos.up());
+                        }
+                    }
                 } else if (j < this.getMaxAge(state) && (world.getBaseLightLevel(pos, 0) >= 9)) {
                         float f = getAvailableMoisture(this, world, pos);
                         if (random.nextInt((int) (25.0F / f) + 1) == 0) {
                             world.setBlockState(pos, state.with(AGE, j + 1), 2);
                         }
-
                 }
             }
         }
@@ -114,13 +127,11 @@ public class WeedCrop extends CropBlock implements BlockEntityProvider {
 
     public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
         if (itemStack.hasTag()) {
-            NbtCompound tag =  itemStack.getTag();
+            NbtCompound tag =  itemStack.getSubTag("cannacraft:strain");
             BlockEntity blockEntity = world.getBlockEntity(pos);
             if (blockEntity instanceof WeedCropEntity && tag != null && tag.contains("ID")) {
-                ModComponents.STRAIN.get(blockEntity).setIndex(tag.getInt("ID"));
-                if(tag.getBoolean("Identified")){
-                    ModComponents.STRAIN.get(blockEntity).identify();
-                }
+                ((WeedCropEntity) blockEntity).setData(tag.getInt("ID"), tag.getInt("THC"), tag.getBoolean("Identified"));
+                world.markDirty(pos);
             }
         }
     }
