@@ -51,11 +51,24 @@ public class Cannacraft implements ModInitializer {
     }
     public static int identify(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
-        ItemStack itemStack = self.getMainHandStack();
-        if(itemStack.getItem().equals(ModItems.SEED)) {
-            ModComponents.STRAIN.get(itemStack).identify();
-            System.out.println("Seed identified!");
-            return 1;
+        ItemStack handStack = self.getMainHandStack();
+        if(handStack.getItem().equals(ModItems.SEED)) {
+            if(flag == 0) {
+                ModComponents.STRAIN.get(handStack).identify();
+                System.out.println("Seed identified!");
+                return 1;
+            } else {
+                int i;
+                int j = 0;
+                for(i = 0; self.getInventory().size() > i; i++) {
+                    ItemStack itemStack = self.getInventory().getStack(i);
+                    if (itemStack != null && itemStack.getItem().equals(ModItems.SEED) && !ModComponents.STRAIN.get(itemStack).identified()) {
+                        ModComponents.STRAIN.get(itemStack).identify();
+                        j++;
+                    }
+                }
+                System.out.println(j+" seeds identified!");
+            }
         }
         return 1;
     }
@@ -79,10 +92,13 @@ public class Cannacraft implements ModInitializer {
             dispatcher.register(literal("seed")
                     .then(literal("identify")
                             .executes(ctx -> {
-
-                                identify(ctx);
+                                identify(ctx, 0);
                                 return 1;
-                    }))
+                                }).then(literal("all")
+                                    .executes(ctx -> {
+                                    identify(ctx, 1);
+                                    return 1;
+                                    })))
                     .then(literal("set")
                             .then(argument("strain", IntegerArgumentType.integer(0, ItemStrainComponent.strainCount))
                                 .executes(ctx -> {
