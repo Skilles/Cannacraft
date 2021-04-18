@@ -5,7 +5,6 @@ import com.skilles.cannacraft.registry.ModComponents;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AliasedBlockItem;
 import net.minecraft.item.ItemStack;
@@ -14,7 +13,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -23,19 +21,26 @@ import net.minecraft.world.World;
 import java.util.List;
 
 public class Seed extends AliasedBlockItem {
-    //CompoundTag strainTag;
+
     public Seed(Block block, Settings settings) {
         super(block, settings);
     }
-    /*@Override
+
+
+    @Override
     public String getTranslationKey(ItemStack stack) {
-        CompoundTag compoundTag = stack.getTag();
-        if (compoundTag != null && compoundTag.contains("Strain", 8)) {
-            String strain = compoundTag.getString("Strain");
-            return super.getTranslationKey(stack) + "." + strain;
+        NbtCompound tag = stack.getSubTag("cannacraft:strain");
+        if (tag != null && tag.contains("ID", NbtElement.INT_TYPE)) {
+            if(!tag.getBoolean("Identified")) {
+                return super.getTranslationKey(stack) + ".unidentified";
+            } else {
+                int id = tag.getInt("ID");
+                return super.getTranslationKey(stack) + "." + id;
+            }
         }
         return super.getTranslationKey(stack);
-    }*/
+    }
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
         if(world.isClient) {

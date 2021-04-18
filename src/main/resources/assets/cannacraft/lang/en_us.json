@@ -2,5 +2,10 @@
   "item.cannacraft.seed": "Cannabis Seeds",
   "block.cannacraft.seed_chest": "Seed Chest",
   "block.cannacraft.weed_crop": "Cannabis Crop",
-  "itemGroup.cannacraft.general": "Cannacraft"
+  "itemGroup.cannacraft.general": "Cannacraft",
+  "item.cannacraft.seed.unidentified": "Unidentified Cannabis Seeds",
+  "item.cannacraft.seed.0": "OG Kush Seeds",
+  "item.cannacraft.seed.1": "Purple Punch Seeds",
+  "item.cannacraft.seed.2": "Chem Trix Seeds",
+  "item.cannacraft.seed.3": "Unknown"
 }
