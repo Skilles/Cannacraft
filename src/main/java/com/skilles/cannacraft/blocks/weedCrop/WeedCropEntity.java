@@ -1,5 +1,6 @@
 package com.skilles.cannacraft.blocks.weedCrop;
 
+import com.skilles.cannacraft.items.ItemStrainComponent;
 import com.skilles.cannacraft.registry.ModEntities;
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.minecraft.block.BlockState;

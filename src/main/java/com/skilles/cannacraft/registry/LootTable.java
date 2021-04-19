@@ -35,7 +35,7 @@ public class LootTable {
         for(i = 0; i < ItemStrainComponent.STRAIN_COUNT; i++) {
             int finalI = i;
             FabricLootPoolBuilder newPoolBuilder = poolBuilder
-                    .withEntry(ItemEntry.builder(ModItems.SEED).apply(SetNbtLootFunction.builder(Util.make(new NbtCompound(), (nbtCompound) -> {
+                    .withEntry(ItemEntry.builder(ModItems.WEED_SEED).apply(SetNbtLootFunction.builder(Util.make(new NbtCompound(), (nbtCompound) -> {
                         NbtCompound strainNbt = new NbtCompound();
                         strainNbt.putInt("ID", finalI);
                         nbtCompound.put("cannacraft:strain", strainNbt);

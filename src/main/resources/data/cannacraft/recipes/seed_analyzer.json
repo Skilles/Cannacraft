@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "UWU",
+    "CFC",
+    "UWU"
+  ],
+  "key": {
+    "W": {
+      "item": "cannacraft:weed_seed"
+    },
+    "C": {
+      "item": "minecraft:clay"
+    },
+    "U": {
+      "item": "minecraft:iron_ingot"
+    },
+    "F": {
+      "item": "minecraft:furnace"
+    }
+  },
+  "result": {
+    "item": "cannacraft:seed_analyzer"
+  }
+}

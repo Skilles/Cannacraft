@@ -13,6 +13,7 @@ public final class ModComponents implements ItemComponentInitializer {
 
     @Override
     public void registerItemComponentFactories(ItemComponentFactoryRegistry registry) {
-        registry.register(ModItems.SEED, STRAIN, ItemStrainComponent::new);
+        registry.register(ModItems.WEED_SEED, STRAIN, ItemStrainComponent::new);
+        registry.register(ModItems.WEED_FRUIT, STRAIN, ItemStrainComponent::new);
     }
 }

@@ -1,7 +1,8 @@
 package com.skilles.cannacraft.blocks.weedCrop;
 
-import com.skilles.cannacraft.items.Seed;
+import com.skilles.cannacraft.items.WeedSeed;
 import com.skilles.cannacraft.registry.ModBlocks;
+import com.skilles.cannacraft.registry.ModComponents;
 import com.skilles.cannacraft.registry.ModItems;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
@@ -9,16 +10,19 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.CropBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.stat.Stats;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.annotation.ElementType;
 import java.util.Random;
 
 public class WeedCrop extends CropBlock implements BlockEntityProvider {
@@ -42,6 +46,23 @@ public class WeedCrop extends CropBlock implements BlockEntityProvider {
         stateManager.add(AGE);
         stateManager.add(MAXAGE);
     }
+    protected static NbtCompound trimTag(NbtCompound tag){
+        NbtCompound newTag = tag;
+        newTag.remove("id");
+        newTag.remove("x");
+        newTag.remove("y");
+        newTag.remove("z");
+        return newTag;
+    }
+
+    @SuppressWarnings("deprecated")
+    @Override
+    public void onStacksDropped(BlockState state, ServerWorld world, BlockPos pos, ItemStack stack) {
+        NbtCompound tag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
+        stack.setTag(trimTag(tag));
+        super.onStacksDropped(state, world, pos, stack);
+    }
+
 
     @Override
     public boolean isMature(BlockState state) {
@@ -57,14 +78,10 @@ public class WeedCrop extends CropBlock implements BlockEntityProvider {
     public void grow(ServerWorld world, Random random, BlockPos pos, BlockState state) {
         super.grow(world, random, pos, state);
         if(state.get(AGE) == state.get(MAXAGE)) {
-            Seed seedItem = (Seed) this.getSeedsItem().asItem();
             NbtCompound tag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
-            tag.remove("id");
-            tag.remove("x");
-            tag.remove("y");
-            tag.remove("z");
-            ItemStack itemStack = new ItemStack(seedItem);
-            itemStack.putSubTag("cannacraft:strain", tag);
+
+            ItemStack itemStack = new ItemStack(ModItems.WEED_FRUIT);
+            itemStack.putSubTag("cannacraft:strain", trimTag(tag));
             dropStack(world, pos, itemStack);
         }
     }
@@ -81,7 +98,7 @@ public class WeedCrop extends CropBlock implements BlockEntityProvider {
 
     @Override
     protected ItemConvertible getSeedsItem() {
-        return ModItems.SEED;
+        return ModItems.WEED_SEED;
     }
 
     public int getMaxAge(BlockState state) {
@@ -129,6 +146,7 @@ public class WeedCrop extends CropBlock implements BlockEntityProvider {
         if (itemStack.hasTag()) {
             NbtCompound tag =  itemStack.getSubTag("cannacraft:strain");
             BlockEntity blockEntity = world.getBlockEntity(pos);
+            tag.putInt("ID", ModComponents.STRAIN.get(itemStack).getIndex()); // index 0 = null bug workaround
             if (blockEntity instanceof WeedCropEntity && tag != null && tag.contains("ID")) {
                 ((WeedCropEntity) blockEntity).setData(tag.getInt("ID"), tag.getInt("THC"), tag.getBoolean("Identified"));
                 world.markDirty(pos);

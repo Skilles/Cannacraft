@@ -9,10 +9,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AliasedBlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -20,9 +22,9 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
-public class Seed extends AliasedBlockItem {
+public class WeedSeed extends AliasedBlockItem {
 
-    public Seed(Block block, Settings settings) {
+    public WeedSeed(Block block, Settings settings) {
         super(block, settings);
     }
 
@@ -40,7 +42,6 @@ public class Seed extends AliasedBlockItem {
         }
         return super.getTranslationKey(stack);
     }
-
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
         if(world.isClient) {
@@ -74,13 +75,14 @@ public class Seed extends AliasedBlockItem {
         }
         return super.useOnBlock(context);
     }
-
+    private boolean appended = false;
     @Override
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
         NbtCompound tag = stack.getSubTag("cannacraft:strain");
-        System.out.println(tag);
-        if(tag != null && tag.contains("ID") && !(tag.getInt("ID") == ItemStrainComponent.UNKNOWN_ID)){ // checks if ID is set to actual strain
+        //System.out.println(tag);
+        if(tag != null && tag.contains("ID") && !(tag.getInt("ID") == ItemStrainComponent.UNKNOWN_ID) && !appended){ // checks if ID is set to actual strain
+
             StrainInterface stackInterface = ModComponents.STRAIN.get(stack);
             if(stackInterface.identified()) {
                 String strain = stackInterface.getStrain();
@@ -94,6 +96,7 @@ public class Seed extends AliasedBlockItem {
                 tooltip.add(new LiteralText("Type: Unknown"));
             }
             //System.out.println("Tooltip updated! strain="+strain);
+        appended = true;
 
 
        }

@@ -17,6 +17,7 @@ public interface StrainInterface extends ComponentV3 {
 
     String getStrain();
     int getIndex();
+    int getIndex(String strain);
     String getType();
     int getThc();
 

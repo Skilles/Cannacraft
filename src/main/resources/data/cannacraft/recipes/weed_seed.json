@@ -1,0 +1,7 @@
+{
+  "type": "cannacraft:analyze",
+  "ingredient": {
+    "item": "cannacraft:weed_seed"
+  },
+  "result": "cannacraft:weed_fruit"
+}

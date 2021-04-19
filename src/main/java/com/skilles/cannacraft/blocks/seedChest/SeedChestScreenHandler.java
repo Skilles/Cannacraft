@@ -2,16 +2,13 @@ package com.skilles.cannacraft.blocks.seedChest;
 
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.registry.ModScreens;
-import com.sun.org.apache.xpath.internal.operations.Mod;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import org.jetbrains.annotations.Nullable;
 
 public class SeedChestScreenHandler extends ScreenHandler {
     private final Inventory inventory;
@@ -39,10 +36,10 @@ public class SeedChestScreenHandler extends ScreenHandler {
         //Our inventory
         for (m = 0; m < 3; ++m) {
             for (l = 0; l < 3; ++l) {
-                this.addSlot(new Slot(inventory, l + m * 3, 62 + l * 18, 17 + m * 18){
+                this.addSlot(new Slot(inventory, l + m * 3, 62 + l * 18, 17 + m * 18) {
                     public boolean canInsert(ItemStack stack) {
                         // Only allow tagged seeds
-                        return stack.getItem() == ModItems.SEED && stack.hasTag();
+                        return stack.getItem() == ModItems.WEED_SEED && stack.hasTag();
                     }
                 });
             }
@@ -60,10 +57,12 @@ public class SeedChestScreenHandler extends ScreenHandler {
 
 
     }
+
     @Override
     public boolean canUse(PlayerEntity player) {
         return this.inventory.canPlayerUse(player);
     }
+
     @Override
     public boolean canInsertIntoSlot(ItemStack stack, Slot slot) {
         return false;
