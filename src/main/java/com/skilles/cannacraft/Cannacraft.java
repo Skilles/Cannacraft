@@ -47,7 +47,7 @@ public class Cannacraft implements ModInitializer {
     public static int setSeed(CommandContext<ServerCommandSource> ctx, int strain) throws CommandSyntaxException {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack itemStack = self.getMainHandStack();
-        if(itemStack.getItem().equals(ModItems.WEED_SEED)){
+        if(itemStack.getItem().equals(ModItems.WEED_SEED) || itemStack.getItem().equals(ModItems.WEED_FRUIT)){
             //NbtCompound tag = itemStack.getOrCreateSubTag("cannacraft:strain");
             ModComponents.STRAIN.get(itemStack).setIndex(strain); // BUG: index NBT is null when set to 0
             //itemStack.putSubTag("cannacraft:strain", tag);
@@ -57,7 +57,7 @@ public class Cannacraft implements ModInitializer {
     public static int identify(CommandContext<ServerCommandSource> ctx, int flag) throws CommandSyntaxException {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack handStack = self.getMainHandStack();
-        if(handStack.getItem().equals(ModItems.WEED_SEED)) {
+        if(handStack.getItem().equals(ModItems.WEED_SEED) || handStack.getItem().equals(ModItems.WEED_FRUIT)) {
             if(flag == 0) {
                 ModComponents.STRAIN.get(handStack).identify();
                 System.out.println("Seed identified!");
