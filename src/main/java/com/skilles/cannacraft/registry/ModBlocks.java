@@ -7,7 +7,9 @@ import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.CropBlock;
+import net.minecraft.block.Material;
+import net.minecraft.block.PlantBlock;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -16,8 +18,7 @@ public class ModBlocks {
     public static final Block SEED_CHEST = new SeedChest(FabricBlockSettings
             .copyOf(Blocks.CHEST));
 
-    public static final CropBlock WEED_CROP = new WeedCrop(FabricBlockSettings
-            .copyOf(Blocks.WHEAT));
+    public static final PlantBlock WEED_CROP = new WeedCrop(FabricBlockSettings.of(Material.PLANT).noCollision().ticksRandomly().breakInstantly().sounds(BlockSoundGroup.GRASS));
 
     public static final Block STRAIN_ANALYZER = new StrainAnalyzer(FabricBlockSettings
             .copyOf(Blocks.COAL_BLOCK));
