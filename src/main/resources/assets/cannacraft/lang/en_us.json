@@ -10,9 +10,9 @@
   "item.cannacraft.weed_seed.2": "Chem Trix Seeds",
   "item.cannacraft.weed_seed.3": "Unknown Seeds",
   "item.cannacraft.weed_fruit.unidentified": "Unidentified Cannabis",
-  "item.cannacraft.weed_fruit.0": "OG Kush Seeds",
-  "item.cannacraft.weed_fruit.1": "Purple Punch Seeds",
-  "item.cannacraft.weed_fruit.2": "Chem Trix Seeds",
-  "item.cannacraft.weed_fruit.3": "Unknown Seeds",
+  "item.cannacraft.weed_fruit.0": "OG Kush Fruit",
+  "item.cannacraft.weed_fruit.1": "Purple Punch Fruit",
+  "item.cannacraft.weed_fruit.2": "Chem Trix Fruit",
+  "item.cannacraft.weed_fruit.3": "Unknown Cannabis",
   "block.cannacraft.strain_analyzer": "Strain Analyzer"
 }
