@@ -35,6 +35,20 @@ public class WeedFruit extends Item {
     }
 
     @Override
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
+        if(world.isClient) {
+            ItemStack clientStack = playerEntity.getStackInHand(hand);
+            StrainInterface clientStackInterface = ModComponents.STRAIN.get(clientStack);
+            if(!playerEntity.isSneaking()) {
+                //System.out.println(ModComponents.STRAIN.get(clientStack).syncTest());
+                System.out.println("Strain of held fruit: " + clientStackInterface.getStrain() + " THC: " + clientStackInterface.getThc() + " Identified: " + clientStackInterface.identified());
+            } else {
+                System.out.println(clientStack.getTag());
+            }
+        }
+        return TypedActionResult.success(playerEntity.getStackInHand(hand));
+    }
+    @Override
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
         NbtCompound tag = stack.getOrCreateSubTag("cannacraft:strain");

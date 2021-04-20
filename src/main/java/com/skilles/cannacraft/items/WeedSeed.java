@@ -9,12 +9,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AliasedBlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -70,7 +68,9 @@ public class WeedSeed extends AliasedBlockItem {
                         + " THC: " + tag.getInt("THC"));
                 System.out.println(tag);
             } else {
-                System.out.println("Max Age: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.MAXAGE) + " Age: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.AGE));
+                System.out.println("Max Age: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.MAXAGE)
+                        + " Age: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.AGE)
+                        + " Mature: " + !context.getWorld().getBlockState(context.getBlockPos()).hasRandomTicks());
             }
         }
         return super.useOnBlock(context);

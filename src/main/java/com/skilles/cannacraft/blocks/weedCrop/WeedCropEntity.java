@@ -1,6 +1,5 @@
 package com.skilles.cannacraft.blocks.weedCrop;
 
-import com.skilles.cannacraft.items.ItemStrainComponent;
 import com.skilles.cannacraft.registry.ModEntities;
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.minecraft.block.BlockState;
@@ -17,11 +16,10 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
     private int thc;
     private boolean identified;
 
-    public void setData(int index, int thc, boolean identifed) {
+    public void setData(int index, int thc, boolean identified) {
         this.index = index;
         this.thc = thc;
-        this.identified = identifed;
-        System.out.println(writeNbt(new NbtCompound()));
+        this.identified = identified;
     }
 
     @Override
@@ -31,7 +29,6 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
         tag.putInt("THC", thc);
         tag.putBoolean("Identified", identified);
         return tag;
-
     }
 
     @Override
