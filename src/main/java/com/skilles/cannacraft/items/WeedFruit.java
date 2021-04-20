@@ -1,17 +1,16 @@
 package com.skilles.cannacraft.items;
 
-import com.skilles.cannacraft.Cannacraft;
 import com.skilles.cannacraft.registry.ModComponents;
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.item.FoodComponent;
-import net.minecraft.item.FoodComponents;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -25,10 +24,10 @@ public class WeedFruit extends Item {
         NbtCompound tag = stack.getSubTag("cannacraft:strain");
         if (tag != null && tag.contains("ID", NbtElement.INT_TYPE)) {
             if(!tag.getBoolean("Identified")) {
-                return "cannacraft.strain" + ".unidentified";
+                return super.getTranslationKey(stack) + ".unidentified";
             } else {
                 int id = tag.getInt("ID");
-                return "cannacraft.strain" + "." + id;
+                return super.getTranslationKey(stack) + "." + id;
             }
         }
         return super.getTranslationKey(stack);
