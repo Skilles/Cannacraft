@@ -6,20 +6,22 @@ Add realistic cannabis to Minecraft using Fabric. Create growhouses and grow you
 ## To-do List
 **Short Term**
 * [X] Strains
-* [X] First crop
-* [X] First commands
-* [X] Custom behavior (in progress)
-* [ ] Custom inventory texture
-* [ ] Processing blocks
-* [ ] Animation
+* [X] Crop
+* [X] Commands
+* [ ] Item behavior (in progress)
+* [ ] Processing blocks (in progress)
+
 
 **Medium Term**
-* [ ] Custom crop behavior
+* [X] Crop behavior
+* [ ] Genetics (in progress)
 * [ ] More blocks
+* [ ] Block/inventory textures
 * [ ] Custom synergy
 * [ ] Custom villager?
 
 **Long Term**
-* [ ] Strain breeding
 * [ ] Growhouse building
 * [ ] Paraphernalia
+* [ ] Animation
+* [ ] Strain textures
