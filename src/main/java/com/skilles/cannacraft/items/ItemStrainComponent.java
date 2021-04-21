@@ -34,6 +34,15 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
         return StrainMap.indexOf(name);
     }
     @Override
+    public void setGenetics(NbtList geneList) {
+        putList("Genes", geneList);
+    }
+    @Override
+    public List getGenetics() {
+        if(!hasTag("Genes")) putList("Genes", GeneticsManager.toNbtList(GeneticsManager.getTestArray()));
+        return getList("Genes", CcaNbtType.LIST);
+    }
+    @Override
     public void setStrain(int index) { // sets strain and type NBT based on index
         this.getOrCreateRootTag().putInt("ID", index);
         this.putString("Strain", StrainMap.getStrain(index).name());
