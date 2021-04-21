@@ -1,7 +1,7 @@
 package com.skilles.cannacraft.registry;
 
 import com.google.common.collect.Lists;
-import com.skilles.cannacraft.items.ItemStrainComponent;
+import com.skilles.cannacraft.strain.StrainMap;
 import net.fabricmc.fabric.api.loot.v1.FabricLootPoolBuilder;
 import net.fabricmc.fabric.api.loot.v1.FabricLootSupplierBuilder;
 import net.fabricmc.fabric.api.loot.v1.event.LootTableLoadingCallback;
@@ -32,7 +32,7 @@ public class LootTable {
                 .rolls(ConstantLootNumberProvider.create(1))
                 .withCondition(RandomChanceLootCondition.builder(dropLootChance).build());
         int i;
-        for(i = 0; i < ItemStrainComponent.STRAIN_COUNT; i++) {
+        for(i = 0; i < StrainMap.getStrainCount(); i++) {
             int finalI = i;
             FabricLootPoolBuilder newPoolBuilder = poolBuilder
                     .withEntry(ItemEntry.builder(ModItems.WEED_SEED).apply(SetNbtLootFunction.builder(Util.make(new NbtCompound(), (nbtCompound) -> {

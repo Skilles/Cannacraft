@@ -6,7 +6,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -20,19 +19,13 @@ public class WeedFruit extends Item {
         super(settings);
     }
     @Override
-    public String getTranslationKey(ItemStack stack) {
-        NbtCompound tag = stack.getSubTag("cannacraft:strain");
-        if (tag != null && tag.contains("ID", NbtElement.INT_TYPE)) {
-            if(!tag.getBoolean("Identified")) {
-                return super.getTranslationKey(stack) + ".unidentified";
-            } else {
-                int id = tag.getInt("ID");
-                return super.getTranslationKey(stack) + "." + id;
-            }
+    public Text getName(ItemStack stack) {
+        if(stack.hasTag()) {
+            NbtCompound tag = stack.getSubTag("cannacraft:strain");
+            return Text.of(tag.getString("Strain"));
         }
-        return super.getTranslationKey(stack);
+        return super.getName(stack);
     }
-
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
         if(world.isClient) {

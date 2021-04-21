@@ -10,7 +10,6 @@ import net.minecraft.item.AliasedBlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -28,17 +27,12 @@ public class WeedSeed extends AliasedBlockItem {
 
 
     @Override
-    public String getTranslationKey(ItemStack stack) {
-        NbtCompound tag = stack.getSubTag("cannacraft:strain");
-        if (tag != null && tag.contains("ID", NbtElement.INT_TYPE)) {
-            if(!tag.getBoolean("Identified")) {
-                return super.getTranslationKey(stack) + ".unidentified";
-            } else {
-                int id = tag.getInt("ID");
-                return super.getTranslationKey(stack) + "." + id;
-            }
+    public Text getName(ItemStack stack) {
+        if(stack.hasTag()) {
+            NbtCompound tag = stack.getSubTag("cannacraft:strain");
+            return Text.of(tag.getString("Strain") +" Seeds");
         }
-        return super.getTranslationKey(stack);
+        return super.getName(stack);
     }
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
@@ -47,7 +41,7 @@ public class WeedSeed extends AliasedBlockItem {
             StrainInterface clientStackInterface = ModComponents.STRAIN.get(clientStack);
             if(!playerEntity.isSneaking()) {
                 //System.out.println(ModComponents.STRAIN.get(clientStack).syncTest());
-                System.out.println("Strain of held seed: " + clientStackInterface.getStrain() + " THC: " + clientStackInterface.getThc() + " Identified: " + clientStackInterface.identified());
+                System.out.println("Strain of held seed: " + clientStackInterface.getStrain() + " THC: " + clientStackInterface.getThc() + " Identified: " + clientStackInterface.identified() + " Genes: " + clientStackInterface.getGenetics());
             } else {
                 System.out.println(clientStack.getTag());
             }
@@ -75,13 +69,12 @@ public class WeedSeed extends AliasedBlockItem {
         }
         return super.useOnBlock(context);
     }
-    private boolean appended = false;
     @Override
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
         NbtCompound tag = stack.getSubTag("cannacraft:strain");
         //System.out.println(tag);
-        if(tag != null && tag.contains("ID") && !(tag.getInt("ID") == ItemStrainComponent.UNKNOWN_ID) && !appended){ // checks if ID is set to actual strain
+        if(tag != null && tag.contains("ID") && !(tag.getInt("ID") == ItemStrainComponent.UNKNOWN_ID)){ // checks if ID is set to actual strain
 
             StrainInterface stackInterface = ModComponents.STRAIN.get(stack);
             if(stackInterface.identified()) {
@@ -96,7 +89,6 @@ public class WeedSeed extends AliasedBlockItem {
                 tooltip.add(new LiteralText("Type: Unknown"));
             }
             //System.out.println("Tooltip updated! strain="+strain);
-        appended = true;
 
 
        }
