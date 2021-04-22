@@ -46,7 +46,7 @@ public final class StrainMap {
         return strainArray.size();
     }
     public static Strain getStrain(int index) {
-        if(!strainArray.containsKey(index)) return null;
+        if(!strainArray.containsKey(index)) return strainArray.get(0);
         return strainArray.get(index);
     }
     public static Strain getStrain(String name) {
