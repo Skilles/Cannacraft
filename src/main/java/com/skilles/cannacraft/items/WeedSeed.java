@@ -53,7 +53,7 @@ public class WeedSeed extends AliasedBlockItem {
     public ActionResult useOnBlock(ItemUsageContext context) {
         Block block = context.getWorld().getBlockState(context.getBlockPos()).getBlock();
 
-        if(block instanceof WeedCrop && context.getWorld().isClient) {
+        if(block instanceof WeedCrop && !context.getWorld().isClient) {
             BlockEntity blockEntity = context.getWorld().getBlockEntity(context.getBlockPos());
             NbtCompound tag = blockEntity.writeNbt(new NbtCompound());
             if(context.getPlayer().isSneaking()) {
@@ -64,7 +64,8 @@ public class WeedSeed extends AliasedBlockItem {
             } else {
                 System.out.println("Max Age: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.MAXAGE)
                         + " Age: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.AGE)
-                        + " Mature: " + !context.getWorld().getBlockState(context.getBlockPos()).hasRandomTicks());
+                        + " Mature: " + !context.getWorld().getBlockState(context.getBlockPos()).hasRandomTicks()
+                        + " Breeding: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.BREEDING));
             }
         }
         return super.useOnBlock(context);
@@ -81,12 +82,15 @@ public class WeedSeed extends AliasedBlockItem {
                 String strain = stackInterface.getStrain();
                 String type = stackInterface.getType();
                 int thc = stackInterface.getThc();
+                String sex = stackInterface.isMale() ? "Male" : "Female";;
                 tooltip.add(new LiteralText("Strain: " + strain));
                 tooltip.add(new LiteralText("Type: " + type));
                 tooltip.add(new LiteralText("THC: " + thc + "%"));
+                tooltip.add(new LiteralText("Sex: "+sex));
             } else {
                 tooltip.add(new LiteralText("Strain: Unidentified"));
                 tooltip.add(new LiteralText("Type: Unknown"));
+                tooltip.add(new LiteralText("Sex: Unknown"));
             }
             //System.out.println("Tooltip updated! strain="+strain);
 

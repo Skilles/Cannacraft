@@ -58,6 +58,19 @@ public class Cannacraft implements ModInitializer {
         }
         return 1;
     }
+    public static int setSex(CommandContext<ServerCommandSource> ctx, String gender) throws CommandSyntaxException {
+        final ServerPlayerEntity self = ctx.getSource().getPlayer();
+        ItemStack itemStack = self.getMainHandStack();
+        if(itemStack.getItem().equals(ModItems.WEED_SEED)){
+            //NbtCompound tag = itemStack.getOrCreateSubTag("cannacraft:strain");
+            if(gender.equalsIgnoreCase("male")) { ModComponents.STRAIN.get(itemStack).setMale(true); }
+            else if(gender.equalsIgnoreCase("female")) { ModComponents.STRAIN.get(itemStack).setMale(false); }
+            else { System.out.println("Unknown gender: "+ gender); }
+
+            //itemStack.putSubTag("cannacraft:strain", tag);
+        }
+        return 1;
+    }
     public static int identify(CommandContext<ServerCommandSource> ctx, int flag) throws CommandSyntaxException {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack handStack = self.getMainHandStack();
@@ -97,13 +110,10 @@ public class Cannacraft implements ModInitializer {
         Registry.register(Registry.RECIPE_TYPE, id("analyze"), ANALYZE_RECIPE);
         Registry.register(Registry.RECIPE_SERIALIZER, id("analyze"), ANALYZE_RECIPE_SERIALIZER);
 
-        LootTable.registerLoot();
-        System.out.println("LootTables registered!");
-
-
         StrainMap.registerStrains();
 
-        //System.out.println("Strains initialized = "+StrainMap.getStrainCount());
+        LootTable.registerLoot();
+        System.out.println("LootTables registered!");
 
         ModItems.registerItems();
         System.out.println("Items registered!");
@@ -118,7 +128,7 @@ public class Cannacraft implements ModInitializer {
         System.out.println("ScreenHandlers registered!");
 
         CommandRegistrationCallback.EVENT.register((dispatcher, integrated) -> {
-            dispatcher.register(literal("weed")
+            dispatcher.register(literal("strain")
                     .then(literal("identify")
                             .executes(ctx -> {
                                 identify(ctx, 0);
@@ -128,27 +138,30 @@ public class Cannacraft implements ModInitializer {
                                     identify(ctx, 1);
                                     return 1;
                                     })))
-                    .then(literal("strain")
-                        .then(literal("set")
+                    .then(literal("set")
                             .then(argument("index", IntegerArgumentType.integer(0, StrainMap.getStrainCount()))
                                 .executes(ctx -> {
                                     System.out.println("Seed strain set!");
                                     setStrain(ctx, getInteger(ctx, "index"));
                                     return 1;
-            })))
-                            .then(literal("add")
-                                    .then(argument("name", StringArgumentType.string())
-                                            .then(argument("type", StringArgumentType.string())
-                                .executes(ctx -> {
-                                    addStrain(ctx, getString(ctx, "name"), getString(ctx, "type"));
+                                })))
+                    .then(literal("gender")
+                            .then(argument("sex", StringArgumentType.string()).executes(ctx -> {
+                                setSex(ctx, getString(ctx,"sex"));
+                                return 1;
+                            })))
+                    .then(literal("add")
+                            .then(argument("name", StringArgumentType.string())
+                                    .then(argument("type", StringArgumentType.string())
+                                        .executes(ctx -> {
+                                        addStrain(ctx, getString(ctx, "name"), getString(ctx, "type"));
                                     return 1;
-                                })
-            ))))
-                            .then(literal("list")
-                                    .executes(ctx -> {
-                                        listStrain(ctx);
-                                    return 1;
-                    }))
+                                }))))
+                    .then(literal("list")
+                            .executes(ctx -> {
+                                listStrain(ctx);
+                                return 1;
+                            }))
             );
         });
     }

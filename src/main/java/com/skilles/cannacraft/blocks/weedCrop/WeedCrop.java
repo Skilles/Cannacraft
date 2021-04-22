@@ -2,41 +2,49 @@ package com.skilles.cannacraft.blocks.weedCrop;
 
 import com.skilles.cannacraft.registry.ModComponents;
 import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.strain.GeneticsManager;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
+import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertilizable { // custom crop block implementation (very WIP)
 
     //public static final IntProperty STRAIN = IntProperty.of("strain", 0, 2); // maybe add custom textures per strain
     public static final IntProperty MAXAGE = IntProperty.of("maxage", 0, 7);
+    public static final BooleanProperty BREEDING = BooleanProperty.of("breeding");
     public static final IntProperty AGE = Properties.AGE_7;
     private static final VoxelShape[] AGE_TO_SHAPE = new VoxelShape[]{Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D), Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 4.0D, 16.0D), Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 6.0D, 16.0D), Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D), Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 10.0D, 16.0D), Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 12.0D, 16.0D), Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D), Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D)};
 
     public WeedCrop(Settings settings) {
         super(settings);
-        this.setDefaultState(withMaxAge(7).with(AGE, 0));
+        this.setDefaultState(withMaxAge(7).with(AGE, 0).with(BREEDING, false));
     }
     public BlockState withMaxAge(int age) {
         return this.getDefaultState().with(MAXAGE, age);
     }
+    public BlockState withBreeding(BlockState state, boolean breeding) { return state.with(BREEDING, breeding); }
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
         return new WeedCropEntity(pos, state);
@@ -60,6 +68,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     protected void appendProperties(StateManager.Builder<Block, BlockState> stateManager) {
         stateManager.add(AGE);
         stateManager.add(MAXAGE);
+        stateManager.add(BREEDING);
     }
     protected static NbtCompound trimTag(NbtCompound tag){
         NbtCompound newTag = tag;
@@ -68,20 +77,20 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         newTag.remove("x");
         newTag.remove("y");
         newTag.remove("z");
+        newTag.putInt("THC", tag.getInt("Seed THC"));
+        newTag.remove("Seed THC");
         }
         return newTag;
     }
 
     public boolean isMature(BlockState state) {
         //if(!state.get(MATURE)) return false;
-
         return (state.get((this.getAgeProperty())) >= getMaxAge(state));
     }
 
     @Override
     public boolean isFertilizable(BlockView world, BlockPos pos, BlockState state, boolean isClient) {
-        if(getMaxAge(state) == 7) return true;
-        return !isMature(state);
+        return hasRandomTicks(state);
     }
 
     @Override
@@ -159,6 +168,9 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     public int getMaxAge(BlockState state) {
         return state.get(MAXAGE);
     }
+    public boolean isBreeding(BlockState state) {
+        return state.get(BREEDING);
+    }
 
     /* List<ItemStack> implementation (for future drop modifiers)
         NbtCompound tag;
@@ -196,8 +208,11 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) { // drops cannabis with BE's NBT
        if(getAge(state) == getMaxAge(state)) {
             ItemStack newStack = new ItemStack(ModItems.WEED_FRUIT);
+            ItemStack seedStack = new ItemStack(ModItems.WEED_SEED);
             NbtCompound tag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
             if (tag != null) {
+                tag.putInt("THC", tag.getInt("Seed THC"));
+                seedStack.putSubTag("cannacraft:strain", trimTag(tag));
                 newStack.putSubTag("cannacraft:strain", trimTag(tag));
             } else {
                 System.out.println("Error: NULLTAG");
@@ -207,11 +222,61 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
                 ItemStack itemStack = newStack.copy();
                 dropStack(world, pos, itemStack);
             }
-            dropStack(world, pos, newStack);
+            if(!tag.getBoolean("Male")) dropStack(world, pos, newStack);
+            dropStack(world, pos, seedStack);
         }
         super.onBreak(world, pos, state, player);
     }
 
+    /**
+     * Sets the "Seed THC" nbt tag of the BlockEntity to the average of its own "Seed THC" and the highest "Seed THC" nbt of adjacent male crops
+     */
+    private void setSeedThc(World world, BlockPos pos){
+        NbtCompound ogTag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
+        if(!ogTag.getBoolean("Male")) {
+            List<Integer> thcArray = new ArrayList<>();
+            List<Direction> validDirections = new ArrayList<>();
+            for (Direction direction : Direction.Type.HORIZONTAL) {
+                BlockEntity blockEntity2 = world.getBlockEntity(pos.offset(direction));
+                if (blockEntity2 instanceof WeedCropEntity) {
+                    NbtCompound tag = blockEntity2.writeNbt(new NbtCompound());
+                    validDirections.add(direction);
+                    if (tag.getBoolean("Male")) {
+                        thcArray.add(tag.getInt("Seed THC"));
+                    }
+                }
+            }
+            if (!thcArray.isEmpty() && ogTag != null && ogTag.contains("THC")) {
+                ogTag.putInt("Seed THC", GeneticsManager.crossThc(thcArray.stream().max(Integer::compare).get(), ogTag.getInt("THC")));
+                System.out.println("THC: " + ogTag.getInt("Seed THC"));
+                world.getBlockEntity(pos).readNbt(ogTag);
+                ogTag = world.getBlockEntity(pos).writeNbt(new NbtCompound());;
+                System.out.println("New tag: " + ogTag);
+                world.setBlockState(pos, world.getBlockState(pos).with(BREEDING, true), 2);
+            }
+            if (thcArray.isEmpty()) {
+                System.out.println("No surrounding crops!");
+            }
+        }
+    }
+    @Override
+    public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
+        super.randomDisplayTick(state, world, pos, random);
+            if (isBreeding(state)) {
+                Direction direction = Direction.UP;
+                Direction.Axis axis = direction.getAxis();
+                double h = random.nextDouble() * 0.6D - 0.3D;
+                double i = axis == Direction.Axis.X ? direction.getOffsetX() * 0.52D : h;
+                double j = random.nextDouble() * 6.0D / 16.0D;
+                double k = axis == Direction.Axis.Z ? direction.getOffsetZ() * 0.52D : h;
+                float r = random.nextFloat();
+                float g = 256;
+                float b = random.nextFloat();
+                world.addParticle(new DustParticleEffect(new Vec3f(r, g, b), .7f), pos.getX() + 0.5 + i,
+                        pos.getY() + j, pos.getZ() + 0.5 + k, 0, 0, 0);
+
+        }
+    }
 
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) { // grows the first stage, then grows the second stage
@@ -220,20 +285,23 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
 
             for (i = 1; world.getBlockState(pos.down(i)).isOf(this); ++i) {
             }
-
             int j = getAge(state);
             if (j < this.getMaxAge(state) && (world.getBaseLightLevel(pos, 0) >= 9)) {
                 float f = getAvailableMoisture(this, world, pos);
                 if (random.nextInt((int) (25.0F / f) + 1) == 0) {
                     world.setBlockState(pos, state.with(AGE, j + 1), 2);
                 }
-            } else if (j == 7) {
+            } else if (j == 7) { // onGrow
+                setSeedThc(world, pos);
                 if (world.isAir(pos.up())) { // if block above is air
                     if (getMaxAge(state) == 7) { // if block is 1st stage
                         float f = getAvailableMoisture(this, world, pos);
                         if (random.nextInt((int) (25.0F / f) + 1) == 0) {
                             world.setBlockState(pos.up(), withMaxAge(5), 2);
-                            world.getBlockEntity(pos.up()).readNbt(world.getBlockEntity(pos).writeNbt(new NbtCompound()));
+                            NbtCompound tag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
+                            world.setBlockState(pos, withBreeding(state, false), 2);
+                            world.getBlockEntity(pos).readNbt(tag);
+                            world.getBlockEntity(pos.up()).readNbt(tag);
                             world.markDirty(pos.up());
                         }
                     }
@@ -299,7 +367,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
             BlockEntity blockEntity = world.getBlockEntity(pos);
             tag.putInt("ID", ModComponents.STRAIN.get(itemStack).getIndex()); // index 0 = null bug workaround
             if (blockEntity instanceof WeedCropEntity && tag != null && tag.contains("ID")) {
-                ((WeedCropEntity) blockEntity).setData(tag.getInt("ID"), tag.getInt("THC"), tag.getBoolean("Identified"));
+                ((WeedCropEntity) blockEntity).setData(tag.getInt("ID"), tag.getInt("THC"), tag.getBoolean("Identified"), tag.getBoolean("Male"));
                 world.markDirty(pos);
             }
         }

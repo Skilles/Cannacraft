@@ -16,6 +16,7 @@ public interface StrainInterface extends ComponentV3 {
     void setStrain(int index); // setType not needed
     void setGenetics(NbtList geneList);
     void setThc(int thc);
+    void setMale(boolean isMale);
 
 
     String getStrain();
@@ -24,6 +25,7 @@ public interface StrainInterface extends ComponentV3 {
     int getIndex(String strain);
     String getType();
     int getThc();
+    boolean isMale();
 
 
     void identify();

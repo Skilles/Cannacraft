@@ -1,5 +1,6 @@
 package com.skilles.cannacraft.items;
 
+import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.GeneticsManager;
 import com.skilles.cannacraft.strain.StrainMap;
 import dev.onyxstudios.cca.api.v3.component.Component;
@@ -19,8 +20,10 @@ import static com.skilles.cannacraft.strain.StrainMap.normalDist;
 public class ItemStrainComponent extends ItemComponent implements StrainInterface {
 
     public static final int UNKNOWN_ID = 0; // null
+    ItemStack stack;
     public ItemStrainComponent(ItemStack stack) {
         super(stack);
+        this.stack = stack;
     }
 
     @Override
@@ -48,6 +51,7 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
         this.putString("Strain", StrainMap.getStrain(index).name());
         this.putString("Type", WordUtils.capitalizeFully(StrainMap.getStrain(index).type().toString()));
         this.putInt("THC", getThc());
+        if(stack.getItem().equals(ModItems.WEED_SEED)) this.putBoolean("Male", isMale());
     }
     @Override
     public String getStrain() {
@@ -78,6 +82,15 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
     public void identify() {
         if(!this.hasTag("ID")) this.setStrain(UNKNOWN_ID);
         this.putBoolean("Identified", true);
+    }
+    @Override
+    public boolean isMale() {
+        if(!this.hasTag("Male")) this.putBoolean("Male", false);
+        return this.getBoolean("Male");
+    }
+    @Override
+    public void setMale(boolean isMale) {
+        this.getOrCreateRootTag().putBoolean("Male", isMale);
     }
 
 
