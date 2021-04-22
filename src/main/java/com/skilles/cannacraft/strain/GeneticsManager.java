@@ -6,27 +6,146 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
+
+import static com.skilles.cannacraft.strain.StrainMap.Type;
+import static com.skilles.cannacraft.strain.StrainMap.strainList;
 
 public final class GeneticsManager {
     public static int crossThc(int thc1, int thc2) {
         return (thc1 + thc2) / 2;
     }
     public static ArrayList<Pair<Genes, Integer>> geneArray = new ArrayList<>();
+    private static List suffixes = new ArrayList() {{  // common endings of strains
+        add("OG");
+        add("Kush");
+        add("Cookies");
+        add("Dream");
+        add("Poison");
+        add("Crack");
+        add("Dawg");
+    }};
+
+    private static Random random =  new Random();
+
+    /**
+     * @return returns a set with all possible combinations of existing strains
+     */
+    public static Set crossStrainSet() {
+
+        Set<String> nameSet = strainList.keySet();
+        nameSet.remove("Unknown");
+        Set<String> set = new HashSet<>(); // no dupes
+        for (String name1: nameSet) { // loops 3 times
+            for(int i = 0; i < nameSet.size(); i++) { // loops 3 times
+                if(!name1.equals(nameSet.toArray()[i])) { // prevent "OG OG"
+                    String cross1 = GeneticsManager.crossNames(name1, (String) nameSet.toArray()[i]);
+                    String cross2 = GeneticsManager.crossNames((String) nameSet.toArray()[i], name1);
+                    String cross3 = GeneticsManager.altCrossNames(name1, (String) nameSet.toArray()[i]);
+                    String cross4 = GeneticsManager.altCrossNames((String) nameSet.toArray()[i], name1);
+                    set.add(cross1);
+                    set.add(cross2);
+                    set.add(cross3);
+                    set.add(cross4);
+                }
+            }
+        }
+        return set;
+    }
     /**
      *
      * @param name1 the first word of this argument will be the first word of the new name
      * @param name2 the second word of this argument will be the second word of the new name (first if only one word)
      * @return Returns a combined strain name
      */
-    public static String crossNames(String name1, String name2) {
-        String[] nameOneArray = StringUtils.split(name1);
-        String[] nameTwoArray = StringUtils.split(name1);
-        if(nameTwoArray.length < 2) {
-            return nameOneArray[0] + " " + nameTwoArray[0];
+    private static String crossNames(String name1, String name2) {
+        int index = name2.indexOf(' ');
+        String nameOne = name1.substring(0, name1.indexOf(' ')).trim();
+        String nameTwo = name2.substring(index).trim();
+
+        if(index > -1) {
+            return nameOne + " " + name2;
         }
-        return nameOneArray[0] + " " + nameTwoArray[1];
+        return nameOne + " " + nameTwo;
+    }
+
+    /**
+     * @param name1 has priority in suffixes
+     * @param name2 will default use as the first word
+     * @return returns the crossed name of strains according to the prefix list
+     */
+    public static String crossStrains(String name1, String name2) {
+        String[] nameOne = StringUtils.split(name1);
+        String[] nameTwo = StringUtils.split(name2);
+
+        if(nameOne.length > 1 && nameTwo.length > 1) {
+             if (suffixes.contains(nameTwo[1]) && !suffixes.contains(nameOne[1])) {
+                return altCrossNames(nameOne[0], nameTwo[1]);
+            } else {
+                 return altCrossNames(nameTwo[0], nameOne[1]);
+             }
+        } else if(nameOne.length > 1 && nameTwo.length == 1) {
+            return altCrossNames(nameTwo[0], nameOne[1]);
+        } else if(nameTwo.length > 1 && nameOne.length == 1) {
+            return altCrossNames(nameOne[0], nameTwo[1]);
+        } else { // both length 1
+            if (suffixes.contains(nameTwo[0])) {
+                return altCrossNames(name1, name2);
+            } else {
+                return altCrossNames(name2, name1);
+            }
+        }
+    }
+    /**
+     *
+     * @param name1 the first word of this argument will be the first word of the new name
+     * @param name2 the first word of this argument will be the second word of the new name
+     * @return Returns a combined strain name
+     */
+    private static String altCrossNames(String name1, String name2) {
+        if(StringUtils.contains("Unknown", name1) || StringUtils.contains("Unknown", 2)) {
+            return null;
+        }
+        int name1index = name1.indexOf(' ');
+        int name2index = name2.indexOf(' ');
+        String nameOne;
+        String nameTwo;
+        if(name1index > -1) {
+            nameOne = name1.substring(0, name1index);
+        } else {
+             nameOne = name1;
+        }
+        if(name2index > -1) {
+            nameTwo = name2.substring(0, name2index);
+        } else {
+            nameTwo = name2;
+        }
+
+        return nameOne + " " + nameTwo;
+    }
+    /**
+     * @param type1 dominant type which has priority
+     * @param type2
+     * @return returns hybrid ONLY if sativa x indica or hybrid x hybrid
+     */
+    public static Type crossTypes(Type type1, Type type2) {
+        if(type2.equals(Type.UNKNOWN)) return Type.UNKNOWN;
+        switch(type1) {
+            case INDICA:
+                if(type2.equals(Type.SATIVA)) return Type.HYBRID;
+                return Type.INDICA;
+            case SATIVA:
+                if(type2.equals(Type.INDICA)) return Type.HYBRID;
+                return Type.SATIVA;
+            case HYBRID:
+                if(type2.equals(Type.HYBRID)) return Type.HYBRID;
+                return type2;
+            default:
+                return Type.UNKNOWN;
+        }
+    }
+    public static Random random() {
+        return random;
     }
     public static NbtList toNbtList(ArrayList<Pair<Genes, Integer>> list) {
         NbtList nbtList = new NbtList();

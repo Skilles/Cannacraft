@@ -23,7 +23,7 @@ public final class StrainMap {
     private static String json;
 
     protected static BiMap<Integer, Strain> strainArray = HashBiMap.create();
-    private static Map<String, Strain> strainList = new HashMap<>(); // for name lookup
+    protected static Map<String, Strain> strainList = new HashMap<>(); // for name lookup
     public enum Type {
         INDICA,
         SATIVA,
@@ -95,6 +95,12 @@ public final class StrainMap {
             strainList.put(strainArray.get(i).name(),strainArray.get(i));
         }
     }
+    public static boolean isPresent(Strain strain) {
+        return strainArray.containsValue(strain);
+    }
+    public static boolean isPresent(String name) {
+        return strainArray.containsValue(toStrain(name));
+    }
     public static int normalDist(int mean, int std, int min) {
         Random random = new Random();
         int newThc = (int) Math.round(random.nextGaussian()*std+mean);
@@ -106,8 +112,8 @@ public final class StrainMap {
     public static Strain toStrain(String name) {
         return strainList.get(name);
     }
-    public static Map<String, Strain> getStrains() {
-        return strainList;
+    public static Map<Integer, Strain> getStrains() {
+        return strainArray;
     }
     public static void save() {
         try {
