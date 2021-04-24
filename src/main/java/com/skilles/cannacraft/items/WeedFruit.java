@@ -20,9 +20,9 @@ public class WeedFruit extends Item {
     }
     @Override
     public Text getName(ItemStack stack) {
-        if(stack.hasTag()) {
+        if (stack.hasTag()) {
             NbtCompound tag = stack.getSubTag("cannacraft:strain");
-            return Text.of(tag.getString("Strain"));
+            return tag.getBoolean("Identified") ? Text.of(tag.getString("Strain")) : Text.of("Unidentified Cannabis");
         }
         return super.getName(stack);
     }

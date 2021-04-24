@@ -29,9 +29,9 @@ public class WeedSeed extends AliasedBlockItem {
 
     @Override
     public Text getName(ItemStack stack) {
-        if(stack.hasTag()) {
+        if (stack.hasTag()) {
             NbtCompound tag = stack.getSubTag("cannacraft:strain");
-            return Text.of(tag.getString("Strain") +" Seeds");
+            return tag.getBoolean("Identified") ? Text.of(tag.getString("Strain") + " Seeds") : Text.of("Unidentified Seeds");
         }
         return super.getName(stack);
     }
