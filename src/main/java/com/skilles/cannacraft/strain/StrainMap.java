@@ -117,6 +117,9 @@ public final class StrainMap {
     public static Map<Integer, Strain> getStrains() {
         return strainArray;
     }
+    public static boolean containsStrain(String name) {
+        return strainList.containsKey(name);
+    }
     public static void save() {
         try {
             Writer writer = new FileWriter("strains.json");
