@@ -153,11 +153,11 @@ public final class GeneticsManager {
         String sex = tag.getBoolean("Male") ? "Male" : "Female";
         int id = tag.getInt("ID");
         int thc = tag.getInt("THC");
-        if(tag.getBoolean("identified")) {
+        if(tag.getBoolean("Identified")) {
             tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText(StrainMap.getStrain(id).name()).formatted(Formatting.GREEN)));
-            tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StrainMap.getStrain(id).type().name())).formatted(Formatting.DARK_GREEN)));
+            tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StringUtils.capitalize(StringUtils.lowerCase(StrainMap.getStrain(id).type().name())))).formatted(Formatting.DARK_GREEN)));
             tooltip.add(new LiteralText("THC: ").formatted(Formatting.GRAY).append(new LiteralText(thc + "%").formatted(Formatting.DARK_GREEN)));
-            tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText(sex)).formatted(Formatting.DARK_GREEN));
+            tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText(sex).formatted(Formatting.DARK_GREEN)));
         } else {
             tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText("Unidentified").formatted(Formatting.GREEN)));
             tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText("Unknown").formatted(Formatting.DARK_GREEN)));
