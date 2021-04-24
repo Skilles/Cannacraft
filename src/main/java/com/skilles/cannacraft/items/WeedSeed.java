@@ -37,11 +37,10 @@ public class WeedSeed extends AliasedBlockItem {
     }
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
-        if(world.isClient) {
+        if (world.isClient) {
             ItemStack clientStack = playerEntity.getStackInHand(hand);
             StrainInterface clientStackInterface = ModComponents.STRAIN.get(clientStack);
-            if(!playerEntity.isSneaking()) {
-                //System.out.println(ModComponents.STRAIN.get(clientStack).syncTest());
+            if (!playerEntity.isSneaking()) {
                 System.out.println("Strain of held seed: " + clientStackInterface.getStrain() + " THC: " + clientStackInterface.getThc() + " Identified: " + clientStackInterface.identified() + " Genes: " + clientStackInterface.getGenetics());
             } else {
                 System.out.println(clientStack.getTag());

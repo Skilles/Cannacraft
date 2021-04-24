@@ -11,7 +11,6 @@ public final class Strain {
     public Strain(String strain, StrainMap.Type type) {
         setName(strain);
         setType(type);
-        //setThc(normalDist(15, 5, 13));
         CLASS_COUNT++;
     }
 
@@ -31,19 +30,6 @@ public final class Strain {
         this.type = type;
     }
 
-    protected void setThc(int thc) {
-        /*(switch(name) {
-            case "OG Kush":
-                thc = normalDist(15, 5, 13);
-                break;
-            case "Purple Punch":
-                thc = normalDist(15, 5, 13);
-                break;
-            case "Chem Trix":
-                thc = normalDist(15, 5, 13);
-                break;
-        }*/
-    }
     public String toString() {
         return name + " | " + type;
     }
