@@ -1,7 +1,9 @@
 package com.skilles.cannacraft.items;
 
+import com.skilles.cannacraft.blocks.strainAnalyzer.StrainAnalyzer;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
 import com.skilles.cannacraft.registry.ModComponents;
+import com.skilles.cannacraft.strain.GeneticsManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.item.TooltipContext;
@@ -10,7 +12,6 @@ import net.minecraft.item.AliasedBlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -79,30 +80,10 @@ public class WeedSeed extends AliasedBlockItem {
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
         NbtCompound tag = stack.getSubTag("cannacraft:strain");
-        //System.out.println(tag);
-        if(tag != null && tag.contains("ID") && !(tag.getInt("ID") == ItemStrainComponent.UNKNOWN_ID)){ // checks if ID is set to actual strain
-
-            StrainInterface stackInterface = ModComponents.STRAIN.get(stack);
-            if(stackInterface.identified()) {
-                String strain = stackInterface.getStrain();
-                String type = stackInterface.getType();
-                int thc = stackInterface.getThc();
-                String sex = stackInterface.isMale() ? "Male" : "Female";;
-                tooltip.add(new LiteralText("Strain: " + strain));
-                tooltip.add(new LiteralText("Type: " + type));
-                tooltip.add(new LiteralText("THC: " + thc + "%"));
-                tooltip.add(new LiteralText("Sex: "+sex));
-            } else {
-                tooltip.add(new LiteralText("Strain: Unidentified"));
-                tooltip.add(new LiteralText("Type: Unknown"));
-                tooltip.add(new LiteralText("Sex: Unknown"));
-            }
-            //System.out.println("Tooltip updated! strain="+strain);
+        if (tag != null && tag.contains("ID") && !(tag.getInt("ID") == 0)) { // checks if ID is set to actual strain
+            GeneticsManager.appendTooltips(tooltip, tag);
+        }
 
 
-       }
     }
-
-
-
 }

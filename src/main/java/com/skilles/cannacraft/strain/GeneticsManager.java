@@ -3,6 +3,9 @@ package com.skilles.cannacraft.strain;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 
@@ -77,7 +80,6 @@ public final class GeneticsManager {
     public static String crossStrains(String name1, String name2) {
         String[] nameOne = StringUtils.split(name1);
         String[] nameTwo = StringUtils.split(name2);
-
         if(nameOne.length > 1 && nameTwo.length > 1) {
              if (suffixes.contains(nameTwo[1]) && !suffixes.contains(nameOne[1])) {
                 return altCrossNames(nameOne[0], nameTwo[1]);
@@ -147,6 +149,22 @@ public final class GeneticsManager {
     public static Random random() {
         return random;
     }
+    public static void appendTooltips(List<Text> tooltip, NbtCompound tag) {
+        String sex = tag.getBoolean("Male") ? "Male" : "Female";
+        int id = tag.getInt("ID");
+        int thc = tag.getInt("THC");
+        if(tag.getBoolean("identified")) {
+            tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText(StrainMap.getStrain(id).name()).formatted(Formatting.GREEN)));
+            tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StrainMap.getStrain(id).type().name())).formatted(Formatting.DARK_GREEN)));
+            tooltip.add(new LiteralText("THC: ").formatted(Formatting.GRAY).append(new LiteralText(thc + "%").formatted(Formatting.DARK_GREEN)));
+            tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText(sex)).formatted(Formatting.DARK_GREEN));
+        } else {
+            tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText("Unidentified").formatted(Formatting.GREEN)));
+            tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText("Unknown").formatted(Formatting.DARK_GREEN)));
+            tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText("Unknown").formatted(Formatting.DARK_GREEN)));
+        }
+    }
+
     public static NbtList toNbtList(ArrayList<Pair<Genes, Integer>> list) {
         NbtList nbtList = new NbtList();
         for (Pair<Genes, Integer> entry: list) {
