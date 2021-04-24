@@ -240,7 +240,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     }
 
     /**
-     * Crosses name/type/thc with adjacent male. Will not breed if males > 1
+     * Crosses name/type/thc with adjacent male. Gets random male if more than one. THC will not change if male THC is lower than female.
      */
     private void breedCrops(World world, BlockPos pos, Random random){
         NbtCompound ogTag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
@@ -251,35 +251,41 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
             int id = ogTag.getInt("ID");
             int thc = ogTag.getInt("Seed THC");
             int COUNT = 0;
+            int maleId = 0;
+            List<Integer> thcValues = new ArrayList<>();
             for (Direction direction : Direction.Type.HORIZONTAL) {
                 BlockEntity blockEntity2 = world.getBlockEntity(pos.offset(direction));
                 if (blockEntity2 instanceof WeedCropEntity) {
                     NbtCompound tag = blockEntity2.writeNbt(new NbtCompound());
 
                     if (tag.getBoolean("Male")) {
-                        /*if(thc < tag.getInt("Seed THC")) {
-                        }*/
-                        int maleId = tag.getInt("ID");
-                        thc = tag.getInt("Seed THC");
-                        stringArray.add(getStrain(maleId).name());
-                        typeArray.add(getStrain(maleId).type());
+                        if (thc < tag.getInt("Seed THC")) {
+                            thcValues.add(tag.getInt("Seed THC")); // adds iterative highest thc values
+                            maleId = tag.getInt("ID"); // highest thc male id
+                            thc = tag.getInt("Seed THC"); // highest thc value
+                        }
+                        stringArray.add(getStrain(tag.getInt("Seed THC")).name()); // all names of surrounding males
+                        typeArray.add(getStrain(tag.getInt("Seed THC")).type());
                         COUNT++;
                     }
                 }
             }
-            if(COUNT == 1) {
+            if (COUNT > 0) {
+                if (maleId == 0) {
+                    thc = ogTag.getInt("Seed THC");
+                    maleId = indexOf(stringArray.get(GeneticsManager.random().nextInt(stringArray.size() - 1))); // id is random male
+                }
                 // Set thc
                 ogTag.putInt("Seed THC", GeneticsManager.crossThc(thc, ogTag.getInt("THC")));
                 System.out.println("THC: " + ogTag.getInt("Seed THC"));
-
                 // Set name/type
                 int randId = random.nextInt(stringArray.size());
                 String name1 = getStrain(id).name();
-                String name2 = stringArray.get(randId);
+                String name2 = stringArray.get(maleId);
                 Type type1 = getStrain(id).type();
                 Type type2 = typeArray.get(randId);
                 String crossedName = GeneticsManager.crossStrains(name1, name2);
-                if(!isPresent(crossedName)) addStrain(crossedName, GeneticsManager.crossTypes(type1, type2));
+                if (!isPresent(crossedName)) addStrain(crossedName, GeneticsManager.crossTypes(type1, type2));
                 ogTag.putInt("Seed ID", indexOf(crossedName));
 
                 // Save nbt
@@ -290,8 +296,6 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
 
                 System.out.println("New tag: " + ogTag);
                 world.setBlockState(pos, world.getBlockState(pos).with(BREEDING, true), 2);
-            } else {
-                System.out.println("Too many males");
             }
         }
     }
