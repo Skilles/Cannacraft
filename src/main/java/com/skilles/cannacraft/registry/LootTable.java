@@ -1,7 +1,6 @@
 package com.skilles.cannacraft.registry;
 
 import com.google.common.collect.Lists;
-import com.skilles.cannacraft.items.ItemStrainComponent;
 import net.fabricmc.fabric.api.loot.v1.FabricLootPoolBuilder;
 import net.fabricmc.fabric.api.loot.v1.FabricLootSupplierBuilder;
 import net.fabricmc.fabric.api.loot.v1.event.LootTableLoadingCallback;
@@ -11,7 +10,6 @@ import net.minecraft.loot.function.SetNbtLootFunction;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.List;
@@ -28,20 +26,13 @@ public class LootTable {
 
     private static final List<LootTableInsert> INSERTS = Lists.newArrayList();
     static FabricLootPoolBuilder lootPool() {
+        NbtCompound subTag = new NbtCompound();
+        NbtCompound baseTag = new NbtCompound();
+        subTag.putInt("ID", 0);
+        baseTag.put("cannacraft:strain", subTag);
         FabricLootPoolBuilder poolBuilder = FabricLootPoolBuilder.builder()
                 .rolls(ConstantLootNumberProvider.create(1))
-                .withCondition(RandomChanceLootCondition.builder(dropLootChance).build());
-        int i;
-        for(i = 0; i < ItemStrainComponent.STRAIN_COUNT; i++) {
-            int finalI = i;
-            FabricLootPoolBuilder newPoolBuilder = poolBuilder
-                    .withEntry(ItemEntry.builder(ModItems.SEED).apply(SetNbtLootFunction.builder(Util.make(new NbtCompound(), (nbtCompound) -> {
-                        NbtCompound strainNbt = new NbtCompound();
-                        strainNbt.putInt("ID", finalI);
-                        nbtCompound.put("cannacraft:strain", strainNbt);
-                    }))).build()); // dynamically add new strains to loot table
-            poolBuilder = newPoolBuilder;
-        }
+                .withCondition(RandomChanceLootCondition.builder(dropLootChance).build()).withEntry(ItemEntry.builder(ModItems.WEED_SEED).apply(SetNbtLootFunction.builder(baseTag)).build());
         return poolBuilder;
     }
     private static final FabricLootPoolBuilder lootPool = lootPool();

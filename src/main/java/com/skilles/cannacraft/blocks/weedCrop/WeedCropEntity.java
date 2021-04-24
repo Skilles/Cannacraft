@@ -14,13 +14,18 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
     }
     private int index;
     private int thc;
+    private int seedThc;
     private boolean identified;
+    private boolean isMale;
+    private int seedId;
 
-    public void setData(int index, int thc, boolean identifed) {
+    public void setData(int index, int thc, boolean identified, boolean isMale) {
         this.index = index;
         this.thc = thc;
-        this.identified = identifed;
-        System.out.println(writeNbt(new NbtCompound()));
+        this.seedThc = thc;
+        this.identified = identified;
+        this.isMale = isMale;
+        this.seedId = index;
     }
 
     @Override
@@ -28,9 +33,11 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
         super.writeNbt(tag);
         tag.putInt("ID", index);
         tag.putInt("THC", thc);
+        tag.putInt("Seed THC", seedThc);
         tag.putBoolean("Identified", identified);
+        tag.putBoolean("Male", isMale);
+        tag.putInt("Seed ID", seedId);
         return tag;
-
     }
 
     @Override
@@ -39,6 +46,11 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
             this.identified = nbt.getBoolean("Identified");
             this.index = nbt.getInt("ID");
             this.thc = nbt.getInt("THC");
+            this.seedThc = nbt.getInt("Seed THC");
+            this.isMale = nbt.getBoolean("Male");
+            this.seedId = nbt.getInt("Seed ID");
+            if(this.index == 0) this.index = this.seedId;
+            if(this.thc == 0) this.seedThc = thc;
     }
 
 

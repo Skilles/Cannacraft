@@ -1,59 +1,57 @@
 package com.skilles.cannacraft.items;
 
+import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.strain.GeneticsManager;
+import com.skilles.cannacraft.strain.StrainMap;
 import dev.onyxstudios.cca.api.v3.component.Component;
-import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
+import dev.onyxstudios.cca.api.v3.item.CcaNbtType;
 import dev.onyxstudios.cca.api.v3.item.ItemComponent;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtList;
+import org.apache.commons.lang3.text.WordUtils;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Random;
+import java.util.List;
+
+import static com.skilles.cannacraft.strain.StrainMap.normalDist;
 
 // separate component for ItemStacks
 
-public class ItemStrainComponent extends ItemComponent implements StrainInterface, AutoSyncedComponent {
+public class ItemStrainComponent extends ItemComponent implements StrainInterface {
 
-    public static final int UNKNOWN_ID = 3; // null
-    public static int STRAIN_COUNT = 3;
-
+    public static final int UNKNOWN_ID = 0; // null
+    ItemStack stack;
     public ItemStrainComponent(ItemStack stack) {
         super(stack);
+        this.stack = stack;
     }
+
     @Override
     public int getIndex() {
-        if(!this.hasTag("ID")) this.putInt("ID", UNKNOWN_ID); // default is unknown
+        if(!this.hasTag("ID")) this.setStrain(UNKNOWN_ID);
+
         return this.getInt("ID");
     }
     @Override
-    public void setIndex(int index) {
-    this.putInt("ID", index); // BUG: index 0 is null
-    setStrain(index);
+    public int getIndex(String name) {
+        return StrainMap.indexOf(name);
     }
     @Override
-    public void setStrain(int index) { // sets strain and type based on index
-        String strain;
-        String type;
-        switch (index) {
-            case 0:
-                strain = "OG Kush";
-                type = "Hybrid";
-                break;
-            case 1:
-                strain = "Purple Punch";
-                type = "Indica";
-                break;
-            case 2:
-                strain = "Chem Trix";
-                type = "Sativa";
-                break;
-            case UNKNOWN_ID:
-                strain = "Unknown";
-                type = "Unknown";
-                break;
-            default:
-                throw new IllegalStateException("Unexpected index value: " + index);
-        }
-        this.putString("Strain", strain);
-        this.putString("Type", type);
+    public void setGenetics(NbtList geneList) {
+        putList("Genes", geneList);
+    }
+    @Override
+    public List getGenetics() {
+        if(!hasTag("Genes")) putList("Genes", GeneticsManager.toNbtList(GeneticsManager.getTestArray()));
+        return getList("Genes", CcaNbtType.LIST);
+    }
+    @Override
+    public void setStrain(int index) { // sets strain and type NBT based on index
+        this.getOrCreateRootTag().putInt("ID", index);
+        this.putString("Strain", StrainMap.getStrain(index).name());
+        this.putString("Type", WordUtils.capitalizeFully(StrainMap.getStrain(index).type().toString()));
+        this.putInt("THC", getThc());
+        if(stack.getItem().equals(ModItems.WEED_SEED)) this.putBoolean("Male", isMale());
     }
     @Override
     public String getStrain() {
@@ -76,22 +74,25 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
     }
     @Override
     public boolean identified() {
+        if(this.hasTag("ID") && this.getInt("ID") == UNKNOWN_ID) this.putBoolean("Identified", true);
         if(!this.hasTag("Identified")) this.putBoolean("Identified", false);
         return this.getBoolean("Identified");
     }
     @Override
     public void identify() {
+        if(!this.hasTag("ID")) this.setStrain(UNKNOWN_ID);
         this.putBoolean("Identified", true);
     }
-
-    public static int normalDist(int mean, int std, int min) {
-        Random random = new Random();
-        int newThc = (int) Math.round(random.nextGaussian()*std+mean);
-        if(newThc < min) {
-            newThc = min;
-        }
-        return newThc;
+    @Override
+    public boolean isMale() {
+        if(!this.hasTag("Male")) this.putBoolean("Male", false);
+        return this.getBoolean("Male");
     }
+    @Override
+    public void setMale(boolean isMale) {
+        this.getOrCreateRootTag().putBoolean("Male", isMale);
+    }
+
 
     @Override
     public void copyFrom(Component other) {
