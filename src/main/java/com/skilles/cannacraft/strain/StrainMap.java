@@ -20,8 +20,8 @@ public final class StrainMap {
 
     private static final GsonBuilder builder = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting();
     private static Gson gson = builder.create();
-    private static String json;
 
+    public static int ogStrainCount = 4;
     protected static BiMap<Integer, Strain> strainArray = HashBiMap.create();
     protected static Map<String, Strain> strainList = new HashMap<>(); // for name lookup
     public enum Type {
@@ -86,6 +86,7 @@ public final class StrainMap {
     public static void resetStrains() {
         strainArray.clear();
         strainList.clear();
+        ogStrainCount = 4;
         addStrain("Unknown", Type.UNKNOWN);
         addStrain("OG Kush", Type.HYBRID);
         addStrain("Purple Punch", Type.INDICA);
@@ -93,6 +94,7 @@ public final class StrainMap {
         for (int i = 0; strainArray.size() > i; i++) {
             System.out.println("Strain: "+ strainArray.get(i));
             strainList.put(strainArray.get(i).name(),strainArray.get(i));
+            ogStrainCount++;
         }
     }
     public static boolean isPresent(Strain strain) {
