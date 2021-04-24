@@ -4,12 +4,10 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.skilles.cannacraft.Cannacraft;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 @Environment(EnvType.CLIENT)
@@ -29,7 +27,7 @@ public class StrainAnalyzerScreen extends HandledScreen<StrainAnalyzerScreenHand
         int j = this.field_2800;
         this.drawTexture(matrices, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight);
         int l = this.handler.processingTime() / 8;
-        this.drawTexture(matrices, i + 79, j + 34, 176, 14, l, 16);
+        this.drawTexture(matrices, i + 78, j + 31, 177, 7, l, 23);
     }
 
     @Override
@@ -38,7 +36,6 @@ public class StrainAnalyzerScreen extends HandledScreen<StrainAnalyzerScreenHand
         super.render(matrices, mouseX, mouseY, delta);
         this.drawMouseoverTooltip(matrices, mouseX, mouseY);
     }
-
     @Override
     protected void init() {
         super.init();

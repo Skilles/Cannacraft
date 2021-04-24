@@ -17,15 +17,13 @@ import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
@@ -42,6 +40,7 @@ import java.util.Random;
 public class StrainAnalyzer extends BlockWithEntity {
     public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
     public static final BooleanProperty ACTIVE = BooleanProperty.of("active");
+    public static ScreenHandler handler;
     public StrainAnalyzer(Settings settings) {
         super(settings);
         setDefaultState(getStateManager().getDefaultState().with(FACING, Direction.NORTH).with(ACTIVE, false));
@@ -50,7 +49,7 @@ public class StrainAnalyzer extends BlockWithEntity {
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         if (!world.isClient) {
             NamedScreenHandlerFactory screenHandler = state.createScreenHandlerFactory(world, pos);
-
+            handler = player.currentScreenHandler;
             player.openHandledScreen(screenHandler);
         }
         return ActionResult.SUCCESS;
@@ -59,9 +58,9 @@ public class StrainAnalyzer extends BlockWithEntity {
     @Override
     public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
         if (state.get(ACTIVE)) {
-            if (random.nextDouble() < 0.02d) {
+            /*if (random.nextDouble() < 0.2d) {
                 world.playSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_AMETHYST_BLOCK_CHIME, SoundCategory.BLOCKS, .7f, 1f, false);
-            }
+            }*/
 
             Direction direction = state.get(FACING);
             Direction.Axis axis = direction.getAxis();
@@ -99,7 +98,7 @@ public class StrainAnalyzer extends BlockWithEntity {
 
     @Override
     public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options) {
-        tooltip.add(Text.of("Dev tooltip"));
+        tooltip.add(Text.of("Analyzes unidentified seeds").shallowCopy().formatted(Formatting.GOLD));
     }
 
     @Override
@@ -135,5 +134,4 @@ public class StrainAnalyzer extends BlockWithEntity {
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         builder.add(FACING, ACTIVE);
     }
-
 }

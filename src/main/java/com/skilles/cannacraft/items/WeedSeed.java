@@ -51,21 +51,26 @@ public class WeedSeed extends AliasedBlockItem {
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
-        Block block = context.getWorld().getBlockState(context.getBlockPos()).getBlock();
-
-        if(block instanceof WeedCrop && !context.getWorld().isClient) {
-            BlockEntity blockEntity = context.getWorld().getBlockEntity(context.getBlockPos());
-            NbtCompound tag = blockEntity.writeNbt(new NbtCompound());
-            if(context.getPlayer().isSneaking()) {
-                System.out.println("Strain of crop: " + tag.getString("Strain")
-                        + " Identified: " + tag.getBoolean("identified")
-                        + " THC: " + tag.getInt("THC"));
-                System.out.println(tag);
-            } else {
-                System.out.println("Max Age: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.MAXAGE)
-                        + " Age: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.AGE)
-                        + " Mature: " + !context.getWorld().getBlockState(context.getBlockPos()).hasRandomTicks()
-                        + " Breeding: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.BREEDING));
+        if (!context.getWorld().isClient()) {
+            Block block = context.getWorld().getBlockState(context.getBlockPos()).getBlock();
+            if (block instanceof StrainAnalyzer) {
+                System.out.println("Active: " + context.getWorld().getBlockState(context.getBlockPos()).get(StrainAnalyzer.ACTIVE)
+                        + " Facing: " + context.getWorld().getBlockState(context.getBlockPos()).get(StrainAnalyzer.FACING));
+            }
+            if (block instanceof WeedCrop) {
+                BlockEntity blockEntity = context.getWorld().getBlockEntity(context.getBlockPos());
+                NbtCompound tag = blockEntity.writeNbt(new NbtCompound());
+                if (context.getPlayer().isSneaking()) {
+                    System.out.println("Strain of crop: " + tag.getString("Strain")
+                            + " Identified: " + tag.getBoolean("identified")
+                            + " THC: " + tag.getInt("THC"));
+                    System.out.println(tag);
+                } else {
+                    System.out.println("Max Age: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.MAXAGE)
+                            + " Age: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.AGE)
+                            + " Mature: " + !context.getWorld().getBlockState(context.getBlockPos()).hasRandomTicks()
+                            + " Breeding: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.BREEDING));
+                }
             }
         }
         return super.useOnBlock(context);

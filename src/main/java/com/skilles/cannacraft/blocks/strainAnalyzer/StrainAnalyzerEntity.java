@@ -1,9 +1,7 @@
 package com.skilles.cannacraft.blocks.strainAnalyzer;
 
-import com.skilles.cannacraft.Cannacraft;
 import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.registry.ModItems;
-import net.fabricmc.fabric.api.tag.TagRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -13,14 +11,11 @@ import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeType;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -31,13 +26,11 @@ public class StrainAnalyzerEntity extends BlockEntity implements SidedInventory,
 
     private int processingTime;
     public DefaultedList<ItemStack> inventory;
-    private final RecipeType<AnalyzeRecipe> recipeType;
     private final PropertyDelegate propertyDelegate;
 
     public StrainAnalyzerEntity(BlockPos pos, BlockState state) {
         super(ModEntities.STRAIN_ANALYZER_ENTITY, pos, state);
         this.inventory = DefaultedList.ofSize(2, ItemStack.EMPTY);
-        this.recipeType = Cannacraft.ANALYZE_RECIPE;
         this.propertyDelegate = new PropertyDelegate() {
             @Override
             public int get(int index) {
@@ -60,9 +53,10 @@ public class StrainAnalyzerEntity extends BlockEntity implements SidedInventory,
     public static void tick(World world, BlockPos pos, BlockState state, StrainAnalyzerEntity blockEntity) {
         if (world == null || world.isClient) return;
         if (blockEntity.isWorking()) {
-            if (canCraft(blockEntity.inventory) && blockEntity.processingTime == 1) {
-                Recipe<?> recipe = world.getRecipeManager().getFirstMatch(blockEntity.recipeType, blockEntity, world).orElse(null);
-                craft(recipe, blockEntity.inventory);
+            if (canCraft(blockEntity.inventory) && blockEntity.processingTime == 184) {
+                craft(blockEntity.inventory);
+
+                blockEntity.processingTime = 1;
                 markDirty(world, pos, state);
             } else if (!canCraft(blockEntity.inventory)) {
                 blockEntity.processingTime = 0;
@@ -74,11 +68,11 @@ public class StrainAnalyzerEntity extends BlockEntity implements SidedInventory,
             markDirty(world, pos, state);
 
             if (!world.isReceivingRedstonePower(pos)) {
-                blockEntity.processingTime--;
+                blockEntity.processingTime++;
             }
 
         } else if (canCraft(blockEntity.inventory)) {
-            blockEntity.processingTime = 200;
+            blockEntity.processingTime = 1;
             markDirty(world, pos, state);
         }
 
@@ -106,30 +100,44 @@ public class StrainAnalyzerEntity extends BlockEntity implements SidedInventory,
     }
 
     public boolean isWorking() {
-        return processingTime >= 0;
+        return processingTime != 0;
     }
 
     public static boolean canCraft(DefaultedList<ItemStack> inventory) {
-        ItemStack stack = inventory.get(1);
-        return stack.getCount() >= 1 && stack.isOf(ModItems.WEED_SEED);
+            ItemStack stack = inventory.get(1);
+            ItemStack output = inventory.get(0);
+                if (stack.isOf(ModItems.WEED_SEED) && stack.getCount() >= 1 && stack.hasTag() && !stack.getSubTag("cannacraft:strain").getBoolean("Identified")) {
+                    NbtCompound outputTag = output.copy().getSubTag("cannacraft:strain");
+                    NbtCompound subTag = stack.copy().getSubTag("cannacraft:strain");
+                    if(outputTag == null) return true;
+                    //  if unidentified and NBT aligns
+                    return subTag.getInt("ID") == outputTag.getInt("ID") && subTag.getInt("THC") == outputTag.getInt("THC");
+            }
+        return false;
     }
 
-    public static void craft(Recipe<?> recipe, DefaultedList<ItemStack> inventory) {
-        if (recipe != null) {
+    public static void craft(DefaultedList<ItemStack> inventory) {
+
             ItemStack stack = inventory.get(1);
-            ItemStack outputSlot = inventory.get(0);
-            ItemStack output = recipe.getOutput();
-            if (outputSlot.isEmpty()) {
-                inventory.set(0, output.copy());
-            } else if (outputSlot.isOf(output.getItem())) {
+            NbtCompound tag = stack.getTag().copy();
+            ItemStack outputSlot = inventory.get(0).copy();
+            ItemStack output = ModItems.WEED_SEED.getDefaultStack();
+
+
+            if(tag != null && outputSlot.isEmpty()) {
+                NbtCompound strainTag = tag.getCompound("cannacraft:strain").copy();
+                strainTag.putBoolean("Identified", true);
+                NbtCompound outputTag = new NbtCompound();
+                outputTag.put("cannacraft:strain", strainTag);
+                output.setTag(outputTag);
+                inventory.set(0, output);
+            }
+            else if (outputSlot.isOf(output.getItem())) {
                 outputSlot.increment(1);
             }
+            stack.decrement(1);
 
-            stack.decrement(2);
-
-        }
     }
-
 
     @Override
     public int[] getAvailableSlots(Direction side) {

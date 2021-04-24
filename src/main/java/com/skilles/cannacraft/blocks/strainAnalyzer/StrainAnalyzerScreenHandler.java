@@ -1,6 +1,5 @@
 package com.skilles.cannacraft.blocks.strainAnalyzer;
 
-import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.registry.ModScreens;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -10,13 +9,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ArrayPropertyDelegate;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.screen.slot.FurnaceOutputSlot;
 import net.minecraft.screen.slot.Slot;
-import org.jetbrains.annotations.Nullable;
 
 public class StrainAnalyzerScreenHandler extends ScreenHandler {
-
 
 
     private final Inventory inventory;
@@ -29,14 +24,14 @@ public class StrainAnalyzerScreenHandler extends ScreenHandler {
 
     public StrainAnalyzerScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory, PropertyDelegate propertyDelegate) {
         super(ModScreens.STRAIN_ANALYZER_SCREEN_HANDLER, syncId);
-        checkSize(inventory, 2);
-        checkDataCount(propertyDelegate, 1);
         this.inventory = inventory;
         this.propertyDelegate = propertyDelegate;
+        checkSize(inventory, 2);
+        checkDataCount(propertyDelegate, 1);
         inventory.onOpen(playerInventory.player);
 
-        this.addSlot(new FurnaceOutputSlot(playerInventory.player, inventory, 0, 56, 34));
-        this.addSlot(new Slot(inventory, 1, 116, 35));
+        this.addSlot(new Slot(inventory, 1, 48, 35));
+        this.addSlot(new Slot(inventory, 0, 110, 36));
 
         for(int l = 0; l < 3; ++l) {
             for(int k = 0; k < 9; ++k) {
