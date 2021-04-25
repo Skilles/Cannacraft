@@ -1,9 +1,11 @@
 package com.skilles.cannacraft.items;
 
-import com.skilles.cannacraft.blocks.strainAnalyzer.StrainAnalyzer;
+import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzer;
+import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzerEntity;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
 import com.skilles.cannacraft.registry.ModComponents;
 import com.skilles.cannacraft.strain.GeneticsManager;
+import com.skilles.cannacraft.strain.StrainMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.item.TooltipContext;
@@ -31,7 +33,7 @@ public class WeedSeed extends AliasedBlockItem {
     public Text getName(ItemStack stack) {
         if (stack.hasTag()) {
             NbtCompound tag = stack.getSubTag("cannacraft:strain");
-            return tag.getBoolean("Identified") ? Text.of(tag.getString("Strain") + " Seeds") : Text.of("Unidentified Seeds");
+            return tag.getBoolean("Identified") ? Text.of(StrainMap.getStrain(tag.getInt("ID")).name() + " Seeds") : Text.of("Unidentified Seeds");
         }
         return super.getName(stack);
     }
@@ -55,13 +57,14 @@ public class WeedSeed extends AliasedBlockItem {
             Block block = context.getWorld().getBlockState(context.getBlockPos()).getBlock();
             if (block instanceof StrainAnalyzer) {
                 System.out.println("Active: " + context.getWorld().getBlockState(context.getBlockPos()).get(StrainAnalyzer.ACTIVE)
-                        + " Facing: " + context.getWorld().getBlockState(context.getBlockPos()).get(StrainAnalyzer.FACING));
+                        + " Facing: " + context.getWorld().getBlockState(context.getBlockPos()).get(StrainAnalyzer.FACING)
+                + " Power: " + ((StrainAnalyzerEntity) context.getWorld().getBlockEntity(context.getBlockPos())).getEnergy());
             }
             if (block instanceof WeedCrop) {
                 BlockEntity blockEntity = context.getWorld().getBlockEntity(context.getBlockPos());
                 NbtCompound tag = blockEntity.writeNbt(new NbtCompound());
                 if (context.getPlayer().isSneaking()) {
-                    System.out.println("Strain of crop: " + tag.getString("Strain")
+                    System.out.println("Strain of crop: " + StrainMap.getStrain(tag.getInt("ID")).name()
                             + " Identified: " + tag.getBoolean("identified")
                             + " THC: " + tag.getInt("THC"));
                     System.out.println(tag);

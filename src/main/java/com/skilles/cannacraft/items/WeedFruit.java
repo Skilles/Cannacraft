@@ -2,6 +2,7 @@ package com.skilles.cannacraft.items;
 
 import com.skilles.cannacraft.registry.ModComponents;
 import com.skilles.cannacraft.strain.GeneticsManager;
+import com.skilles.cannacraft.strain.StrainMap;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -22,7 +23,7 @@ public class WeedFruit extends Item {
     public Text getName(ItemStack stack) {
         if (stack.hasTag()) {
             NbtCompound tag = stack.getSubTag("cannacraft:strain");
-            return tag.getBoolean("Identified") ? Text.of(tag.getString("Strain")) : Text.of("Unidentified Cannabis");
+            return tag.getBoolean("Identified") ? Text.of(StrainMap.getStrain(tag.getInt("ID")).name()) : Text.of("Unidentified Cannabis");
         }
         return super.getName(stack);
     }

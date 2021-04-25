@@ -3,12 +3,11 @@ package com.skilles.cannacraft.items;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.GeneticsManager;
 import com.skilles.cannacraft.strain.StrainMap;
-import dev.onyxstudios.cca.api.v3.component.Component;
+import dev.onyxstudios.cca.api.v3.component.CopyableComponent;
 import dev.onyxstudios.cca.api.v3.item.CcaNbtType;
 import dev.onyxstudios.cca.api.v3.item.ItemComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtList;
-import org.apache.commons.lang3.text.WordUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -17,7 +16,7 @@ import static com.skilles.cannacraft.strain.StrainMap.normalDist;
 
 // separate component for ItemStacks
 
-public class ItemStrainComponent extends ItemComponent implements StrainInterface {
+public class ItemStrainComponent extends ItemComponent implements StrainInterface, CopyableComponent<ItemStrainComponent> {
 
     public static final int UNKNOWN_ID = 0; // null
     ItemStack stack;
@@ -33,10 +32,6 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
         return this.getInt("ID");
     }
     @Override
-    public int getIndex(String name) {
-        return StrainMap.indexOf(name);
-    }
-    @Override
     public void setGenetics(NbtList geneList) {
         putList("Genes", geneList);
     }
@@ -48,20 +43,20 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
     @Override
     public void setStrain(int index) { // sets strain and type NBT based on index
         this.getOrCreateRootTag().putInt("ID", index);
-        this.putString("Strain", StrainMap.getStrain(index).name());
-        this.putString("Type", WordUtils.capitalizeFully(StrainMap.getStrain(index).type().toString()));
+        //this.putString("Strain", StrainMap.getStrain(index).name());
+        //this.putString("Type", WordUtils.capitalizeFully(StrainMap.getStrain(index).type().toString()));
         this.putInt("THC", getThc());
         if(stack.getItem().equals(ModItems.WEED_SEED)) this.putBoolean("Male", isMale());
     }
     @Override
     public String getStrain() {
-        if(!this.hasTag("Strain")) setStrain(getIndex());
-        return this.getString("Strain");
+        if(!this.hasTag("ID")) setStrain(getIndex());
+        return StrainMap.getStrain(this.getInt("ID")).name();
     }
     @Override
-    public String getType() {
+    public StrainMap.Type getType() {
         if(!this.hasTag("Type")) setStrain(getIndex());
-        return this.getString("Type");
+        return StrainMap.getStrain(this.getInt("ID")).type();
     }
     @Override
     public int getThc() {
@@ -93,16 +88,14 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
         this.getOrCreateRootTag().putBoolean("Male", isMale);
     }
 
-
-    @Override
-    public void copyFrom(Component other) {
-        if(other != null && other.getClass() == this.getClass()) {
-            other.writeToNbt(getRootTag());
-        }
-    }
-
     @Override
     public boolean equals(@Nullable Object obj) {
         return obj != null && obj.getClass() == this.getClass();
+    }
+
+    @Override
+    public void copyFrom(ItemStrainComponent other) {
+        stack.setTag(other.stack.getTag());
+        //setStrain(other.getIndex());
     }
 }
