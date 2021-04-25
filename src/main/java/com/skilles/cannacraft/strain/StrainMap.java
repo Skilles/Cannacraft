@@ -35,10 +35,6 @@ public final class StrainMap {
     public static void registerStrains() {
         load();
         System.out.println("Strains initialized: "+ strainArray);
-        for (int i = 0; strainArray.size() > i; i++) {
-            System.out.println("Strain: "+ strainArray.get(i));
-            strainList.put(strainArray.get(i).name(),strainArray.get(i));
-        }
         System.out.println("Strains initialized: "+ strainList);
         //GeneticsManager.test();
         save();
@@ -58,28 +54,66 @@ public final class StrainMap {
         return strainArray.inverse().get(strain);
     }
     public static int indexOf(String name) {
-        return strainArray.inverse().get(toStrain(name));
+        if(!strainList.containsKey(name)) return 0;
+        return indexOf(toStrain(name));
     }
     public static void addStrain(String name, Type type) {
-        int index;
-        if(strainArray.isEmpty()) {
-            index = 0;
-        } else {
-            index = strainArray.size();
-        }
         Strain strain = new Strain(name, type);
-        if(strainList.containsKey(name)){
-            strain = null;
-            System.out.println("No duplicate strains!");
-        } else {
-            strainArray.put(index, strain);
-            strainList.put(strainArray.get(index).name(), strainArray.get(index));
-            save();
-        }
+        if (!type.equals(Type.UNKNOWN)) {
+            int index;
 
+            index = strainArray.size();
+
+            if (strainList.containsKey(name)) {
+                strain = null;
+                System.out.println("No duplicate strains!");
+            } else {
+                strainArray.put(index, strain);
+                strainList.put(strainArray.get(index).name(), strainArray.get(index));
+                save();
+            }
+        } else {
+            strainArray.put(0, strain);
+        }
+    }
+
+    /**
+     * @param type the type to find
+     * @return returns true if the type is present in the strain list, false otherwise
+     */
+    private static boolean containsType(Type type) {
+        for (int i = 1; i < strainArray.size(); i++) {
+            if(strainArray.get(i).type().equals(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param type the type to find
+     * @return returns 0 if that type is not found or the index of the first found (excluding index 0)
+     */
+    private static int indexOfType(Type type) {
+        for (int i = 1; i < strainArray.size(); i++) {
+            if(strainArray.get(i).type().equals(type)) {
+                return i;
+            }
+        }
+        return 0;
     }
     public static void removeStrain(int index) {
         if(strainArray.containsKey(index)) {
+            /*boolean cascade = false;
+            strainList.remove(strainArray.get(index).name());
+            for (int i = index; strainArray.size() - 1 > index; i++) {
+                strainArray.forcePut(i, strainArray.get(i + 1));
+                strainArray.remove(i + 1);
+                cascade = true;
+            }
+            if (!cascade) {
+                strainArray.remove(index);
+            }*/
             strainList.remove(strainArray.get(index).name());
             strainArray.remove(index);
         }
@@ -102,7 +136,7 @@ public final class StrainMap {
         return strainArray.containsValue(strain);
     }
     public static boolean isPresent(String name) {
-        return strainArray.containsValue(toStrain(name));
+        return strainList.containsKey(name);
     }
     public static int normalDist(int mean, int std, int min) {
         Random random = new Random();
@@ -117,9 +151,6 @@ public final class StrainMap {
     }
     public static Map<String, Strain> getStrains() {
         return strainList;
-    }
-    public static boolean containsStrain(String name) {
-        return strainList.containsKey(name);
     }
     public static void save() {
         try {
@@ -139,9 +170,12 @@ public final class StrainMap {
             Map<Integer, Strain> strainMap = gson.fromJson(reader, type);
             for (Map.Entry<Integer, Strain> entry : strainMap.entrySet()) {
                 strainArray.put(entry.getKey(), entry.getValue());
+                strainList.put(entry.getValue().name(), entry.getValue());
             }
         } catch(Exception e) {
             System.out.println("Error loading strains");
+            resetStrains();
+            save();
         }
     }
 }
