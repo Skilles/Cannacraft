@@ -24,8 +24,8 @@ public class SeedChestScreenHandler extends ScreenHandler {
     //and can therefore directly provide it as an argument. This inventory will then be synced to the client.
     public SeedChestScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory) {
         super(ModScreens.SEED_CHEST_SCREEN_HANDLER, syncId);
-        checkSize(inventory, 9);
         this.inventory = inventory;
+        checkSize(inventory, 9);
         //some inventories do custom logic when a player opens it.
         inventory.onOpen(playerInventory.player);
 
@@ -56,6 +56,10 @@ public class SeedChestScreenHandler extends ScreenHandler {
         }
 
 
+    }
+
+    public Inventory getInventory() {
+        return inventory;
     }
 
     @Override

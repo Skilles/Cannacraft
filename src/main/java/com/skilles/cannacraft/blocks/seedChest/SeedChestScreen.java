@@ -29,7 +29,7 @@ public class SeedChestScreen extends HandledScreen<SeedChestScreenHandler> {
         drawTexture(matrices, x, y, 0, 0, backgroundWidth, backgroundHeight);
 
         Inventory inventory = this.handler.getInventory();
-        drawCenteredString(matrices, this.textRenderer, "Seeds: "+inventory.count(ModItems.WEED_SEED), x+32, y + 25, 0x98D982);
+        drawCenteredString(matrices, this.textRenderer, "Seeds: "+inventory.count(ModItems.WEED_SEED), x+30, 65, 255);
     }
 
     @Override
