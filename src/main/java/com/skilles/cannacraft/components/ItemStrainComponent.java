@@ -1,4 +1,4 @@
-package com.skilles.cannacraft.items;
+package com.skilles.cannacraft.components;
 
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.GeneticsManager;
@@ -19,7 +19,7 @@ import static com.skilles.cannacraft.strain.StrainMap.normalDist;
 public class ItemStrainComponent extends ItemComponent implements StrainInterface, CopyableComponent<ItemStrainComponent> {
 
     public static final int UNKNOWN_ID = 0; // null
-    ItemStack stack;
+    final ItemStack stack;
     public ItemStrainComponent(ItemStack stack) {
         super(stack);
         this.stack = stack;
@@ -36,7 +36,7 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
         putList("Genes", geneList);
     }
     @Override
-    public List getGenetics() {
+    public List<NbtList> getGenetics() {
         if(!hasTag("Genes")) putList("Genes", GeneticsManager.toNbtList(GeneticsManager.getTestArray()));
         return getList("Genes", CcaNbtType.LIST);
     }

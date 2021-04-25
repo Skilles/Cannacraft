@@ -1,4 +1,4 @@
-package com.skilles.cannacraft.blocks.strainAnalyzer;
+package com.skilles.cannacraft.blocks.machines.strainAnalyzer;
 
 import com.skilles.cannacraft.blocks.MachineBlockEntity;
 import com.skilles.cannacraft.registry.ModEntities;
@@ -71,6 +71,9 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
             blockEntity.addEnergy(2);
         }
         if (blockEntity.isWorking()) {
+            if (!world.isReceivingRedstonePower(pos)) {
+                processTick(blockEntity);
+            }
             if (canCraft(blockEntity.inventory) && blockEntity.processingTime == 184) {
                 craft(blockEntity.inventory);
                 blockEntity.processingTime = 1;
@@ -84,11 +87,6 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
             state = state.with(StrainAnalyzer.ACTIVE, true);
             world.setBlockState(pos, state, Block.NOTIFY_ALL);
             markDirty(world, pos, state);
-
-
-            if (!world.isReceivingRedstonePower(pos)) {
-                processTick(blockEntity);
-            }
 
         } else if (canCraft(blockEntity.inventory)) {
             blockEntity.processingTime = 1;

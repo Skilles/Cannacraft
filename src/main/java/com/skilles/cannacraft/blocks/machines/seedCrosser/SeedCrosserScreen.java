@@ -1,4 +1,4 @@
-package com.skilles.cannacraft.blocks.seedCrosser;
+package com.skilles.cannacraft.blocks.machines.seedCrosser;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.skilles.cannacraft.Cannacraft;

@@ -1,8 +1,8 @@
 package com.skilles.cannacraft.registry;
 
+import com.skilles.cannacraft.blocks.machines.seedCrosser.SeedCrosserEntity;
+import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzerEntity;
 import com.skilles.cannacraft.blocks.seedChest.SeedChestEntity;
-import com.skilles.cannacraft.blocks.seedCrosser.SeedCrosserEntity;
-import com.skilles.cannacraft.blocks.strainAnalyzer.StrainAnalyzerEntity;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCropEntity;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.entity.BlockEntityType;

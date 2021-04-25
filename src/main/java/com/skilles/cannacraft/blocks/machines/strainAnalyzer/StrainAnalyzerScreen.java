@@ -1,4 +1,4 @@
-package com.skilles.cannacraft.blocks.strainAnalyzer;
+package com.skilles.cannacraft.blocks.machines.strainAnalyzer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.skilles.cannacraft.Cannacraft;

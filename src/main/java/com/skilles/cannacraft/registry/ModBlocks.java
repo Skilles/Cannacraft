@@ -1,9 +1,9 @@
 package com.skilles.cannacraft.registry;
 
 import com.skilles.cannacraft.Cannacraft;
+import com.skilles.cannacraft.blocks.machines.seedCrosser.SeedCrosser;
+import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzer;
 import com.skilles.cannacraft.blocks.seedChest.SeedChest;
-import com.skilles.cannacraft.blocks.seedCrosser.SeedCrosser;
-import com.skilles.cannacraft.blocks.strainAnalyzer.StrainAnalyzer;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;

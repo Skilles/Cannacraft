@@ -20,9 +20,9 @@ public class LootTable {
     private static final Identifier FERN_LOOT_TABLE_ID = new Identifier("minecraft", "blocks/fern");
     private static final Identifier LARGE_FERN_LOOT_TABLE_ID = new Identifier("minecraft", "blocks/large_fern");
 
-    static boolean enable = true;
+    static final boolean enable = true;
     static float chestLootChance = .04f;
-    static float dropLootChance = 0.5f;
+    static final float dropLootChance = 0.5f;
 
     private static final List<LootTableInsert> INSERTS = Lists.newArrayList();
     static FabricLootPoolBuilder lootPool() {
@@ -30,10 +30,9 @@ public class LootTable {
         NbtCompound baseTag = new NbtCompound();
         subTag.putInt("ID", 0);
         baseTag.put("cannacraft:strain", subTag);
-        FabricLootPoolBuilder poolBuilder = FabricLootPoolBuilder.builder()
+        return FabricLootPoolBuilder.builder()
                 .rolls(ConstantLootNumberProvider.create(1))
                 .withCondition(RandomChanceLootCondition.builder(dropLootChance).build()).withEntry(ItemEntry.builder(ModItems.WEED_SEED).apply(SetNbtLootFunction.builder(baseTag)).build());
-        return poolBuilder;
     }
     private static final FabricLootPoolBuilder lootPool = lootPool();
     public static void registerLoot()

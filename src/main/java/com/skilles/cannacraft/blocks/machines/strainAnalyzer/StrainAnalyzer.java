@@ -1,4 +1,4 @@
-package com.skilles.cannacraft.blocks.seedCrosser;
+package com.skilles.cannacraft.blocks.machines.strainAnalyzer;
 
 import com.skilles.cannacraft.blocks.MachineBlock;
 import com.skilles.cannacraft.registry.ModEntities;
@@ -9,8 +9,6 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.DustParticleEffect;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -23,18 +21,19 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Random;
 
-public class SeedCrosser extends MachineBlock {
+public class StrainAnalyzer extends MachineBlock {
 
-    public SeedCrosser(Settings settings) {
+    public StrainAnalyzer(Settings settings) {
         super(settings);
+        setDefaultState(getStateManager().getDefaultState().with(FACING, Direction.NORTH).with(ACTIVE, false));
     }
 
     @Override
     public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
         if (state.get(ACTIVE)) {
-            if (((SeedCrosserEntity) world.getBlockEntity(pos)).propertyDelegate.get(0) > 170) {
+            /*if (.processingTime() > 190) {
                 world.playSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_AMETHYST_BLOCK_CHIME, SoundCategory.BLOCKS, .7f, 1f, false);
-            }
+            }*/
 
             Direction direction = state.get(FACING);
             Direction.Axis axis = direction.getAxis();
@@ -56,17 +55,17 @@ public class SeedCrosser extends MachineBlock {
     @Nullable
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new SeedCrosserEntity(pos, state);
+        return new StrainAnalyzerEntity(pos, state);
     }
 
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return checkType(type, ModEntities.SEED_CROSSER_ENTITY, SeedCrosserEntity::tick);
+        return checkType(type, ModEntities.STRAIN_ANALYZER_ENTITY, StrainAnalyzerEntity::tick);
     }
 
     @Override
     public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options) {
-        tooltip.add(Text.of("Crosses two seeds together").shallowCopy().formatted(Formatting.GOLD));
+        tooltip.add(Text.of("Analyzes unidentified seeds").shallowCopy().formatted(Formatting.GOLD));
     }
 }

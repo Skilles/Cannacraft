@@ -1,4 +1,4 @@
-package com.skilles.cannacraft;
+package com.skilles.cannacraft.blocks;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;

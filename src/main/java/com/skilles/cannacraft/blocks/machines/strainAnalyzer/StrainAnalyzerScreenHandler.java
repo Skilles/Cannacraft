@@ -1,4 +1,4 @@
-package com.skilles.cannacraft.blocks.strainAnalyzer;
+package com.skilles.cannacraft.blocks.machines.strainAnalyzer;
 
 import com.skilles.cannacraft.registry.ModScreens;
 import net.minecraft.entity.player.PlayerEntity;

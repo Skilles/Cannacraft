@@ -1,6 +1,6 @@
 package com.skilles.cannacraft.blocks.seedChest;
 
-import com.skilles.cannacraft.ImplementedInventory;
+import com.skilles.cannacraft.blocks.ImplementedInventory;
 import com.skilles.cannacraft.registry.ModEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -33,7 +33,6 @@ public class SeedChestEntity extends BlockEntity implements NamedScreenHandlerFa
     @Override
     public DefaultedList<ItemStack> getItems() {
         return inventory;
-
     }
 
     //These Methods are from the NamedScreenHandlerFactory Interface

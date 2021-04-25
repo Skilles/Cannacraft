@@ -1,7 +1,7 @@
-package com.skilles.cannacraft.blocks.seedCrosser;
+package com.skilles.cannacraft.blocks.machines.seedCrosser;
 
 import com.skilles.cannacraft.blocks.MachineBlockEntity;
-import com.skilles.cannacraft.blocks.strainAnalyzer.StrainAnalyzer;
+import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzer;
 import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.GeneticsManager;
@@ -73,10 +73,12 @@ public class SeedCrosserEntity extends MachineBlockEntity {
             blockEntity.addEnergy(2);
         }
         if (blockEntity.isWorking()) {
+            if (!world.isReceivingRedstonePower(pos)) {
+                processTick(blockEntity);
+            }
             if (canCraft(blockEntity.inventory) && blockEntity.processingTime == 184) {
                 craft(blockEntity.inventory);
                 blockEntity.processingTime = 1;
-                //blockEntity.propertyDelegate.set(0, 1);
                 markDirty(world, pos, state);
             } else if (!canCraft(blockEntity.inventory)) {
                 blockEntity.processingTime = 0;
@@ -86,11 +88,6 @@ public class SeedCrosserEntity extends MachineBlockEntity {
             state = state.with(StrainAnalyzer.ACTIVE, true);
             world.setBlockState(pos, state, Block.NOTIFY_ALL);
             markDirty(world, pos, state);
-
-
-            if (!world.isReceivingRedstonePower(pos)) {
-                processTick(blockEntity);
-            }
 
         } else if (canCraft(blockEntity.inventory)) {
             blockEntity.processingTime = 1;
@@ -126,7 +123,7 @@ public class SeedCrosserEntity extends MachineBlockEntity {
                         NbtCompound outputTag = output.getSubTag("cannacraft:strain");
                         String newName = GeneticsManager.crossStrains(StrainMap.getStrain(tag.getInt("ID")).name(), StrainMap.getStrain(tag2.getInt("ID")).name());
                         int newThc = GeneticsManager.crossThc(tag.getInt("THC"), tag2.getInt("THC"));
-                        return StrainMap.containsStrain(newName) && outputTag.getInt("ID") == StrainMap.indexOf(newName) && newThc == outputTag.getInt("THC");
+                        return StrainMap.isPresent(newName) && outputTag.getInt("ID") == StrainMap.indexOf(newName) && newThc == outputTag.getInt("THC");
                     }
                 }
             }

@@ -53,8 +53,7 @@ public enum Genes {
         Genes[] var1 = values();
         int var2 = var1.length;
 
-        for (int var3 = 0; var3 < var2; ++var3) {
-            Genes gene = var1[var3];
+        for (Genes gene : var1) {
             if (gene.name.equals(name)) {
                 return gene;
             }

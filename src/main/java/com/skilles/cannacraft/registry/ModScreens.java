@@ -2,12 +2,12 @@ package com.skilles.cannacraft.registry;
 
 
 import com.skilles.cannacraft.Cannacraft;
+import com.skilles.cannacraft.blocks.machines.seedCrosser.SeedCrosserScreen;
+import com.skilles.cannacraft.blocks.machines.seedCrosser.SeedCrosserScreenHandler;
+import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzerScreen;
+import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzerScreenHandler;
 import com.skilles.cannacraft.blocks.seedChest.SeedChestScreen;
 import com.skilles.cannacraft.blocks.seedChest.SeedChestScreenHandler;
-import com.skilles.cannacraft.blocks.seedCrosser.SeedCrosserScreen;
-import com.skilles.cannacraft.blocks.seedCrosser.SeedCrosserScreenHandler;
-import com.skilles.cannacraft.blocks.strainAnalyzer.StrainAnalyzerScreen;
-import com.skilles.cannacraft.blocks.strainAnalyzer.StrainAnalyzerScreenHandler;
 import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.minecraft.screen.ScreenHandlerType;

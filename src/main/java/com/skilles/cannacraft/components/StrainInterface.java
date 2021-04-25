@@ -1,6 +1,6 @@
-package com.skilles.cannacraft.items;
+package com.skilles.cannacraft.components;
 
-import com.skilles.cannacraft.registry.ModComponents;
+import com.skilles.cannacraft.registry.ModMisc;
 import com.skilles.cannacraft.strain.StrainMap;
 import dev.onyxstudios.cca.api.v3.component.ComponentV3;
 import net.minecraft.nbt.NbtList;
@@ -10,7 +10,7 @@ import java.util.List;
 public interface StrainInterface extends ComponentV3 {
 
     static <T> StrainInterface get(T provider) {
-        return ModComponents.STRAIN.get(provider);
+        return ModMisc.STRAIN.get(provider);
     }
 
     void setStrain(int index); // setType not needed
@@ -20,7 +20,7 @@ public interface StrainInterface extends ComponentV3 {
 
 
     String getStrain();
-    List getGenetics();
+    List<NbtList> getGenetics();
     int getIndex();
     StrainMap.Type getType();
     int getThc();

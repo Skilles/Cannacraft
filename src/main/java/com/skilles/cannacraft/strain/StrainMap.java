@@ -14,21 +14,22 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-
+/**
+ * This class is responsible for a lot of strain related data management
+ */
 public final class StrainMap {
 
-
     private static final GsonBuilder builder = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting();
-    private static Gson gson = builder.create();
+    private static final Gson gson = builder.create();
 
     public static int ogStrainCount = 4;
-    protected static BiMap<Integer, Strain> strainArray = HashBiMap.create();
-    protected static Map<String, Strain> strainList = new HashMap<>(); // for name lookup
+    protected static final BiMap<Integer, Strain> strainArray = HashBiMap.create();
+    protected static final Map<String, Strain> strainList = new HashMap<>(); // for name lookup
     public enum Type {
         INDICA,
         SATIVA,
         HYBRID,
-        UNKNOWN;
+        UNKNOWN
     }
 
     public static void registerStrains() {
@@ -50,7 +51,7 @@ public final class StrainMap {
         return strainArray.get(index);
     }
     public static Strain getStrain(String name) {
-        if(!strainList.containsKey(name)) return null;
+        if(!strainList.containsKey(name)) return strainArray.get(0);
         return strainList.get(name);
     }
     public static int indexOf(Strain strain) {
@@ -114,8 +115,8 @@ public final class StrainMap {
     public static Strain toStrain(String name) {
         return strainList.get(name);
     }
-    public static Map<Integer, Strain> getStrains() {
-        return strainArray;
+    public static Map<String, Strain> getStrains() {
+        return strainList;
     }
     public static boolean containsStrain(String name) {
         return strainList.containsKey(name);

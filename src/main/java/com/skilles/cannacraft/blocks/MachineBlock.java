@@ -1,6 +1,6 @@
 package com.skilles.cannacraft.blocks;
 
-import com.skilles.cannacraft.blocks.strainAnalyzer.StrainAnalyzerEntity;
+import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzerEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;

@@ -1,4 +1,4 @@
-package com.skilles.cannacraft.blocks.seedCrosser;
+package com.skilles.cannacraft.blocks.machines.seedCrosser;
 
 import com.skilles.cannacraft.registry.ModScreens;
 import net.minecraft.entity.player.PlayerEntity;
