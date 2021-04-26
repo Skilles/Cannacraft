@@ -81,5 +81,5 @@ public class StrainAnalyzerScreenHandler extends ScreenHandler {
         return this.propertyDelegate.get(0);
     }
     public int powerStored() { return this.propertyDelegate.get(1); }
-
+    public int getArrowWidth() { return (int) (processingTime() / (StrainAnalyzerEntity.timeToProcess / 22) - 0.15); }
 }

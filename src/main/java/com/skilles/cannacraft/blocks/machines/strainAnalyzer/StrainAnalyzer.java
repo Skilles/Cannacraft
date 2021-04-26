@@ -1,6 +1,7 @@
 package com.skilles.cannacraft.blocks.machines.strainAnalyzer;
 
-import com.skilles.cannacraft.blocks.MachineBlock;
+import com.skilles.cannacraft.blocks.machines.MachineBlock;
+import com.skilles.cannacraft.blocks.machines.seedCrosser.SeedCrosserEntity;
 import com.skilles.cannacraft.registry.ModEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -11,6 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3f;
@@ -31,9 +33,6 @@ public class StrainAnalyzer extends MachineBlock {
     @Override
     public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
         if (state.get(ACTIVE)) {
-            /*if (.processingTime() > 190) {
-                world.playSound(pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_AMETHYST_BLOCK_CHIME, SoundCategory.BLOCKS, .7f, 1f, false);
-            }*/
 
             Direction direction = state.get(FACING);
             Direction.Axis axis = direction.getAxis();
@@ -67,5 +66,17 @@ public class StrainAnalyzer extends MachineBlock {
     @Override
     public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options) {
         tooltip.add(Text.of("Analyzes unidentified seeds").shallowCopy().formatted(Formatting.GOLD));
+    }
+    @Override
+    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+        if (state.getBlock() != newState.getBlock()) {
+            BlockEntity blockEntity = world.getBlockEntity(pos);
+            if (blockEntity instanceof SeedCrosserEntity) {
+                ItemScatterer.spawn(world, pos, (SeedCrosserEntity)blockEntity);
+                // update comparators
+                world.updateComparators(pos,this);
+            }
+            super.onStateReplaced(state, world, pos, newState, moved);
+        }
     }
 }

@@ -1,12 +1,11 @@
 package com.skilles.cannacraft.blocks.machines.strainAnalyzer;
 
-import com.skilles.cannacraft.blocks.MachineBlockEntity;
+import com.skilles.cannacraft.blocks.machines.MachineBlockEntity;
 import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.registry.ModItems;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
@@ -14,14 +13,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-import team.reborn.energy.Energy;
-import team.reborn.energy.EnergySide;
-import team.reborn.energy.EnergyTier;
 
 public class StrainAnalyzerEntity extends MachineBlockEntity {
 
@@ -29,6 +28,7 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
     private final double powerMultiplier = 1; // Energy use multiplier
     private final boolean needsPower = true;
     private final PropertyDelegate propertyDelegate;
+    protected static final int timeToProcess = 175;
 
     public StrainAnalyzerEntity(BlockPos pos, BlockState state) {
         super(ModEntities.STRAIN_ANALYZER_ENTITY, pos, state, DefaultedList.ofSize(2, ItemStack.EMPTY));
@@ -67,36 +67,61 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
         if (world == null || world.isClient) return;
         if(isNextTo(world, pos, Blocks.GLOWSTONE) && blockEntity.powerStored < blockEntity.getMaxStoredPower()) {
             blockEntity.addEnergy(2);
+            markDirty(world, pos, state);
         }
         if (blockEntity.isWorking()) {
             if (!world.isReceivingRedstonePower(pos)) {
-                processTick(blockEntity);
+                processTick(blockEntity); // playSound is called here
+                state = state.with(StrainAnalyzer.ACTIVE, true);
+                world.setBlockState(pos, state, Block.NOTIFY_ALL);
+                markDirty(world, pos, state);
             }
-            if (canCraft(blockEntity.inventory) && blockEntity.processingTime == 184) {
+            if (canCraft(blockEntity.inventory) && blockEntity.processingTime == timeToProcess) { // when done crafting
                 craft(blockEntity.inventory);
-                blockEntity.processingTime = 1;
-                //blockEntity.propertyDelegate.set(0, 1);
+                blockEntity.processingTime = 1; // keep working
                 markDirty(world, pos, state);
             } else if (!canCraft(blockEntity.inventory)) {
                 blockEntity.processingTime = 0;
                 markDirty(world, pos, state);
             }
-
-            state = state.with(StrainAnalyzer.ACTIVE, true);
-            world.setBlockState(pos, state, Block.NOTIFY_ALL);
-            markDirty(world, pos, state);
-
-        } else if (canCraft(blockEntity.inventory)) {
+        } else if (canCraft(blockEntity.inventory) && blockEntity.powerStored != 0) { // start if has power
             blockEntity.processingTime = 1;
             markDirty(world, pos, state);
-        }
-
-        if (!blockEntity.isWorking() && !canCraft(blockEntity.inventory)) {
+        } else { // when no items or can't craft
+            blockEntity.processingTime = 0;
             state = state.with(StrainAnalyzer.ACTIVE, false);
             world.setBlockState(pos, state, Block.NOTIFY_ALL);
             markDirty(world, pos, state);
         }
 
+    }
+    private void playSound() {
+        World world  = getWorld();
+        SoundEvent runSound = SoundEvents.BLOCK_FIRE_AMBIENT;
+        assert world != null;
+        if(!world.isClient) {
+            if(this.processingTime % 25 == 0) {
+                if (this.processingTime != timeToProcess) {
+                    world.playSound(
+                            null, // Player - if non-null, will play sound for every nearby player *except* the specified player
+                            pos, // The position of where the sound will come from
+                            runSound, // The sound that will play, in this case, the sound the anvil plays when it lands.
+                            SoundCategory.BLOCKS, // This determines which of the volume sliders affect this sound
+                            0.15f, //Volume multiplier, 1 is normal, 0.5 is half volume, etc
+                            0.5f // Pitch multiplier, 1 is normal, 0.5 is half pitch, etc
+                    );
+                } else {
+                    world.playSound(
+                            null, // Player - if non-null, will play sound for every nearby player *except* the specified player
+                            pos, // The position of where the sound will come from
+                            runSound, // The sound that will play, in this case, the sound the anvil plays when it lands.
+                            SoundCategory.BLOCKS, // This determines which of the volume sliders affect this sound
+                            0.15f, //Volume multiplier, 1 is normal, 0.5 is half volume, etc
+                            2f // Pitch multiplier, 1 is normal, 0.5 is half pitch, etc
+                    );
+                }
+            }
+        }
     }
     public boolean isWorking() {
         if(needsPower) {
@@ -108,6 +133,7 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
     public static boolean canCraft(DefaultedList<ItemStack> inventory) {
             ItemStack stack = inventory.get(1);
             ItemStack output = inventory.get(0);
+            if(stack.equals(ItemStack.EMPTY)) return false;
                 if (stack.isOf(ModItems.WEED_SEED) && stack.getCount() >= 1 && stack.hasTag() && !stack.getSubTag("cannacraft:strain").getBoolean("Identified")) {
                     NbtCompound outputTag = output.copy().getSubTag("cannacraft:strain");
                     NbtCompound subTag = stack.copy().getSubTag("cannacraft:strain");
@@ -120,6 +146,7 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
     private static void processTick(StrainAnalyzerEntity blockEntity) {
         blockEntity.processingTime++;
         if(blockEntity.needsPower) blockEntity.useEnergy(1 * blockEntity.powerMultiplier);
+        blockEntity.playSound();
     }
     public static void craft(DefaultedList<ItemStack> inventory) {
 
