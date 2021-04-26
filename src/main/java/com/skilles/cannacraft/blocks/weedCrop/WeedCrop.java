@@ -1,7 +1,7 @@
 package com.skilles.cannacraft.blocks.weedCrop;
 
-import com.skilles.cannacraft.registry.ModComponents;
 import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.ModMisc;
 import com.skilles.cannacraft.strain.GeneticsManager;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -406,7 +406,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         if (itemStack.hasTag()) {
             NbtCompound tag =  itemStack.getSubTag("cannacraft:strain");
             BlockEntity blockEntity = world.getBlockEntity(pos);
-            tag.putInt("ID", ModComponents.STRAIN.get(itemStack).getIndex()); // index 0 = null bug workaround
+            tag.putInt("ID", ModMisc.STRAIN.get(itemStack).getIndex()); // index 0 = null bug workaround
             if (blockEntity instanceof WeedCropEntity && tag != null && tag.contains("ID")) {
                 ((WeedCropEntity) blockEntity).setData(tag.getInt("ID"), tag.getInt("THC"), tag.getBoolean("Identified"), tag.getBoolean("Male"));
                 world.markDirty(pos);

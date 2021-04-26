@@ -7,12 +7,15 @@ public final class Strain {
     public static int CLASS_COUNT = 0;
     private String name;
     private StrainMap.Type type;
+    private int id;
 
     public Strain(String strain, StrainMap.Type type) {
         setName(strain);
         setType(type);
+        this.id = StrainMap.strainArray.size();
         CLASS_COUNT++;
     }
+    public int id() { return id; }
 
     public String name() {
         return name;

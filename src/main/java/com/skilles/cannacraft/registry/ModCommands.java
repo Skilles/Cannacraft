@@ -23,10 +23,8 @@ public class ModCommands {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack itemStack = self.getMainHandStack();
         if (itemStack.getItem().equals(ModItems.WEED_SEED) || itemStack.getItem().equals(ModItems.WEED_FRUIT)) {
-            //NbtCompound tag = itemStack.getOrCreateSubTag("cannacraft:strain");
-            ModComponents.STRAIN.get(itemStack).setStrain(strain); // BUG: index NBT is null when set to 0
-            self.sendSystemMessage(Text.of("Strain set to: " + ModComponents.STRAIN.get(itemStack).getStrain()), Util.NIL_UUID);
-            //itemStack.putSubTag("cannacraft:strain", tag);
+            ModMisc.STRAIN.get(itemStack).setStrain(strain);
+            self.sendSystemMessage(Text.of("Strain set to: " + ModMisc.STRAIN.get(itemStack).getStrain()), Util.NIL_UUID);
         }
         return 1;
     }
@@ -37,14 +35,12 @@ public class ModCommands {
         if (itemStack.getItem().equals(ModItems.WEED_SEED)) {
             //NbtCompound tag = itemStack.getOrCreateSubTag("cannacraft:strain");
             if (gender.equalsIgnoreCase("male")) {
-                ModComponents.STRAIN.get(itemStack).setMale(true);
+                ModMisc.STRAIN.get(itemStack).setMale(true);
             } else if (gender.equalsIgnoreCase("female")) {
-                ModComponents.STRAIN.get(itemStack).setMale(false);
+                ModMisc.STRAIN.get(itemStack).setMale(false);
             } else {
                 self.sendSystemMessage(Text.of("Unknown gender"), Util.NIL_UUID);
             }
-
-            //itemStack.putSubTag("cannacraft:strain", tag);
         }
         return 1;
     }
@@ -54,7 +50,7 @@ public class ModCommands {
         ItemStack handStack = self.getMainHandStack();
         if (handStack.getItem().equals(ModItems.WEED_SEED) || handStack.getItem().equals(ModItems.WEED_FRUIT)) {
             if (flag == 0) {
-                ModComponents.STRAIN.get(handStack).identify();
+                ModMisc.STRAIN.get(handStack).identify();
                 self.sendSystemMessage(Text.of("Seed identified"), Util.NIL_UUID);
                 return 1;
             } else {
@@ -62,8 +58,8 @@ public class ModCommands {
                 int j = 0;
                 for (i = 0; self.getInventory().size() > i; i++) {
                     ItemStack itemStack = self.getInventory().getStack(i);
-                    if (itemStack != null && itemStack.getItem().equals(ModItems.WEED_SEED) && !ModComponents.STRAIN.get(itemStack).identified()) {
-                        ModComponents.STRAIN.get(itemStack).identify();
+                    if (itemStack != null && itemStack.getItem().equals(ModItems.WEED_SEED) && !ModMisc.STRAIN.get(itemStack).identified()) {
+                        ModMisc.STRAIN.get(itemStack).identify();
                         j++;
                     }
                 }
@@ -133,8 +129,8 @@ public class ModCommands {
                             .executes(ctx -> {
                                 final ServerPlayerEntity self = ctx.getSource().getPlayer();
                                 ItemStack stack = new ItemStack(ModItems.WEED_SEED);
-                                ModComponents.STRAIN.get(stack).setStrain(Math.abs(GeneticsManager.random().nextInt(StrainMap.getStrainCount() - 1)) + 1);
-                                ModComponents.STRAIN.get(stack).setThc(StrainMap.normalDist(18, 5, 13));
+                                ModMisc.STRAIN.get(stack).setStrain(Math.abs(GeneticsManager.random().nextInt(StrainMap.getStrainCount() - 1)) + 1);
+                                ModMisc.STRAIN.get(stack).setThc(StrainMap.normalDist(18, 5, 13));
                                 self.giveItemStack(stack);
                                 self.sendSystemMessage(Text.of("Random seed given"), Util.NIL_UUID);
                                 return 1;

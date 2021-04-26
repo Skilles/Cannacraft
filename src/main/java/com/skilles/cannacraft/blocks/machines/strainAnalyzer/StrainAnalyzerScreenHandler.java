@@ -1,4 +1,4 @@
-package com.skilles.cannacraft.blocks.strainAnalyzer;
+package com.skilles.cannacraft.blocks.machines.strainAnalyzer;
 
 import com.skilles.cannacraft.registry.ModScreens;
 import net.minecraft.entity.player.PlayerEntity;
@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ArrayPropertyDelegate;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.FurnaceOutputSlot;
 import net.minecraft.screen.slot.Slot;
 
 public class StrainAnalyzerScreenHandler extends ScreenHandler {
@@ -18,7 +19,7 @@ public class StrainAnalyzerScreenHandler extends ScreenHandler {
     private final PropertyDelegate propertyDelegate;
 
     public StrainAnalyzerScreenHandler(int syncId, PlayerInventory playerInventory) {
-        this(syncId, playerInventory, new SimpleInventory(2), new ArrayPropertyDelegate(1));
+        this(syncId, playerInventory, new SimpleInventory(2), new ArrayPropertyDelegate(2));
     }
 
 
@@ -27,11 +28,11 @@ public class StrainAnalyzerScreenHandler extends ScreenHandler {
         this.inventory = inventory;
         this.propertyDelegate = propertyDelegate;
         checkSize(inventory, 2);
-        checkDataCount(propertyDelegate, 1);
+        checkDataCount(propertyDelegate, 2);
         inventory.onOpen(playerInventory.player);
 
         this.addSlot(new Slot(inventory, 1, 48, 35));
-        this.addSlot(new Slot(inventory, 0, 110, 36));
+        this.addSlot(new FurnaceOutputSlot(playerInventory.player, inventory, 0, 110, 36));
 
         for(int l = 0; l < 3; ++l) {
             for(int k = 0; k < 9; ++k) {
@@ -79,5 +80,6 @@ public class StrainAnalyzerScreenHandler extends ScreenHandler {
     public int processingTime() {
         return this.propertyDelegate.get(0);
     }
-
+    public int powerStored() { return this.propertyDelegate.get(1); }
+    public int getArrowWidth() { return (int) (processingTime() / (StrainAnalyzerEntity.timeToProcess / 22) - 0.15); }
 }

@@ -14,5 +14,8 @@
   "item.cannacraft.weed_fruit.1": "Purple Punch Fruit",
   "item.cannacraft.weed_fruit.2": "Chem Trix Fruit",
   "item.cannacraft.weed_fruit.3": "Unknown Cannabis",
-  "block.cannacraft.strain_analyzer": "Strain Analyzer"
+  "block.cannacraft.strain_analyzer": "Strain Analyzer",
+  "block.cannacraft.seed_crosser": "Seed Crosser",
+  "effect.cannacraft.high": "High",
+  "effect.cannacraft.hunger": "Munchies"
 }

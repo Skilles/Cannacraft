@@ -1,5 +1,9 @@
 package com.skilles.cannacraft.strain;
 
+import com.skilles.cannacraft.registry.ModMisc;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -14,27 +18,31 @@ import java.util.*;
 import static com.skilles.cannacraft.strain.StrainMap.Type;
 import static com.skilles.cannacraft.strain.StrainMap.strainList;
 
+/**
+ * This class contains utilities for modifying strain attributes such as THC, name, and type
+ */
 public final class GeneticsManager {
     public static int crossThc(int thc1, int thc2) {
         return (thc1 + thc2) / 2;
     }
     public static ArrayList<Pair<Genes, Integer>> geneArray = new ArrayList<>();
-    private static List suffixes = new ArrayList() {{  // common endings of strains
+    private static final List<String> suffixes = new ArrayList<String>() {{  // common endings of strains
         add("OG");
         add("Kush");
         add("Cookies");
         add("Dream");
         add("Poison");
         add("Crack");
+        add("Chem");
         add("Dawg");
     }};
 
-    private static Random random =  new Random();
+    private static final Random random =  new Random();
 
     /**
      * @return returns a set with all possible combinations of existing strains
      */
-    public static Set crossStrainSet() {
+    public static Set<String> crossStrainSet() {
 
         Set<String> nameSet = strainList.keySet();
         nameSet.remove("Unknown");
@@ -153,18 +161,89 @@ public final class GeneticsManager {
         String sex = tag.getBoolean("Male") ? "Male" : "Female";
         int id = tag.getInt("ID");
         int thc = tag.getInt("THC");
-        if(tag.getBoolean("identified")) {
+        if(tag.getBoolean("Identified")) {
             tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText(StrainMap.getStrain(id).name()).formatted(Formatting.GREEN)));
-            tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StrainMap.getStrain(id).type().name())).formatted(Formatting.DARK_GREEN)));
+            tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StringUtils.capitalize(StringUtils.lowerCase(StrainMap.getStrain(id).type().name())))).formatted(Formatting.DARK_GREEN)));
             tooltip.add(new LiteralText("THC: ").formatted(Formatting.GRAY).append(new LiteralText(thc + "%").formatted(Formatting.DARK_GREEN)));
-            tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText(sex)).formatted(Formatting.DARK_GREEN));
+            tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText(sex).formatted(Formatting.DARK_GREEN)));
         } else {
             tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText("Unidentified").formatted(Formatting.GREEN)));
             tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText("Unknown").formatted(Formatting.DARK_GREEN)));
             tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText("Unknown").formatted(Formatting.DARK_GREEN)));
         }
     }
+    public static int durationToAmplifier(int duration) {
+        if(duration <= 1200) {
+            return 0;
+        } else if(duration <= 1800) {
+            return 1;
+        } else if (duration <= 2400) {
+            return 2;
+        } else {
+            return 3;
+        }
+    }
+    private static void sendHighMessage(PlayerEntity player) {
+        StatusEffectInstance currentEffect = player.getStatusEffect(ModMisc.HIGH);
+        int amplifier = currentEffect.getAmplifier();
+        switch(amplifier) {
+            case 0:
+                player.sendMessage(new LiteralText("You are now high").formatted(Formatting.GREEN), true);
+                break;
+            case 1:
+                player.sendMessage(new LiteralText("Wow you are really high").formatted(Formatting.GREEN), true);
+                break;
+            case 2:
+                player.sendMessage(new LiteralText("You are insanely high").formatted(Formatting.GREEN), true);
+                break;
+            case 3:
+                player.sendMessage(new LiteralText("Maybe you should lie down").formatted(Formatting.GREEN), true);
+                break;
+            default:
+                break;
+        }
+    }
+    public static void applyHigh(LivingEntity user, int index, int thc) {
+        int duration;
+        int switchNum = 0;
+        ModMisc.PLAYER.get(user).setStrain(index);
+        if(thc <= 18) switchNum = 1;
+        if(19 <= thc && thc <= 25) switchNum = 2;
+        if(26 <= thc) switchNum = 3;
+        switch(switchNum) {
+            case 1:
+                duration = 1200;
+                break;
+            case 2:
+                duration = 1800;
+                break;
+            case 3:
+                duration = 2400;
+                break;
+            default:
+                duration = 0;
+        }
+        if(user.hasStatusEffect(ModMisc.HIGH)) {
+            StatusEffectInstance currentEffect = user.getStatusEffect(ModMisc.HIGH);
 
+            switch(switchNum) {
+                case 1:
+                    duration = currentEffect.getDuration() + 600;
+                    break;
+                case 2:
+                    duration = currentEffect.getDuration() + 1200;
+                    break;
+                case 3:
+                    duration = currentEffect.getDuration() + 1800;
+                    break;
+                default:
+                    duration = 0;
+            }
+        }
+        int amplifier = durationToAmplifier(duration);
+        user.addStatusEffect(new StatusEffectInstance(ModMisc.HIGH, duration, amplifier));
+        sendHighMessage((PlayerEntity) user);
+    }
     public static NbtList toNbtList(ArrayList<Pair<Genes, Integer>> list) {
         NbtList nbtList = new NbtList();
         for (Pair<Genes, Integer> entry: list) {
@@ -178,7 +257,9 @@ public final class GeneticsManager {
     public static ArrayList<Pair<Genes, Integer>> fromNbtList(NbtList list) {
         ArrayList<Pair<Genes, Integer>> arrayList = new ArrayList<>();
         for (NbtElement compoundEntry : list) {
-            Pair pair = new Pair(((NbtCompound) compoundEntry).get("Gene"),((NbtCompound) compoundEntry).get("Level"));
+            Genes gene = Genes.byName(((NbtCompound) compoundEntry).getString("Gene"));
+            int level = ((NbtCompound) compoundEntry).getInt("Level");
+            Pair<Genes, Integer> pair = new Pair<>(gene, level);
             arrayList.add(pair);
         }
         return arrayList;
@@ -208,7 +289,7 @@ public final class GeneticsManager {
                 newLevel = level1;
                 break;
             case 1:
-                int i = random.nextInt(2); // 2 cases
+                int i = random.nextInt(2); // 0 - 1
                 switch(i) {
                     case 0: // 50%
                         newLevel = Integer.min(level1, level2);
@@ -218,12 +299,13 @@ public final class GeneticsManager {
                         break;
                 }
             case 2:
-                i = random.nextInt(3); // 3 cases
+                i = random.nextInt(4); // 0 - 3
                 if(i == 0) { // 0 25%
                     newLevel = Integer.min(level1, level2);
                     break;
-                } else if(i > 0 && i < 3) { // 1 or 2 50%
+                } else if(i <= 2) { // 1 or 2 50%
                     newLevel = Integer.sum(level1, level2)/2;
+                    break;
                 } else { // 3 25%
                     newLevel = Integer.max(level1, level2);
                     break;
@@ -235,6 +317,7 @@ public final class GeneticsManager {
                     break;
                 } else if(i == 2) { // 2 25%
                     newLevel = Integer.sum(level1, level2)/2;
+                    break;
                 } else { // 3 25%
                     newLevel = Integer.max(level1, level2);
                     break;

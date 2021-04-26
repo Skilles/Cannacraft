@@ -22,7 +22,6 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
-import java.util.Iterator;
 import java.util.List;
 
 public class SeedChest extends BlockWithEntity {
@@ -89,12 +88,10 @@ public class SeedChest extends BlockWithEntity {
     }
 
     private static boolean hasOcelotOnTop(WorldAccess world, BlockPos pos) {
-        List<CatEntity> list = world.getNonSpectatingEntities(CatEntity.class, new Box((double)pos.getX(), (double)(pos.getY() + 1), (double)pos.getZ(), (double)(pos.getX() + 1), (double)(pos.getY() + 2), (double)(pos.getZ() + 1)));
+        List<CatEntity> list = world.getNonSpectatingEntities(CatEntity.class, new Box(pos.getX(), pos.getY() + 1, pos.getZ(), pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1));
         if (!list.isEmpty()) {
-            Iterator var3 = list.iterator();
 
-            while(var3.hasNext()) {
-                CatEntity catEntity = (CatEntity)var3.next();
+            for (CatEntity catEntity : list) {
                 if (catEntity.isInSittingPose()) {
                     return true;
                 }
@@ -119,11 +116,11 @@ public class SeedChest extends BlockWithEntity {
     }
     @Override
     public BlockState rotate(BlockState state, BlockRotation rotation) {
-        return (BlockState)state.with(FACING, rotation.rotate((Direction)state.get(FACING)));
+        return state.with(FACING, rotation.rotate(state.get(FACING)));
     }
     @Override
     public BlockState mirror(BlockState state, BlockMirror mirror) {
-        return state.rotate(mirror.getRotation((Direction)state.get(FACING)));
+        return state.rotate(mirror.getRotation(state.get(FACING)));
     }
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
