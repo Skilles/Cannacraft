@@ -27,12 +27,10 @@ import team.reborn.energy.EnergySide;
 import team.reborn.energy.EnergyTier;
 
 public class SeedCrosserEntity extends MachineBlockEntity {
-    private double powerMultiplier = 1; // Energy use multiplier
-    private boolean needsPower = true;
-    private int processingTime;
-    private int powerStored;
+    private final double powerMultiplier = 1; // Energy use multiplier
+    private final boolean needsPower = true;
     protected final PropertyDelegate propertyDelegate;
-    //private DefaultedList<ItemStack> inventory;
+    protected static final int timeToProcess = 175;
 
     public SeedCrosserEntity(BlockPos pos, BlockState state) {
         super(ModEntities.SEED_CROSSER_ENTITY, pos, state, DefaultedList.ofSize(3, ItemStack.EMPTY));
@@ -170,60 +168,6 @@ public class SeedCrosserEntity extends MachineBlockEntity {
     public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
         return new SeedCrosserScreenHandler(syncId, inv, this, this.propertyDelegate);
     }
-    @Override
-    public double getStored(EnergySide face) {
-        return this.powerStored;
-    }
-
-    @Override
-    public void setStored(double amount) {
-        powerStored = (int) amount;
-    }
-    public void addEnergy(double amount) {
-        setStored(powerStored + amount);
-    }
-    public double getEnergy() {
-        return getStored(EnergySide.UNKNOWN);
-    }
-    public void useEnergy(double amount) {
-        if (amount > powerStored) amount = powerStored;
-        setStored(powerStored - amount);
-    }
-    public void setEnergy(double amount) {
-        setStored(amount);
-    }
-    public void sideTransfer(World world, BlockPos pos, BlockEntity blockEntity) {
-        for (Direction side : Direction.values()) {
-            BlockEntity sideBlockEntity = world.getBlockEntity(pos.offset(side));
-            if (sideBlockEntity == null || !Energy.valid(sideBlockEntity)) {
-                continue;
-            }
-            Energy.of(blockEntity)
-                    .side(side)
-                    .into(Energy.of(sideBlockEntity).side(side.getOpposite()))
-                    .move();
-        }
-    }
-    protected static boolean isNextTo(World world, BlockPos pos, Block block) {
-        for (Direction side : Direction.values()) {
-            Block sideBlock = world.getBlockState(pos.offset(side)).getBlock();
-            if (sideBlock == block) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public double getMaxStoredPower() {
-        return 10000;
-    }
-
-    @Override
-    public EnergyTier getTier() {
-        return EnergyTier.LOW;
-    }
-
 
     @Override
     public NbtCompound writeNbt(NbtCompound nbt) {
@@ -241,5 +185,9 @@ public class SeedCrosserEntity extends MachineBlockEntity {
         Inventories.readNbt(nbt, this.inventory);
         this.processingTime = nbt.getInt("processingTime");
         this.powerStored = nbt.getInt("powerStored");
+    }
+    @Override
+    public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
+        return stack.isOf(ModItems.WEED_SEED);
     }
 }

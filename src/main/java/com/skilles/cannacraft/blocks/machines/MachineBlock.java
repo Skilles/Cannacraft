@@ -1,4 +1,4 @@
-package com.skilles.cannacraft.blocks;
+package com.skilles.cannacraft.blocks.machines;
 
 import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzerEntity;
 import net.minecraft.block.Block;

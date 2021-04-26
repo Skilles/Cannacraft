@@ -26,10 +26,8 @@ import team.reborn.energy.EnergyTier;
 public class StrainAnalyzerEntity extends MachineBlockEntity {
 
 
-    private double powerMultiplier = 1; // Energy use multiplier
-    private boolean needsPower = true;
-    private int processingTime;
-    private int powerStored;
+    private final double powerMultiplier = 1; // Energy use multiplier
+    private final boolean needsPower = true;
     private final PropertyDelegate propertyDelegate;
 
     public StrainAnalyzerEntity(BlockPos pos, BlockState state) {
@@ -145,63 +143,12 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
             stack.decrement(1);
 
     }
-    @Override
-    public double getStored(EnergySide face) {
-        return this.powerStored;
-    }
 
-    @Override
-    public void setStored(double amount) { powerStored = (int) amount; }
-    public void addEnergy(double amount) {
-        setStored(powerStored + amount);
-    }
-    public double getEnergy() {
-        return getStored(EnergySide.UNKNOWN);
-    }
-    public void useEnergy(double amount) {
-        if (amount > powerStored) amount = powerStored;
-            setStored(powerStored - amount);
-    }
-    public void setEnergy(double amount) {
-        setStored(amount);
-    }
-    public void sideTransfer(World world, BlockPos pos, BlockEntity blockEntity) {
-        for (Direction side : Direction.values()) {
-            BlockEntity sideBlockEntity = world.getBlockEntity(pos.offset(side));
-            if (sideBlockEntity == null || !Energy.valid(sideBlockEntity)) {
-                continue;
-            }
-            Energy.of(blockEntity)
-                    .side(side)
-                    .into(Energy.of(sideBlockEntity).side(side.getOpposite()))
-                    .move();
-        }
-    }
-    protected static boolean isNextTo(World world, BlockPos pos, Block block) {
-        for (Direction side : Direction.values()) {
-            Block sideBlock = world.getBlockState(pos.offset(side)).getBlock();
-            if (sideBlock == block) {
-                return true;
-            }
-        }
-        return false;
-    }
     @Nullable
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
         return new StrainAnalyzerScreenHandler(syncId, inv, this, this.propertyDelegate);
     }
-
-    @Override
-    public double getMaxStoredPower() {
-        return 10000;
-    }
-
-    @Override
-    public EnergyTier getTier() {
-        return EnergyTier.LOW;
-    }
-
 
     @Override
     public NbtCompound writeNbt(NbtCompound nbt) {
@@ -220,5 +167,8 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
         this.processingTime = nbt.getInt("processingTime");
         this.powerStored = nbt.getInt("powerStored");
     }
-
+    @Override
+    public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
+        return stack.isOf(ModItems.WEED_SEED);
+    }
 }
