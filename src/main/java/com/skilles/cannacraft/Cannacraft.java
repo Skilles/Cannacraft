@@ -41,6 +41,9 @@ public class Cannacraft implements ModInitializer {
         ModBlocks.registerBlocks();
         System.out.println("Blocks registered!");
 
+        ModMisc.registerEffects();
+        System.out.println("Effects registered!");
+
         ModScreens.registerScreenHandlers();
         System.out.println("ScreenHandlers registered!");
 
