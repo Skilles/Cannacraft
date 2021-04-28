@@ -265,8 +265,8 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
                             maleId = tag.getInt("ID"); // highest thc male id
                             thc = tag.getInt("Seed THC"); // highest thc value
                         }
-                        stringArray.add(getStrain(tag.getInt("Seed THC")).name()); // all names of surrounding males
-                        typeArray.add(getStrain(tag.getInt("Seed THC")).type());
+                        stringArray.add(getStrain(tag.getInt("Seed ID")).name()); // all names of surrounding males
+                        typeArray.add(getStrain(tag.getInt("Seed ID")).type());
                         COUNT++;
                     }
                 }
@@ -274,7 +274,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
             if (COUNT > 0) {
                 if (maleId == 0) {
                     thc = ogTag.getInt("Seed THC");
-                    maleId = indexOf(stringArray.get(GeneticsManager.random().nextInt(stringArray.size() - 1))); // id is random male
+                    maleId = stringArray.size() > 1 ? indexOf((stringArray.get(GeneticsManager.random().nextInt(stringArray.size() - 1)))) : indexOf(stringArray.get(0));
                 }
                 // Set thc
                 ogTag.putInt("Seed THC", GeneticsManager.crossThc(thc, ogTag.getInt("THC")));
