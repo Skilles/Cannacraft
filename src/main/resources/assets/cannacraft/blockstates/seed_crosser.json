@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=east,active=false": {
+      "model": "cannacraft:block/seed_crosser",
+      "y": 90
+    },
+    "facing=east,active=true": {
+      "model": "cannacraft:block/seed_crosser_active",
+      "y": 90
+    },
+    "facing=north,active=false": {
+      "model": "cannacraft:block/seed_crosser"
+    },
+    "facing=north,active=true": {
+      "model": "cannacraft:block/seed_crosser_active"
+    },
+    "facing=south,active=false": {
+      "model": "cannacraft:block/seed_crosser",
+      "y": 180
+    },
+    "facing=south,active=true": {
+      "model": "cannacraft:block/seed_crosser_active",
+      "y": 180
+    },
+    "facing=west,active=false": {
+      "model": "cannacraft:block/seed_crosser",
+      "y": 270
+    },
+    "facing=west,active=true": {
+      "model": "cannacraft:block/seed_crosser_active",
+      "y": 270
+    }
+  }
+}

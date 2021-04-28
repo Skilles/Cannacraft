@@ -1,0 +1,27 @@
+{
+  "0": {
+    "name": "Unknown",
+    "type": "UNKNOWN",
+    "id": 0
+  },
+  "1": {
+    "name": "OG Kush",
+    "type": "HYBRID",
+    "id": 1
+  },
+  "2": {
+    "name": "Purple Punch",
+    "type": "INDICA",
+    "id": 2
+  },
+  "3": {
+    "name": "Chem Trix",
+    "type": "SATIVA",
+    "id": 3
+  },
+  "4": {
+    "name": "Chem Punch",
+    "type": "HYBRID",
+    "id": 4
+  }
+}
