@@ -1,56 +1,72 @@
 package com.skilles.cannacraft.blocks.weedCrop;
 
 import com.skilles.cannacraft.registry.ModEntities;
+import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.CompoundTag;
-import com.skilles.cannacraft.StrainType;
 
-import java.util.HashMap;
-import java.util.Map;
+public class WeedCropEntity extends BlockEntity implements BlockEntityClientSerializable {
 
-public class WeedCropEntity extends BlockEntity {
+    private int index;
+    private int thc;
+    private int seedThc;
+    private boolean identified;
+    private boolean isMale;
+    private int seedId;
 
-    public WeedCropEntity(BlockEntityType<?> blockEntityType) {
+    public WeedCropEntity() {
         super(ModEntities.WEED_CROP_ENTITY);
     }
-    public WeedCropEntity() {
-        this(ModEntities.WEED_CROP_ENTITY);
-    }
 
-
-    // Stores strain name and type. Contains setStrain() with either index or strainName parameters, getStrain(), and getType().
-
-
-    private int thc = 0;
-
-
-    private StrainType strain = new StrainType();
-    public void setStrain(int strainIndex) {
-        this.strain.setStrain(strainIndex);
-    }
-    public void setStrain(String strainName) { this.strain.setStrain(strainName); }
-    public void setThc(int thc) {
+    public void setData(int index, int thc, boolean identified, boolean isMale) {
+        this.index = index;
         this.thc = thc;
+        this.seedThc = thc;
+        this.identified = identified;
+        this.isMale = isMale;
+        this.seedId = index;
     }
 
     @Override
     public CompoundTag toTag(CompoundTag tag) {
         super.toTag(tag);
-        tag.putString("Strain", strain.getStrain());
-        tag.putInt("THC", strain.getTHC());
-        tag.putString("Type", strain.getType());
+        tag.putInt("ID", index);
+        tag.putInt("THC", thc);
+        tag.putInt("Seed THC", seedThc);
+        tag.putBoolean("Identified", identified);
+        tag.putBoolean("Male", isMale);
+        tag.putInt("Seed ID", seedId);
         return tag;
     }
 
     @Override
-    public void fromTag(BlockState state, CompoundTag compoundTag) {
-        super.fromTag(state, compoundTag);
-        if(compoundTag != null) {
-            setStrain(compoundTag.getString("Strain")); //  set strain based on nbt tag
-            thc = compoundTag.getInt("THC");
-            setThc(thc);
-        }
+    public void fromTag(BlockState state, CompoundTag nbt) {
+        super.fromTag(state, nbt);
+        this.identified = nbt.getBoolean("Identified");
+        this.index = nbt.getInt("ID");
+        this.thc = nbt.getInt("THC");
+        this.seedThc = nbt.getInt("Seed THC");
+        this.isMale = nbt.getBoolean("Male");
+        this.seedId = nbt.getInt("Seed ID");
+        if (this.index == 0) this.index = this.seedId;
+        if (this.thc == 0) this.seedThc = thc;
+    }
+
+
+    @Override
+    public void fromClientTag(CompoundTag tag) {
+        fromTag(this.getCachedState(), tag);
+    }
+
+    @Override
+    public CompoundTag toClientTag(CompoundTag tag) {
+        return toTag(tag);
+    }
+
+    @Override
+    public void sync() {
+        if (!world.isClient)
+            BlockEntityClientSerializable.super.sync();
     }
 }

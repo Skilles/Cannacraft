@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.6-SNAPSHOT'
+	id 'fabric-loom' version '0.7-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -36,8 +36,21 @@ dependencies {
 
 	modApi "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:${project.cca_version}"
 	modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-item:${project.cca_version}"
+	modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:${project.cca_version}"
 	// Includes Cardinal Components API as a Jar-in-Jar dependency (optional but recommended)
+	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:${project.cca_version}"
 	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-item:${project.cca_version}"
+	include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:${project.cca_version}"
+
+	modApi 'teamreborn:energy:0.1.1'
+	include 'teamreborn:energy:0.1.1'
+
+
+	// compile against the API
+	//modCompileOnly "mcp.mobius.waila:wthit-api:fabric-${project.wthit_api_version}"
+
+	// run against the full jar
+	//modRuntime "mcp.mobius.waila.wthit-fabric:wthit-fabric-${project.wthit_version}"
 }
 
 processResources {
@@ -60,7 +73,7 @@ tasks.withType(JavaCompile).configureEach {
 	// We'll use that if it's available, but otherwise we'll use the older option.
 	def targetVersion = 8
 	if (JavaVersion.current().isJava9Compatible()) {
-		 it.options.release = targetVersion
+		it.options.release = targetVersion
 	}
 }
 

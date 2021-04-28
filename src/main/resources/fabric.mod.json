@@ -25,10 +25,11 @@
       "com.skilles.cannacraft.CannacraftClient"
     ],
     "cardinal-components": [
-      "com.skilles.cannacraft.registry.ModComponents"
+      "com.skilles.cannacraft.registry.ModMisc"
     ]
   },
   "mixins": [
+    "cannacraft.mixins.json"
   ],
 
   "depends": {
@@ -41,7 +42,8 @@
   },
   "custom": {
     "cardinal-components": [
-      "cannacraft:straincomponent"
+      "cannacraft:strain",
+      "cannacraft:player"
     ]
   }
 }
