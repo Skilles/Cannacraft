@@ -8,6 +8,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.server.world.ServerWorld;
@@ -213,8 +214,8 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         */
     @Override
     public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) { // drops cannabis with BE's NBT
-       boolean brokenWithShears = true;
-       //if(player.getStackInHand(player.ha).getItem().equals(Items.SHEARS)) brokenWithShears = true;
+       boolean brokenWithShears = false;
+       if(player.getMainHandStack().isOf(Items.SHEARS)) brokenWithShears = true;
         if(getAge(state) == getMaxAge(state)) {
             ItemStack newStack = new ItemStack(ModItems.WEED_FRUIT);
             ItemStack seedStack = new ItemStack(ModItems.WEED_SEED);
@@ -227,11 +228,11 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
                 System.out.println("Error: NULLTAG");
             }
             if(world.getBlockState(pos.up()).isOf(this)) {
-                world.breakBlock(pos.up(), false, player);
                 if(world.getBlockState(pos.up()).get(AGE) >= world.getBlockState(pos.up()).get(MAXAGE)) {
                     ItemStack itemStack = newStack.copy();
                     if (!tag.getBoolean("Male") && brokenWithShears) dropStack(world, pos, itemStack);
                 }
+                world.breakBlock(pos.up(), false, player);
             }
             if(!tag.getBoolean("Male") && brokenWithShears) dropStack(world, pos, newStack);
             dropStack(world, pos, seedStack);
@@ -281,7 +282,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
                 // Set name/type
                 int randId = random.nextInt(stringArray.size());
                 String name1 = getStrain(id).name();
-                String name2 = stringArray.get(maleId);
+                String name2 = getStrain(maleId).name();
                 Type type1 = getStrain(id).type();
                 Type type2 = typeArray.get(randId);
                 String crossedName = GeneticsManager.crossStrains(name1, name2);
