@@ -3,6 +3,7 @@ package com.skilles.cannacraft.strain;
 import com.skilles.cannacraft.registry.ModMisc;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -188,16 +189,32 @@ public final class GeneticsManager {
         int amplifier = currentEffect.getAmplifier();
         switch(amplifier) {
             case 0:
-                player.sendMessage(new LiteralText("You are now high").formatted(Formatting.GREEN), true);
+                player.applyStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, currentEffect.getDuration(), 0, true,false));
+                player.sendMessage(new LiteralText("The buzz has made you resistant to fire").formatted(Formatting.GREEN), true);
                 break;
             case 1:
-                player.sendMessage(new LiteralText("Wow you are really high").formatted(Formatting.GREEN), true);
+                player.applyStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, currentEffect.getDuration(), 0, true, false));
+                player.sendMessage(new LiteralText("Why are your hands shaking").formatted(Formatting.GREEN), true);
                 break;
             case 2:
-                player.sendMessage(new LiteralText("You are insanely high").formatted(Formatting.GREEN), true);
+                if (GeneticsManager.random().nextInt(2) == 0) {
+                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, currentEffect.getDuration(), 0, true,false));
+                    player.sendMessage(new LiteralText("You feel stronger for some reason").formatted(Formatting.GREEN), true);
+                } else {
+                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, currentEffect.getDuration(), 0, true, false));
+                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.SLOW_FALLING, currentEffect.getDuration(), 0, true, false));
+                    player.sendMessage(new LiteralText("You feel like you're floating").formatted(Formatting.GREEN), true);
+                }
                 break;
             case 3:
-                player.sendMessage(new LiteralText("Maybe you should lie down").formatted(Formatting.GREEN), true);
+                if (GeneticsManager.random().nextInt(2) == 0) {
+                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, currentEffect.getDuration(), 0, true, false));
+                    player.sendMessage(new LiteralText("Sonic").formatted(Formatting.GREEN), true);
+                } else {
+                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, currentEffect.getDuration(), 0, true, false));
+                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.HUNGER, currentEffect.getDuration(), 0, true, false));
+                    player.sendMessage(new LiteralText("You could really use some oreos").formatted(Formatting.GREEN), true);
+                }
                 break;
             default:
                 break;
