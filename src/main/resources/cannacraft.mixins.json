@@ -4,10 +4,10 @@
   "package": "com.skilles.cannacraft.mixins",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "HungerMixin",
     "ItemEntityMixin",
     "StatusEffectAccessor"
   ],
+  "client": ["InventoryScreenMixin"],
   "injectors": {
     "defaultRequire": 1
   }
