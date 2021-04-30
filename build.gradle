@@ -45,7 +45,7 @@ dependencies {
 	modApi 'teamreborn:energy:0.1.1'
 	include 'teamreborn:energy:0.1.1'
 
-
+	annotationProcessor "net.fabricmc:fabric-mixin-compile-extensions:0.4.3"
 	// compile against the API
 	//modCompileOnly "mcp.mobius.waila:wthit-api:fabric-${project.wthit_api_version}"
 
