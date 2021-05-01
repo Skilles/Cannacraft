@@ -85,16 +85,14 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
                 markDirty(world, pos, state);
             }
         } else if (canCraft(blockEntity.inventory) && blockEntity.powerStored != 0) { // start if has power
-            blockEntity.processingTime = 1;
-            markDirty(world, pos, state);
+                blockEntity.processingTime = 1;
         } else { // when no items or can't craft
-            blockEntity.processingTime = 0;
-            state = state.with(StrainAnalyzer.ACTIVE, false);
-            world.setBlockState(pos, state, Block.NOTIFY_ALL);
+                blockEntity.processingTime = 0;
+                state = state.with(StrainAnalyzer.ACTIVE, false);
+                world.setBlockState(pos, state, Block.NOTIFY_ALL);
+            }
             markDirty(world, pos, state);
         }
-
-    }
     private void playSound() {
         World world  = getWorld();
         SoundEvent runSound = SoundEvents.BLOCK_FIRE_AMBIENT;
