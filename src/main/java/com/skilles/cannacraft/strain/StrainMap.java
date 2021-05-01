@@ -156,8 +156,7 @@ public final class StrainMap {
         return strainArray;
     }
     public static void save() {
-        try {
-            Writer writer = new FileWriter("strains.json");
+        try (Writer writer = new FileWriter("strains.json")) {
             gson.toJson(strainArray, writer);
             writer.close();
             System.out.println("Strains saved to file");
