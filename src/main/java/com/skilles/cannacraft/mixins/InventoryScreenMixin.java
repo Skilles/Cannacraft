@@ -41,7 +41,7 @@ public abstract class InventoryScreenMixin {
     /**
      * Replaces HungerMixin
      **/
-    @ModifyVariable(method = "drawStatusEffectDescriptions", at = @At(value = "STORE"), ordinal = 0)
+    @ModifyVariable(method = "drawStatusEffectDescriptions(Lnet/minecraft/client/util/math/MatrixStack;IILjava/lang/Iterable;)V", at = @At(value = "STORE"), ordinal = 0)
     private String munchies(String string) {
         if(string.equalsIgnoreCase(I18n.translate("effect.minecraft.hunger"))) {
             return I18n.translate("effect.cannacraft.hunger");
@@ -53,7 +53,7 @@ public abstract class InventoryScreenMixin {
     /**
      * Checks whether player is high
      */
-    @Inject(method = "drawStatusEffects", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderColor(FFFF)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
+    @Inject(method = "drawStatusEffects(Lnet/minecraft/client/util/math/MatrixStack;)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderColor(FFFF)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
     private void setHigh(MatrixStack matrices, CallbackInfo ci, int i, Collection<StatusEffectInstance> collection) {
         if(collection.stream().anyMatch(obj -> obj.getEffectType().equals(ModMisc.HIGH))) {
             isHigh = true;
@@ -63,7 +63,7 @@ public abstract class InventoryScreenMixin {
     /**
      * Sets the spacing between the effect boxes
      */
-    @ModifyVariable(method = "drawStatusEffects", at = @At("STORE"), ordinal = 1)
+    @ModifyVariable(method = "drawStatusEffects(Lnet/minecraft/client/util/math/MatrixStack;)V", at = @At("STORE"), ordinal = 1)
     private int setJ(int j) {
         return isHigh ? 26 : 33;
     }
@@ -71,25 +71,25 @@ public abstract class InventoryScreenMixin {
      * These injects capture local variables for comparison in later method calls
      */
     @Inject(method = "drawStatusEffectBackgrounds(Lnet/minecraft/client/util/math/MatrixStack;IILjava/lang/Iterable;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/AbstractInventoryScreen;drawTexture(Lnet/minecraft/client/util/math/MatrixStack;IIIIII)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void captureBackground(MatrixStack matrices, int i, int j, Iterable iterable, CallbackInfo ci, int k, Iterator var6, StatusEffectInstance statusEffectInstance) {
+    private void captureBackground(MatrixStack matrices, int i, int j, Iterable<StatusEffectInstance> iterable, CallbackInfo ci, int k, Iterator var6, StatusEffectInstance statusEffectInstance) {
         if(isHigh) {
             backgroundType = statusEffectInstance.getEffectType();
         }
     }
-    @Inject(method = "drawStatusEffectSprites", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/AbstractInventoryScreen;drawSprite(Lnet/minecraft/client/util/math/MatrixStack;IIIIILnet/minecraft/client/texture/Sprite;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void captureSprite(MatrixStack matrices, int i, int j, Iterable iterable, CallbackInfo ci, StatusEffectSpriteManager statusEffectSpriteManager, int k, Iterator var7, StatusEffectInstance statusEffectInstance, StatusEffect statusEffect, Sprite sprite) {
+    @Inject(method = "drawStatusEffectSprites(Lnet/minecraft/client/util/math/MatrixStack;IILjava/lang/Iterable;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/AbstractInventoryScreen;drawSprite(Lnet/minecraft/client/util/math/MatrixStack;IIIIILnet/minecraft/client/texture/Sprite;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
+    private void captureSprite(MatrixStack matrices, int i, int j, Iterable<StatusEffectInstance> iterable, CallbackInfo ci, StatusEffectSpriteManager statusEffectSpriteManager, int k, Iterator var7, StatusEffectInstance statusEffectInstance, StatusEffect statusEffect, Sprite sprite) {
         if(isHigh) {
             spriteType = statusEffect;
         }
     }
-    @Inject(method = "drawStatusEffectBackgrounds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/AbstractInventoryScreen;drawTexture(Lnet/minecraft/client/util/math/MatrixStack;IIIIII)V"))
+    @Inject(method = "drawStatusEffectBackgrounds(Lnet/minecraft/client/util/math/MatrixStack;IILjava/lang/Iterable;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/AbstractInventoryScreen;drawTexture(Lnet/minecraft/client/util/math/MatrixStack;IIIIII)V"))
     private void drawNewTexture(CallbackInfo ci) {
         if(isHigh && !backgroundType.equals(ModMisc.HIGH)) RenderSystem.setShaderTexture(0, new Identifier("cannacraft","textures/gui/container/background.png"));
     }
     /**
      * These injects adjust the offset for the sprite, background, and texts
      */
-    @ModifyArgs(method = "drawStatusEffectBackgrounds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/AbstractInventoryScreen;drawTexture(Lnet/minecraft/client/util/math/MatrixStack;IIIIII)V"))
+    @ModifyArgs(method = "drawStatusEffectBackgrounds(Lnet/minecraft/client/util/math/MatrixStack;IILjava/lang/Iterable;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/AbstractInventoryScreen;drawTexture(Lnet/minecraft/client/util/math/MatrixStack;IIIIII)V"))
     private void background(Args args) {
         if (isHigh) {
             int k = args.get(2);
@@ -101,7 +101,7 @@ public abstract class InventoryScreenMixin {
             }
         }
     }
-    @ModifyArgs(method = "drawStatusEffectSprites", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/AbstractInventoryScreen;drawSprite(Lnet/minecraft/client/util/math/MatrixStack;IIIIILnet/minecraft/client/texture/Sprite;)V"))
+    @ModifyArgs(method = "drawStatusEffectSprites(Lnet/minecraft/client/util/math/MatrixStack;IILjava/lang/Iterable;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/AbstractInventoryScreen;drawSprite(Lnet/minecraft/client/util/math/MatrixStack;IIIIILnet/minecraft/client/texture/Sprite;)V"))
     private void sprite(Args args) {
         if(isHigh) {
             int width = args.get(4);
@@ -127,7 +127,7 @@ public abstract class InventoryScreenMixin {
     int runTime = 0;
     @Unique
     boolean contains = false;
-    @ModifyArgs(method = "drawStatusEffectDescriptions", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/font/TextRenderer;drawWithShadow(Lnet/minecraft/client/util/math/MatrixStack;Ljava/lang/String;FFI)I"))
+    @ModifyArgs(method = "drawStatusEffectDescriptions(Lnet/minecraft/client/util/math/MatrixStack;IILjava/lang/Iterable;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/font/TextRenderer;drawWithShadow(Lnet/minecraft/client/util/math/MatrixStack;Ljava/lang/String;FFI)I"))
     private void text(Args args) {
         if(isHigh) {
             String name = args.get(1);
