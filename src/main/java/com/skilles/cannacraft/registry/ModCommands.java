@@ -125,6 +125,14 @@ public class ModCommands {
                                 listStrain(ctx);
                                 return 1;
                             }))
+                    .then(literal("cross")
+                            .then(argument("name1", StringArgumentType.string())
+                                    .then(argument("name2", StringArgumentType.string())
+                                            .executes(ctx -> {
+                                                final ServerPlayerEntity self = ctx.getSource().getPlayer();
+                                                self.sendSystemMessage(Text.of(GeneticsManager.crossStrains(getString(ctx, "name1"), getString(ctx, "name2"))), Util.NIL_UUID);
+                                                return 1;
+                                            }))))
                     .then(literal("random")
                             .executes(ctx -> {
                                 final ServerPlayerEntity self = ctx.getSource().getPlayer();
@@ -140,7 +148,7 @@ public class ModCommands {
                                         setSex(ctx, getString(ctx, "sex"));
                                         return 1;
                     })))
-                    .then(literal("resetlist").executes(ctx -> {
+                    .then(literal("clear").executes(ctx -> {
                         StrainMap.resetStrains();
                         final ServerPlayerEntity self = ctx.getSource().getPlayer();
                         self.sendSystemMessage(Text.of("Strains reset"), Util.NIL_UUID);
