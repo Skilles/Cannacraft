@@ -1,10 +1,16 @@
 package com.skilles.cannacraft.strain;
 
+import com.google.common.collect.Lists;
+import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.registry.ModMisc;
+import com.skilles.cannacraft.strain.StrainMap.Type;
+import net.minecraft.block.Block;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -12,11 +18,13 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
-import static com.skilles.cannacraft.strain.StrainMap.Type;
 import static com.skilles.cannacraft.strain.StrainMap.strainList;
 
 /**
@@ -27,117 +35,154 @@ public final class GeneticsManager {
         return (thc1 + thc2) / 2;
     }
     public static ArrayList<Pair<Genes, Integer>> geneArray = new ArrayList<>();
-    private static final List<String> suffixes = new ArrayList<String>() {{  // common endings of strains
-        add("OG");
-        add("Kush");
-        add("Cookies");
-        add("Dream");
-        add("Poison");
-        add("Crack");
-        add("Chem");
-        add("Dawg");
-    }};
+    private static final Map<String, Integer> suffixesMap = new HashMap<String, Integer>() {{
+        put("OG", 5);
+        put("Kush", 2);
+        put("Cookies", 1);
+        put("Dream", 1);
+        put("Poison", 0);
+        put("Crack", 0);
+        put("Dawg", 0);
+        put("Punch", 1);
+        put("Trix", 0);
+        put("Cake", 0);
+    }
+    };
 
     private static final Random random =  new Random();
 
     /**
-     * @return returns a set with all possible combinations of existing strains
+     * @return a list with all possible combinations of strains
      */
-    public static Set<String> crossStrainSet() {
-
-        Set<String> nameSet = strainList.keySet();
-        nameSet.remove("Unknown");
-        Set<String> set = new HashSet<>(); // no dupes
-        for (String name1: nameSet) { // loops 3 times
-            for(int i = 0; i < nameSet.size(); i++) { // loops 3 times
-                if(!name1.equals(nameSet.toArray()[i])) { // prevent "OG OG"
-                    String cross1 = GeneticsManager.crossNames(name1, (String) nameSet.toArray()[i]);
-                    String cross2 = GeneticsManager.crossNames((String) nameSet.toArray()[i], name1);
-                    String cross3 = GeneticsManager.altCrossNames(name1, (String) nameSet.toArray()[i]);
-                    String cross4 = GeneticsManager.altCrossNames((String) nameSet.toArray()[i], name1);
-                    set.add(cross1);
-                    set.add(cross2);
-                    set.add(cross3);
-                    set.add(cross4);
-                }
-            }
+    public static List<String> getStrainCombinations(List<String> nameOne, List<String> nameTwo) {
+        List<List<String>> combinationLists = Lists.cartesianProduct(nameOne, nameTwo);
+        List<String> nameList = new ArrayList<>();
+        for (List<String> stringList: combinationLists) {
+            nameList.add(stringList.get(0) + " " + stringList.get(1));
+            nameList.add(stringList.get(1) + " " + stringList.get(0));
         }
-        return set;
-    }
-    /**
-     *
-     * @param name1 the first word of this argument will be the first word of the new name
-     * @param name2 the second word of this argument will be the second word of the new name (first if only one word)
-     * @return Returns a combined strain name
-     */
-    private static String crossNames(String name1, String name2) {
-        int index = name2.indexOf(' ');
-        String nameOne = name1.substring(0, name1.indexOf(' ')).trim();
-        String nameTwo = name2.substring(index).trim();
-
-        if(index > -1) {
-            return nameOne + " " + name2;
-        }
-        return nameOne + " " + nameTwo;
+        return nameList;
     }
 
     /**
-     * @param name1 has priority in suffixes
-     * @param name2 will default use as the first word
+     * @param map to parse
+     * @return returns the key with the highest value
+     */
+    public static <K, V extends Comparable<V>> K maxEntry(Map<K, V> map) {
+        Optional<Map.Entry<K, V>> maxEntry = map.entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue()
+                );
+        assert maxEntry.isPresent();
+        return maxEntry.get().getKey();
+    }
+    /**
+     * @param name1 by default is the first word
+     * @param name2 by default is the second word
      * @return returns the crossed name of strains according to the prefix list
      */
     public static String crossStrains(String name1, String name2) {
-        String[] nameOne = StringUtils.split(name1);
-        String[] nameTwo = StringUtils.split(name2);
-        if(nameOne.length > 1 && nameTwo.length > 1) {
-             if (suffixes.contains(nameTwo[1]) && !suffixes.contains(nameOne[1])) {
-                return altCrossNames(nameOne[0], nameTwo[1]);
-            } else {
-                 return altCrossNames(nameTwo[0], nameOne[1]);
-             }
-        } else if(nameOne.length > 1 && nameTwo.length == 1) {
-            return altCrossNames(nameTwo[0], nameOne[1]);
-        } else if(nameTwo.length > 1 && nameOne.length == 1) {
-            return altCrossNames(nameOne[0], nameTwo[1]);
-        } else { // both length 1
-            if (suffixes.contains(nameTwo[0])) {
-                return altCrossNames(name1, name2);
-            } else {
-                return altCrossNames(name2, name1);
+        List<String> nameOneFinal = Arrays.asList(StringUtils.split(name1));
+        List<String> nameTwoFinal = Arrays.asList(StringUtils.split(name2));
+        final List<String> finalNames = new ArrayList<String>() {{
+            addAll(nameOneFinal);
+            addAll(nameTwoFinal);
+        }};
+        if(nameOneFinal.contains("Unknown") || nameTwoFinal.contains("Unknown")) return "Unknown";
+
+
+        // Finds all combinations of names and returns a value if any are a known strain
+        // TODO: add priority for original strains
+        List<String> nameList = getStrainCombinations(nameOneFinal, nameTwoFinal);
+        //Optional<String> optionalOriginal = nameList.stream().filter(originalStrainList::containsKey).findAny();
+        Optional<String> optional = nameList.stream().filter(strainList::containsKey).findAny();
+        if(optional.isPresent()) {
+            return optional.get();
+        }
+        // Early return if both names are one word
+        if(nameOneFinal.size() == 1 && nameTwoFinal.size() == 1){
+            return nameOneFinal.get(0) + " " + nameTwoFinal.get(0);
+        }
+        // Creates a mutable array of all words
+        List<String> nameOne = new LinkedList<>(Arrays.asList(StringUtils.split(name1)));
+        List<String> nameTwo = new LinkedList<>(Arrays.asList(StringUtils.split(name2)));
+        List<String> names = new ArrayList<String>() {{
+            addAll(nameOneFinal);
+            addAll(nameTwoFinal);
+        }};
+        // Set suffix and remove from names
+        Map<String, Integer> tempSuffixMap = new HashMap<>();
+        for(int i = 0; i < finalNames.size(); i++) {
+            if(suffixesMap.containsKey(finalNames.get(i))) {
+                tempSuffixMap.put(finalNames.get(i), suffixesMap.get(finalNames.get(i)));
+                // Checks if suffix is part of name1 or name2, then removes if it is
+                if(nameOne.contains(finalNames.get(i))) {
+                    filterName(nameOne, tempSuffixMap, names);
+                } else if(nameTwo.contains(finalNames.get(i))){
+                    filterName(nameTwo, tempSuffixMap, names);
+                }
             }
         }
+        String newName1;
+        String newName2;
+        // Checks if suffix was found, if true then suffix is one with highest priority
+        if(!tempSuffixMap.isEmpty()) {
+            newName2 = maxEntry(tempSuffixMap);
+        } else {
+            // If no suffix was not found, set suffix to last element in name list
+            newName2 = names.get(names.size() - 1);
+        }
+        // Sets prefix to first element in name list
+        if(nameOne.isEmpty()) {
+            newName1 = nameTwo.get(0);
+        } else if(nameTwo.isEmpty()) {
+            newName1 = nameOne.get(0);
+        } else {
+            if(nameOneFinal.contains(newName2)) {
+                newName1 = nameTwo.get(0);
+            } else {
+                newName1 = nameOne.get(0);
+            }
+        }
+        System.out.println(names);
+        return newName1+ " " + newName2;
     }
-    /**
-     *
-     * @param name1 the first word of this argument will be the first word of the new name
-     * @param name2 the first word of this argument will be the second word of the new name
-     * @return Returns a combined strain name
-     */
-    private static String altCrossNames(String name1, String name2) {
-        if(StringUtils.contains("Unknown", name1) || StringUtils.contains("Unknown", 2)) {
-            return null;
-        }
-        int name1index = name1.indexOf(' ');
-        int name2index = name2.indexOf(' ');
-        String nameOne;
-        String nameTwo;
-        if(name1index > -1) {
-            nameOne = name1.substring(0, name1index);
-        } else {
-             nameOne = name1;
-        }
-        if(name2index > -1) {
-            nameTwo = name2.substring(0, name2index);
-        } else {
-            nameTwo = name2;
-        }
 
-        return nameOne + " " + nameTwo;
+    /**
+     * This method eventually sorts the output list to only contain names that are not part of the suffix name
+     * @param name name to filter
+     * @param tempSuffixMap suffix map that contains suffixes from name1 and name2
+     * @param names output list
+     * @return returns how many names were removed from the compound word (0 = simple word)
+     */
+    private static int filterName(List<String> name, Map<String, Integer> tempSuffixMap, List<String> names) {
+        if(name.size() > 1) {
+            // Check if nameTwo has two prefixes and clears if it does
+            if(suffixesMap.containsKey(name.get(0)) && suffixesMap.containsKey(name.get(1))) {
+                names.remove(name.get(0));
+                names.remove(name.get(1));
+                name.clear();
+                return 2;
+            } else {
+                if (tempSuffixMap.containsKey(name.get(0))) {
+                    names.remove(name.remove(0));
+                    return 1;
+                } else if (tempSuffixMap.containsKey(name.get(1))) {
+                    names.remove(name.remove(1));
+                    return 1;
+                }
+            }
+        } else {
+            // Remove name from names because it is for sure a lone prefix
+            names.remove(name.get(0));
+            name.clear();
+        }
+        return 0;
     }
     /**
      * @param type1 dominant type which has priority
-     * @param type2
      * @return returns hybrid ONLY if sativa x indica or hybrid x hybrid
+     * TODO: set type dynamically based on name
      */
     public static Type crossTypes(Type type1, Type type2) {
         if(type2.equals(Type.UNKNOWN)) return Type.UNKNOWN;
@@ -184,6 +229,11 @@ public final class GeneticsManager {
             return 3;
         }
     }
+
+    /**
+     * Sends a player a message according to how high they are
+     * @param player the player to send the message to
+     */
     private static void sendHighMessage(PlayerEntity player) {
         StatusEffectInstance currentEffect = player.getStatusEffect(ModMisc.HIGH);
         int amplifier = currentEffect.getAmplifier();
@@ -220,6 +270,12 @@ public final class GeneticsManager {
                 break;
         }
     }
+
+    /**
+     * @param user entity to
+     * @param index
+     * @param thc
+     */
     public static void applyHigh(LivingEntity user, int index, int thc) {
         int duration;
         int switchNum = 0;
