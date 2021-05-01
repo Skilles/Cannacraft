@@ -7,7 +7,7 @@ public final class Strain {
     public static int CLASS_COUNT = 0;
     private String name;
     private StrainMap.Type type;
-    private int id;
+    private final int id;
 
     public Strain(String strain, StrainMap.Type type) {
         setName(strain);
