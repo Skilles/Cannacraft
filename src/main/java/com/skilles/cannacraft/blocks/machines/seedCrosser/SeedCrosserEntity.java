@@ -6,6 +6,7 @@ import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.GeneticsManager;
 import com.skilles.cannacraft.strain.StrainMap;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -16,9 +17,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
+import net.minecraft.util.Util;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -85,13 +90,14 @@ public class SeedCrosserEntity extends MachineBlockEntity {
                 processTick(blockEntity); // playSound is called here
                 markDirty(world, pos, state);
             }
-        } else if (canCraft(blockEntity.inventory) && blockEntity.powerStored != 0) { // start if has power
-            blockEntity.processingTime = 1;
-            markDirty(world, pos, state);
-        } else { // when no items or can't craft
-            blockEntity.processingTime = 0;
-            state = state.with(StrainAnalyzer.ACTIVE, false);
-            world.setBlockState(pos, state, Block.NOTIFY_ALL);
+        } else {
+            if (canCraft(blockEntity.inventory) && blockEntity.powerStored != 0) { // start if has power
+                blockEntity.processingTime = 1;
+            } else { // when no items or can't craft
+                blockEntity.processingTime = 0;
+                state = state.with(StrainAnalyzer.ACTIVE, false);
+                world.setBlockState(pos, state, Block.NOTIFY_ALL);
+            }
             markDirty(world, pos, state);
         }
 
@@ -130,6 +136,10 @@ public class SeedCrosserEntity extends MachineBlockEntity {
                         0.07f,
                         3f
                 );
+                // Sends message to nearby players
+                for (ServerPlayerEntity player : PlayerLookup.tracking((ServerWorld) world, pos)) {
+                    player.sendSystemMessage(Text.of(StrainMap.getStrain(StrainMap.getStrainCount() - 1).name() + " has been created!"), Util.NIL_UUID);
+                }
             }
         }
     }
@@ -181,7 +191,7 @@ public class SeedCrosserEntity extends MachineBlockEntity {
         StrainMap.Type newType = GeneticsManager.crossTypes(StrainMap.getStrain(tag.getInt("ID")).type(), StrainMap.getStrain(tag2.getInt("ID")).type());
         int newThc = GeneticsManager.crossThc(tag.getInt("THC"), tag2.getInt("THC"));
 
-        if(!StrainMap.getStrains().containsKey(newName)) {
+        if(!StrainMap.getNames().containsKey(newName)) {
             StrainMap.addStrain(newName, newType);
             System.out.println("New strain: "+StrainMap.getStrain(StrainMap.getStrainCount() - 1)); // print latest strain
             flag = 1; // flag if strain was added
