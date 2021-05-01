@@ -317,6 +317,60 @@ public final class GeneticsManager {
         user.addStatusEffect(new StatusEffectInstance(ModMisc.HIGH, duration, amplifier));
         sendHighMessage((PlayerEntity) user);
     }
+    /**
+     * Drops an itemstack with NBT
+     */
+    public static void dropStack(World world, BlockPos pos, Item type, boolean brokenWithShears) {
+        ItemStack toDrop = new ItemStack(type);
+        NbtCompound tag = Objects.requireNonNull(world.getBlockEntity(pos)).writeNbt(new NbtCompound());
+        if (tag != null) {
+            tag.putInt("THC", tag.getInt("Seed THC"));
+            if(type.equals(ModItems.WEED_SEED) && !tag.getBoolean("Male")) {
+                toDrop.putSubTag("cannacraft:strain", trimTag(tag, type));
+                Block.dropStack(world, pos, toDrop);
+            } else if(brokenWithShears && type.equals(ModItems.WEED_FRUIT)) {
+                toDrop.putSubTag("cannacraft:strain", trimTag(tag));
+                Block.dropStack(world, pos, toDrop);
+            }
+        } else {
+            System.out.println("Error: NULLTAG");
+        }
+    }
+    public static void dropStack(World world, BlockPos pos, Item type) {
+        if (type.equals(ModItems.WEED_SEED)) {
+            dropStack(world, pos, type, true);
+        } else {
+            dropStack(world, pos, type, false);
+        }
+    }
+    public static void dropStack(WorldAccess world, BlockPos pos, Item type) {
+        dropStack(Objects.requireNonNull(world.getBlockEntity(pos).getWorld()), pos, type, true);
+    }
+
+    /**
+     * Format Block NBT to conform with ItemStack
+     * @param tag block NBT tag
+     * @param type type of format
+     * @return tag with trimmed NBT
+     */
+    public static NbtCompound trimTag(NbtCompound tag, Item type){
+        NbtCompound newTag = tag;
+        if(tag != null) {
+            newTag.remove("id");
+            newTag.remove("x");
+            newTag.remove("y");
+            newTag.remove("z");
+            newTag.putInt("THC", newTag.getInt("Seed THC"));
+            newTag.remove("Seed THC");
+            if(newTag.contains("Male") && !newTag.getBoolean("Male")) newTag.remove("Male");
+            if(type !=null && type.equals(ModItems.WEED_SEED)) newTag.putInt("ID", newTag.getInt("Seed ID"));
+            newTag.remove("Seed ID");
+        }
+        return newTag;
+    }
+    public static NbtCompound trimTag(NbtCompound tag) {
+        return trimTag(tag, null);
+    }
     public static NbtList toNbtList(ArrayList<Pair<Genes, Integer>> list) {
         NbtList nbtList = new NbtList();
         for (Pair<Genes, Integer> entry: list) {

@@ -26,13 +26,11 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
-import static com.skilles.cannacraft.strain.StrainMap.*;
+import static com.skilles.cannacraft.strain.GeneticsManager.trimTag;
 
-public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertilizable { // custom crop block implementation (very WIP)
+public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertilizable {
 
     //public static final IntProperty STRAIN = IntProperty.of("strain", 0, 2); // maybe add custom textures per strain
     public static final IntProperty MAXAGE = IntProperty.of("maxage", 0, 7);
@@ -72,23 +70,6 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         stateManager.add(AGE);
         stateManager.add(MAXAGE);
         stateManager.add(BREEDING);
-    }
-    protected static NbtCompound trimTag(NbtCompound tag) {
-        return trimTag(tag, 0);
-    }
-    private static NbtCompound trimTag(NbtCompound tag, int flag){
-        NbtCompound newTag = tag;
-        if(tag != null) {
-        newTag.remove("id");
-        newTag.remove("x");
-        newTag.remove("y");
-        newTag.remove("z");
-        newTag.putInt("THC", newTag.getInt("Seed THC"));
-        newTag.remove("Seed THC");
-        if(flag == 1) newTag.putInt("ID", newTag.getInt("Seed ID"));
-        newTag.remove("Seed ID");
-        }
-        return newTag;
     }
 
     public boolean isMature(BlockState state) {
@@ -180,63 +161,36 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         return state.get(BREEDING);
     }
 
-    /* List<ItemStack> implementation (for future drop modifiers)
-        NbtCompound tag;
-        boolean twoStacks;
-        @Override
-        public List<ItemStack> getDroppedStacks(BlockState state, LootContext.Builder builder) {
-            List<ItemStack> itemStackList = Lists.newArrayList();
-            ItemStack newStack = new ItemStack(ModItems.WEED_FRUIT);
-            itemStackList.add(newStack);
-            if (tag != null) {
-                newStack.putSubTag("cannacraft:strain", trimTag(tag));
-            } else {
-                System.out.println("Error: NULLTAG");
-            }
-            if(twoStacks) itemStackList.add(newStack);
-            return itemStackList;
-        }
-
-        @Override
-        public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-            if(state.get(MATURE)) {
-                ItemStack newStack = new ItemStack(ModItems.WEED_FRUIT);
-                tag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
-                if(world.getBlockState(pos.up()).isOf(this)) {
-                    world.breakBlock(pos.up(), false, player);
-                    twoStacks = true;
-                } else {
-                    twoStacks = false;
-                }
-            }
-            super.onBreak(world, pos, state, player);
-        }
-        */
     @Override
     public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) { // drops cannabis with BE's NBT
        boolean brokenWithShears = false;
        if(player.getMainHandStack().isOf(Items.SHEARS)) brokenWithShears = true;
-        if(getAge(state) == getMaxAge(state)) {
-            ItemStack newStack = new ItemStack(ModItems.WEED_FRUIT);
-            ItemStack seedStack = new ItemStack(ModItems.WEED_SEED);
-            NbtCompound tag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
-            if (tag != null) {
-                tag.putInt("THC", tag.getInt("Seed THC"));
-                seedStack.putSubTag("cannacraft:strain", trimTag(tag, 1));
-                newStack.putSubTag("cannacraft:strain", trimTag(tag));
-            } else {
-                System.out.println("Error: NULLTAG");
-            }
-            if(world.getBlockState(pos.up()).isOf(this)) {
-                if(world.getBlockState(pos.up()).get(AGE) >= world.getBlockState(pos.up()).get(MAXAGE)) {
-                    ItemStack itemStack = newStack.copy();
-                    if (!tag.getBoolean("Male") && brokenWithShears) dropStack(world, pos, itemStack);
-                }
-                world.breakBlock(pos.up(), false, player);
-            }
-            if(!tag.getBoolean("Male") && brokenWithShears) dropStack(world, pos, newStack);
-            dropStack(world, pos, seedStack);
-        }
+       if(!world.isClient) {
+           if (getAge(state) == getMaxAge(state)) {
+               ItemStack newStack = new ItemStack(ModItems.WEED_FRUIT);
+               ItemStack seedStack = new ItemStack(ModItems.WEED_SEED);
+               NbtCompound tag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
+               if (tag != null) {
+                   tag.putInt("THC", tag.getInt("Seed THC"));
+                   seedStack.putSubTag("cannacraft:strain", trimTag(tag, ModItems.WEED_SEED));
+                   newStack.putSubTag("cannacraft:strain", trimTag(tag));
+               } else {
+                   System.out.println("Error: NULLTAG");
+               }
+               if (world.getBlockState(pos.up()).isOf(this)) {
+                   if (world.getBlockState(pos.up()).get(AGE) >= world.getBlockState(pos.up()).get(MAXAGE)) {
+                       GeneticsManager.dropStack(world, pos, ModItems.WEED_FRUIT, brokenWithShears);
+                       GeneticsManager.dropStack(world, pos, ModItems.WEED_FRUIT, brokenWithShears);
+                       GeneticsManager.dropStack(world, pos, ModItems.WEED_SEED);
+                   }
+                   world.breakBlock(pos.up(), false, player);
+               } else if (world.getBlockState(pos.down()).isOf(this)) {
+                   GeneticsManager.dropStack(world, pos, ModItems.WEED_FRUIT, brokenWithShears);
+               }
+               GeneticsManager.dropStack(world, pos, ModItems.WEED_FRUIT, brokenWithShears);
+           }
+           GeneticsManager.dropStack(world, pos, ModItems.WEED_SEED);
+       }
         super.onBreak(world, pos, state, player);
     }
 
