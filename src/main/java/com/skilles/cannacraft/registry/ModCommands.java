@@ -8,6 +8,7 @@ import com.skilles.cannacraft.strain.GeneticsManager;
 import com.skilles.cannacraft.strain.StrainMap;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -75,7 +76,23 @@ public class ModCommands {
         self.sendSystemMessage(Text.of("Strain added: " + StrainMap.toStrain(name)), Util.NIL_UUID);
         return 1;
     }
-
+    public static int addGene(CommandContext<ServerCommandSource> ctx, String gene, int level) throws CommandSyntaxException {
+        final ServerPlayerEntity self = ctx.getSource().getPlayer();
+        ItemStack stack = self.getMainHandStack();
+        ModMisc.STRAIN.get(stack).addGene(gene, level);
+        self.sendSystemMessage(Text.of("Gene added: " + gene), Util.NIL_UUID);
+        return 1;
+    }
+    public static int clearGenes(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        final ServerPlayerEntity self = ctx.getSource().getPlayer();
+        ItemStack stack = self.getMainHandStack();
+        if(stack.hasTag()) {
+            NbtCompound tag = stack.getSubTag("cannacraft:strain");
+            tag.remove("Attributes");
+        }
+        self.sendSystemMessage(Text.of("Genes removed"), Util.NIL_UUID);
+        return 1;
+    }
     public static int listStrain(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         self.sendSystemMessage(Text.of(StrainMap.getStrains().toString()), Util.NIL_UUID);
@@ -84,56 +101,71 @@ public class ModCommands {
 
     public static void registerCommands() {
         CommandRegistrationCallback.EVENT.register((dispatcher, integrated) -> {
-            dispatcher.register(literal("strain")
-                    .then(literal("identify")
+            dispatcher.register(literal("cc")
+                    .then(literal("gene")
+                        .then(literal("add")
+                        .then(argument("name", StringArgumentType.string())
+                        .then(argument("level", IntegerArgumentType.integer(1,3))
+                        .executes(ctx -> {
+                            addGene(ctx, getString(ctx, "name"), getInteger(ctx, "level"));
+                            return 1;
+                    }))))
+                    .then(literal("clear")
+                        .executes(ctx -> {
+                            clearGenes(ctx);
+                            return 1;
+                        })))
+                .then(literal("strain")
+                        .then(literal("identify")
                             .executes(ctx -> {
                                 identify(ctx, 0);
                                 return 1;
-                            }).then(literal("all")
-                                    .executes(ctx -> {
-                                        identify(ctx, 1);
-                                        return 1;
-                                    })))
-                    .then(literal("set")
+                            })
+                        .then(literal("all")
+                            .executes(ctx -> {
+                                identify(ctx, 1);
+                                return 1;
+                            })))
+                        .then(literal("set")
                             .then(argument("index", IntegerArgumentType.integer(0, StrainMap.getStrainCount()))
-                                    .executes(ctx -> {
-                                        setStrain(ctx, getInteger(ctx, "index"));
-                                        return 1;
-                                    })))
-                    .then(literal("gender")
+                            .executes(ctx -> {
+                                setStrain(ctx, getInteger(ctx, "index"));
+                                return 1;
+                            })))
+                        .then(literal("gender")
                             .then(argument("sex", StringArgumentType.string()).executes(ctx -> {
                                 setSex(ctx, getString(ctx, "sex"));
                                 return 1;
                             })))
-                    .then(literal("add")
+                        .then(literal("add")
                             .then(argument("name", StringArgumentType.string())
-                                    .then(argument("type", StringArgumentType.string())
-                                            .executes(ctx -> {
-                                                addStrain(ctx, getString(ctx, "name"), getString(ctx, "type"));
-                                                return 1;
-                                            }))))
-                    .then(literal("remove")
+                            .then(argument("type", StringArgumentType.string())
+                            .executes(ctx -> {
+                                addStrain(ctx, getString(ctx, "name"), getString(ctx, "type"));
+                                return 1;
+                            }))))
+                        .then(literal("remove")
                             .then(argument("index", IntegerArgumentType.integer(0, StrainMap.getStrainCount()))
-                                    .executes(ctx -> {
-                                        final ServerPlayerEntity self = ctx.getSource().getPlayer();
-                                        self.sendSystemMessage(Text.of("Strain removed: "+StrainMap.getStrain(getInteger(ctx, "index"))), Util.NIL_UUID);
-                                        StrainMap.removeStrain(getInteger(ctx, "index"));
-                                        return 1;
-                                    })))
-                    .then(literal("list")
+                            .executes(ctx -> {
+                                final ServerPlayerEntity self = ctx.getSource().getPlayer();
+                                self.sendSystemMessage(Text.of("Strain removed: "+StrainMap.getStrain(getInteger(ctx, "index"))), Util.NIL_UUID);
+                                StrainMap.removeStrain(getInteger(ctx, "index"));
+                                return 1;
+                            })))
+                        .then(literal("list")
                             .executes(ctx -> {
                                 listStrain(ctx);
                                 return 1;
                             }))
-                    .then(literal("cross")
+                        .then(literal("cross")
                             .then(argument("name1", StringArgumentType.string())
-                                    .then(argument("name2", StringArgumentType.string())
-                                            .executes(ctx -> {
-                                                final ServerPlayerEntity self = ctx.getSource().getPlayer();
-                                                self.sendSystemMessage(Text.of(GeneticsManager.crossStrains(getString(ctx, "name1"), getString(ctx, "name2"))), Util.NIL_UUID);
-                                                return 1;
-                                            }))))
-                    .then(literal("random")
+                            .then(argument("name2", StringArgumentType.string())
+                            .executes(ctx -> {
+                                final ServerPlayerEntity self = ctx.getSource().getPlayer();
+                                self.sendSystemMessage(Text.of(GeneticsManager.crossStrains(getString(ctx, "name1"), getString(ctx, "name2"))), Util.NIL_UUID);
+                                return 1;
+                            }))))
+                        .then(literal("random")
                             .executes(ctx -> {
                                 final ServerPlayerEntity self = ctx.getSource().getPlayer();
                                 ItemStack stack = new ItemStack(ModItems.WEED_SEED);
@@ -142,19 +174,20 @@ public class ModCommands {
                                 self.giveItemStack(stack);
                                 self.sendSystemMessage(Text.of("Random seed given"), Util.NIL_UUID);
                                 return 1;
-                    })
-                            .then(argument("sex", StringArgumentType.string())
-                                    .executes(ctx -> {
-                                        setSex(ctx, getString(ctx, "sex"));
-                                        return 1;
-                    })))
-                    .then(literal("clear").executes(ctx -> {
-                        StrainMap.resetStrains();
-                        final ServerPlayerEntity self = ctx.getSource().getPlayer();
-                        self.sendSystemMessage(Text.of("Strains reset"), Util.NIL_UUID);
-                        return 1;
-                    }))
-            );
+                            })
+                        .then(argument("sex", StringArgumentType.string())
+                            .executes(ctx -> {
+                                setSex(ctx, getString(ctx, "sex"));
+                                return 1;
+                            })))
+                        .then(literal("clear")
+                            .executes(ctx -> {
+                                StrainMap.resetStrains();
+                                final ServerPlayerEntity self = ctx.getSource().getPlayer();
+                                self.sendSystemMessage(Text.of("Strains reset"), Util.NIL_UUID);
+                                return 1;
+                            }))
+            ));
         });
     }
 }

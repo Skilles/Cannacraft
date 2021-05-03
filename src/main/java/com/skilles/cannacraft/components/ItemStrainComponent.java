@@ -1,30 +1,51 @@
 package com.skilles.cannacraft.components;
 
 import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.strain.Gene;
+import com.skilles.cannacraft.strain.GeneTypes;
 import com.skilles.cannacraft.strain.GeneticsManager;
 import com.skilles.cannacraft.strain.StrainMap;
 import dev.onyxstudios.cca.api.v3.component.CopyableComponent;
 import dev.onyxstudios.cca.api.v3.item.CcaNbtType;
 import dev.onyxstudios.cca.api.v3.item.ItemComponent;
+import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import static com.skilles.cannacraft.components.ItemStrainComponent.StrainType.FRUIT;
+import static com.skilles.cannacraft.components.ItemStrainComponent.StrainType.SEED;
 import static com.skilles.cannacraft.strain.StrainMap.normalDist;
 
-// separate component for ItemStacks
 
 public class ItemStrainComponent extends ItemComponent implements StrainInterface, CopyableComponent<ItemStrainComponent> {
 
     public static final int UNKNOWN_ID = 0; // null
     final ItemStack stack;
+    enum StrainType {
+        SEED,
+        FRUIT
+    }
+    StrainType type;
     public ItemStrainComponent(ItemStack stack) {
         super(stack);
         this.stack = stack;
+        if(stack.isOf(ModItems.WEED_SEED)) {
+            this.type = SEED;
+        } else if(stack.isOf(ModItems.WEED_FRUIT)) {
+            this.type = FRUIT;
+        }
     }
-
+    private boolean seed() {
+        return this.type.equals(SEED);
+    }
+    private boolean fruit() {
+        return this.type.equals(FRUIT);
+    }
     @Override
     public int getIndex() {
         if(!this.hasTag("ID")) this.setStrain(UNKNOWN_ID);
@@ -33,20 +54,41 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
     }
     @Override
     public void setGenetics(NbtList geneList) {
-        putList("Genes", geneList);
+        putList("Attributes", geneList);
     }
     @Override
-    public List<NbtList> getGenetics() {
-        if(!hasTag("Genes")) putList("Genes", GeneticsManager.toNbtList(GeneticsManager.getTestArray()));
-        return getList("Genes", CcaNbtType.LIST);
+    public List<NbtCompound> getGenetics() {
+        if(!hasTag("Attributes")) return null; //putList("Attributes", GeneticsManager.toNbtList(GeneticsManager.getTestArray()));
+        return getList("Attributes", CcaNbtType.COMPOUND);
+    }
+    private NbtList getGeneticsNbt() {
+        if(!hasTag("Attributes")) return null;
+        return getList("Attributes", NbtType.COMPOUND);
+    }
+    @Override
+    public boolean hasGenes() {
+        return getGenetics() != null;
+    }
+    @Override
+    public void addGene(String name, int level) {
+        ArrayList<Gene> currentList = new ArrayList<>();
+        if(hasGenes()){
+            currentList = GeneticsManager.fromNbtList(getGenetics());
+            for(int i = 0; i < currentList.size(); i++) {
+                Gene entry = currentList.get(i);
+                if(entry.name().equalsIgnoreCase(name)) {
+                    currentList.remove(entry);
+                }
+            }
+        }
+        currentList.add(new Gene(GeneTypes.byName(name), level));
+        setGenetics(GeneticsManager.toNbtList(currentList));
     }
     @Override
     public void setStrain(int index) { // sets strain and type NBT based on index
         this.getOrCreateRootTag().putInt("ID", index);
-        //this.putString("Strain", StrainMap.getStrain(index).name());
-        //this.putString("Type", WordUtils.capitalizeFully(StrainMap.getStrain(index).type().toString()));
         this.putInt("THC", getThc());
-        if(stack.getItem().equals(ModItems.WEED_SEED)) this.putBoolean("Male", isMale());
+        if(seed()) this.putBoolean("Male", isMale());
     }
     @Override
     public String getStrain() {
@@ -80,12 +122,18 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
     }
     @Override
     public boolean isMale() {
-        if(!this.hasTag("Male")) this.putBoolean("Male", false);
-        return this.getBoolean("Male");
+        if(seed()) {
+            if (!this.hasTag("Male")) this.putBoolean("Male", false);
+            return this.getBoolean("Male");
+        } else {
+            return false;
+        }
     }
     @Override
     public void setMale(boolean isMale) {
-        this.getOrCreateRootTag().putBoolean("Male", isMale);
+        if(seed()) {
+            this.getOrCreateRootTag().putBoolean("Male", isMale);
+        }
     }
 
     @Override

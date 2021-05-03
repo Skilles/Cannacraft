@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.registry.ModMisc;
 import com.skilles.cannacraft.strain.StrainMap.Type;
+import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.Block;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -34,7 +35,7 @@ public final class GeneticsManager {
     public static int crossThc(int thc1, int thc2) {
         return (thc1 + thc2) / 2;
     }
-    public static ArrayList<Pair<Genes, Integer>> geneArray = new ArrayList<>();
+    public static ArrayList<Pair<GeneTypes, Integer>> geneArray = new ArrayList<>();
     private static final Map<String, Integer> suffixesMap = new HashMap<String, Integer>() {{
         put("OG", 5);
         put("Kush", 2);
@@ -77,6 +78,7 @@ public final class GeneticsManager {
         return maxEntry.get().getKey();
     }
     /**
+     * TODO: follow standard of mother + father
      * @param name1 by default is the first word
      * @param name2 by default is the second word
      * @return returns the crossed name of strains according to the prefix list
@@ -92,9 +94,7 @@ public final class GeneticsManager {
 
 
         // Finds all combinations of names and returns a value if any are a known strain
-        // TODO: add priority for original strains
         List<String> nameList = getStrainCombinations(nameOneFinal, nameTwoFinal);
-        //Optional<String> optionalOriginal = nameList.stream().filter(originalStrainList::containsKey).findAny();
         Optional<String> optional = nameList.stream().filter(strainList::containsKey).findAny();
         if(optional.isPresent()) {
             return optional.get();
@@ -207,11 +207,16 @@ public final class GeneticsManager {
         String sex = tag.getBoolean("Male") ? "Male" : "Female";
         int id = tag.getInt("ID");
         int thc = tag.getInt("THC");
+        NbtList genes = new NbtList();
+        if(tag.contains("Attributes")) genes = tag.getList("Attributes", NbtType.COMPOUND);
         if(tag.getBoolean("Identified")) {
             tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText(StrainMap.getStrain(id).name()).formatted(Formatting.GREEN)));
             tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StringUtils.capitalize(StringUtils.lowerCase(StrainMap.getStrain(id).type().name())))).formatted(Formatting.DARK_GREEN)));
             tooltip.add(new LiteralText("THC: ").formatted(Formatting.GRAY).append(new LiteralText(thc + "%").formatted(Formatting.DARK_GREEN)));
             tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText(sex).formatted(Formatting.DARK_GREEN)));
+            if(!genes.isEmpty()) {
+                tooltip.add(new LiteralText("Press ").append( new LiteralText("SHIFT ").formatted(Formatting.GOLD).append( new LiteralText("to view Genes").formatted(Formatting.WHITE))));
+            }
         } else {
             tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText("Unidentified").formatted(Formatting.GREEN)));
             tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText("Unknown").formatted(Formatting.DARK_GREEN)));
@@ -322,18 +327,22 @@ public final class GeneticsManager {
      */
     public static void dropStack(World world, BlockPos pos, Item type, boolean brokenWithShears) {
         ItemStack toDrop = new ItemStack(type);
-        NbtCompound tag = Objects.requireNonNull(world.getBlockEntity(pos)).writeNbt(new NbtCompound());
-        if (tag != null) {
-            tag.putInt("THC", tag.getInt("Seed THC"));
-            if(type.equals(ModItems.WEED_SEED) && !tag.getBoolean("Male")) {
-                toDrop.putSubTag("cannacraft:strain", trimTag(tag, type));
-                Block.dropStack(world, pos, toDrop);
-            } else if(brokenWithShears && type.equals(ModItems.WEED_FRUIT)) {
-                toDrop.putSubTag("cannacraft:strain", trimTag(tag));
-                Block.dropStack(world, pos, toDrop);
+        if(world.getBlockEntity(pos) != null) {
+            NbtCompound tag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
+            if (tag != null) {
+                tag.putInt("THC", tag.getInt("Seed THC"));
+                if (type.equals(ModItems.WEED_SEED) && !tag.getBoolean("Male")) {
+                    toDrop.putSubTag("cannacraft:strain", trimTag(tag, type));
+                    Block.dropStack(world, pos, toDrop);
+                } else if (brokenWithShears && type.equals(ModItems.WEED_FRUIT)) {
+                    toDrop.putSubTag("cannacraft:strain", trimTag(tag));
+                    Block.dropStack(world, pos, toDrop);
+                }
+            } else {
+                System.out.println("Error: NULLTAG");
             }
         } else {
-            System.out.println("Error: NULLTAG");
+            System.out.println("Error: NULLBENTITY");
         }
     }
     public static void dropStack(World world, BlockPos pos, Item type) {
@@ -344,7 +353,7 @@ public final class GeneticsManager {
         }
     }
     public static void dropStack(WorldAccess world, BlockPos pos, Item type) {
-        dropStack(Objects.requireNonNull(world.getBlockEntity(pos).getWorld()), pos, type, true);
+        dropStack(world.getBlockEntity(pos).getWorld(), pos, type, true);
     }
 
     /**
@@ -371,42 +380,47 @@ public final class GeneticsManager {
     public static NbtCompound trimTag(NbtCompound tag) {
         return trimTag(tag, null);
     }
-    public static NbtList toNbtList(ArrayList<Pair<Genes, Integer>> list) {
+    public static NbtList toNbtList(ArrayList<Gene> list) {
         NbtList nbtList = new NbtList();
-        for (Pair<Genes, Integer> entry: list) {
+        for (Gene entry: list) {
             NbtCompound compound = new NbtCompound();
-            compound.putString("Gene", entry.getLeft().getName());
-            compound.putInt("Level", entry.getRight());
+            compound.putString("Gene", entry.name());
+            compound.putInt("Level", entry.level());
+            String string = entry.name() + ":" + entry.level();
             nbtList.add(compound);
         }
         return nbtList;
     }
-    public static ArrayList<Pair<Genes, Integer>> fromNbtList(NbtList list) {
-        ArrayList<Pair<Genes, Integer>> arrayList = new ArrayList<>();
-        for (NbtElement compoundEntry : list) {
-            Genes gene = Genes.byName(((NbtCompound) compoundEntry).getString("Gene"));
-            int level = ((NbtCompound) compoundEntry).getInt("Level");
-            Pair<Genes, Integer> pair = new Pair<>(gene, level);
-            arrayList.add(pair);
+    public static ArrayList<Gene> fromNbtList(List<NbtCompound> list) {
+        ArrayList<Gene> arrayList = new ArrayList<>();
+        for (NbtCompound compoundEntry : list) {
+            GeneTypes gene = GeneTypes.byName(compoundEntry.getString("Gene"));
+            int level = compoundEntry.getInt("Level");
+            arrayList.add(new Gene(gene, level));
         }
         return arrayList;
     }
-    public static void test() {
-        ArrayList<Pair<Genes, Integer>> arrayList = new ArrayList<>();
-        arrayList.add(new Pair<>(Genes.SPEED, 1));
-        arrayList.add(new Pair<>(Genes.YIELD, 2));
-        NbtList nbtList = toNbtList(arrayList);
-        System.out.println(arrayList);
-        System.out.println(nbtList);
-        System.out.println(fromNbtList(nbtList));
-    }
-    public static ArrayList<Pair<Genes, Integer>> getTestArray() {
-        ArrayList<Pair<Genes, Integer>> arrayList = new ArrayList<>();
-        arrayList.add(new Pair<>(Genes.SPEED, 1));
-        arrayList.add(new Pair<>(Genes.YIELD, 2));
+    public static ArrayList<Gene> fromNbtList(NbtList list) {
+        ArrayList<Gene> arrayList = new ArrayList<>();
+        for (NbtElement compoundEntry : list) {
+            GeneTypes geneType = GeneTypes.byName(((NbtCompound)compoundEntry).getString("Gene"));
+            int level = ((NbtCompound)compoundEntry).getInt("Level");
+            Gene geneObj = new Gene(geneType, level);
+            arrayList.add(geneObj);
+        }
         return arrayList;
     }
-    public Pair<Genes, Integer> crossGenes(int level1, int level2, Genes type) {
+    public static boolean NbtListContains(NbtList nbtList, String name) {
+        if(nbtList == null || nbtList.isEmpty()) return false;
+        for (NbtElement nbtElement : nbtList) {
+            NbtCompound entry = (NbtCompound) nbtElement;
+            if (entry.getString("Gene").equalsIgnoreCase(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public Pair<GeneTypes, Integer> crossGenes(int level1, int level2, GeneTypes type) {
         int levelDiff = Math.abs(level1 - level2);
         int newLevel = 0;
         Random random = new Random();
