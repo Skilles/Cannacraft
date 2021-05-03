@@ -3,21 +3,23 @@ package com.skilles.cannacraft.strain;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
-
+// TODO: add rarity
 public enum GeneTypes {
-    NORMAL(0, "normal", false),
-    YIELD(1, "yield", false),
-    SPEED(2, "speed", true);
+    NORMAL(0, "normal", false, 0),
+    YIELD(1, "yield", false, 2),
+    SPEED(2, "speed", true, 3);
 
     private static final GeneTypes[] VALUES = Arrays.stream(values()).sorted(Comparator.comparingInt(GeneTypes::getId)).toArray(GeneTypes[]::new);
     private final int id;
     private final String name;
+    private final int maxLevel;
     private final boolean recessive;
     public static final int MAX_LEVEL = 3;
 
-    GeneTypes(int id, String name, boolean recessive) {
+    GeneTypes(int id, String name, boolean recessive, int maxLevel) {
         this.id = id;
         this.name = name;
+        this.maxLevel = maxLevel;
         this.recessive = recessive;
     }
 
@@ -28,6 +30,8 @@ public enum GeneTypes {
     public String getName() {
         return this.name;
     }
+
+    public int getMax() { return this.maxLevel; }
 
     public boolean isRecessive() {
         return this.recessive;

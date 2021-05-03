@@ -12,13 +12,21 @@ public class Gene {
 
     public Gene(GeneTypes gene, int level) {
         this.name = gene.getName();
-        this.level = level;
+        if(level <= gene.getMax()) {
+            this.level = level;
+        } else {
+            this.level = gene.getMax();
+        }
         this.id = gene.getId();
     }
     public Gene(NbtCompound compound) {
         if(compound.contains("Gene") && compound.contains("Level")) {
             this.name = compound.getString("Gene");
-            this.level = compound.getInt("Level");
+            if(compound.getInt("Level") <= GeneTypes.byName(name).getMax()) {
+                this.level = compound.getInt("Level");
+            } else {
+                this.level = GeneTypes.byName(name).getMax();
+            }
             this.id = GeneTypes.byName(this.name).getId();
         } else {
             System.out.println("ERROR: no gene/level in constructor compound");
