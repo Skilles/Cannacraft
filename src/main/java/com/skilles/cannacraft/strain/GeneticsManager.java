@@ -357,6 +357,26 @@ public final class GeneticsManager {
     }
 
     /**
+     * @param tag to randomize genes for
+     */
+    public static void randomizeTag(NbtCompound tag) {
+        Random random = random();
+        float chance = random.nextFloat();
+        NbtList nbtList = new NbtList();
+        ArrayList<Gene> geneList = new ArrayList<>();
+        if(chance <= 0.1F) { // 10% chance
+            geneList.add(new Gene(GeneTypes.SPEED, random.nextInt(GeneTypes.SPEED.getMax()) + 1));
+            geneList.add(new Gene(GeneTypes.YIELD, random.nextInt(GeneTypes.YIELD.getMax()) + 1));
+            tag.put("Attributes", nbtList);
+        } else if(chance > 0.1F && chance <= 0.25F) { // 15% chance
+            geneList.add(new Gene(GeneTypes.YIELD, random.nextInt(GeneTypes.YIELD.getMax() - 1) + 1));
+        } else if(chance > 0.25F && chance <= 0.45F) { // 20% chance
+            geneList.add(new Gene(GeneTypes.SPEED, random.nextInt(GeneTypes.SPEED.getMax() - 1) + 1));
+        } else if(chance > 0.45F && chance <= 1F) { // 65% chance
+        }
+        tag.putInt("ID", GeneticsManager.random().nextInt((StrainMap.ogStrainCount - 1)) + 1); // random id
+    }
+    /**
      * Format Block NBT to conform with ItemStack
      * @param tag block NBT tag
      * @param type type of format

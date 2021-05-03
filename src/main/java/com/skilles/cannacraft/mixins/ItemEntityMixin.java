@@ -28,7 +28,7 @@ public abstract class ItemEntityMixin {
         if(stack.getItem().equals(ModItems.WEED_SEED) || stack.getItem().equals(ModItems.WEED_FRUIT)) {
             NbtCompound tag = stack.getSubTag("cannacraft:strain");
             if(tag != null && tag.contains("ID")) {
-                if(tag.getInt("ID") == 0) tag.putInt("ID", GeneticsManager.random().nextInt((StrainMap.ogStrainCount - 1)) + 1);
+                if(tag.getInt("ID") == 0) GeneticsManager.randomizeTag(tag);
                 if(!tag.contains("THC") || (tag.contains("THC") && tag.getInt("THC") < 13)) tag.putInt("THC", StrainMap.normalDist(15, 5, 13));
             }
         }
