@@ -149,12 +149,14 @@ public final class StrainMap {
     public static Strain toStrain(String name) {
         return strainList.get(name);
     }
-    public static Map<String, Strain> getStrains() {
+    public static Map<String, Strain> getNames() {
         return strainList;
     }
+    public static Map<Integer, Strain> getStrains() {
+        return strainArray;
+    }
     public static void save() {
-        try {
-            Writer writer = new FileWriter("strains.json");
+        try (Writer writer = new FileWriter("strains.json")) {
             gson.toJson(strainArray, writer);
             writer.close();
             System.out.println("Strains saved to file");

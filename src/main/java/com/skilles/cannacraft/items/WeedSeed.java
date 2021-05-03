@@ -8,6 +8,7 @@ import com.skilles.cannacraft.registry.ModMisc;
 import com.skilles.cannacraft.strain.GeneticsManager;
 import com.skilles.cannacraft.strain.StrainMap;
 import net.minecraft.block.Block;
+import net.minecraft.block.FarmlandBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
@@ -45,7 +46,12 @@ public class WeedSeed extends AliasedBlockItem {
             ItemStack clientStack = playerEntity.getStackInHand(hand);
             StrainInterface clientStackInterface = ModMisc.STRAIN.get(clientStack);
             if (!playerEntity.isSneaking()) {
-                System.out.println("Strain of held seed: " + clientStackInterface.getStrain() + " THC: " + clientStackInterface.getThc() + " Identified: " + clientStackInterface.identified() + " Genes: " + clientStackInterface.getGenetics());
+                System.out.println("Strain of held seed: "
+                        + clientStackInterface.getStrain()
+                        + " THC: " + clientStackInterface.getThc()
+                        + " Identified: " + clientStackInterface.identified()
+                        + " Genes: " + clientStackInterface.getGenetics()
+                );
             } else {
                 System.out.println(clientStack.getTag());
             }
@@ -55,8 +61,8 @@ public class WeedSeed extends AliasedBlockItem {
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
+        Block block = context.getWorld().getBlockState(context.getBlockPos()).getBlock();
         if (!context.getWorld().isClient()) {
-            Block block = context.getWorld().getBlockState(context.getBlockPos()).getBlock();
             if (block instanceof StrainAnalyzer) {
                 System.out.println("Active: " + context.getWorld().getBlockState(context.getBlockPos()).get(StrainAnalyzer.ACTIVE)
                         + " Facing: " + context.getWorld().getBlockState(context.getBlockPos()).get(StrainAnalyzer.FACING)
@@ -77,6 +83,9 @@ public class WeedSeed extends AliasedBlockItem {
                             + " Breeding: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.BREEDING));
                 }
             }
+        }
+        if (!(block instanceof FarmlandBlock)) {
+            return ActionResult.FAIL;
         }
         return super.useOnBlock(context);
     }
