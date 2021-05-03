@@ -169,7 +169,9 @@ public class ModCommands {
                             .executes(ctx -> {
                                 final ServerPlayerEntity self = ctx.getSource().getPlayer();
                                 ItemStack stack = new ItemStack(ModItems.WEED_SEED);
-                                ModMisc.STRAIN.get(stack).setStrain(Math.abs(GeneticsManager.random().nextInt(StrainMap.getStrainCount() - 1)) + 1);
+                                NbtCompound tag = stack.getOrCreateSubTag("cannacraft:strain");
+                                GeneticsManager.randomizeTag(tag);
+                                //ModMisc.STRAIN.get(stack).setStrain(Math.abs(GeneticsManager.random().nextInt(StrainMap.getStrainCount() - 1)) + 1);
                                 ModMisc.STRAIN.get(stack).setThc(StrainMap.normalDist(18, 5, 13));
                                 self.giveItemStack(stack);
                                 self.sendSystemMessage(Text.of("Random seed given"), Util.NIL_UUID);
