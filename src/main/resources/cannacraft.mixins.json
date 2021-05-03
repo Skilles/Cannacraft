@@ -7,7 +7,10 @@
     "ItemEntityMixin",
     "StatusEffectAccessor"
   ],
-  "client": ["InventoryScreenMixin"],
+  "client": [
+    "InventoryScreenMixin",
+    "ScreenMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
