@@ -23,7 +23,6 @@ public class Cannacraft implements ModInitializer {
 
     @Override
     public void onInitialize() {
-
         StrainMap.registerStrains();
 
         ModCommands.registerCommands();
@@ -41,7 +40,7 @@ public class Cannacraft implements ModInitializer {
         ModBlocks.registerBlocks();
         System.out.println("Blocks registered!");
 
-        ModMisc.registerEffects();
+        ModMisc.registerMisc();
         System.out.println("Effects registered!");
 
         ModScreens.registerScreenHandlers();

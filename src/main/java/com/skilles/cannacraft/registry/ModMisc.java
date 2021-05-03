@@ -1,5 +1,6 @@
 package com.skilles.cannacraft.registry;
 
+import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
 import com.skilles.cannacraft.components.EntityInterface;
 import com.skilles.cannacraft.components.ItemStrainComponent;
 import com.skilles.cannacraft.components.PlayerStrainComponent;
@@ -12,15 +13,25 @@ import dev.onyxstudios.cca.api.v3.entity.EntityComponentInitializer;
 import dev.onyxstudios.cca.api.v3.entity.RespawnCopyStrategy;
 import dev.onyxstudios.cca.api.v3.item.ItemComponentFactoryRegistry;
 import dev.onyxstudios.cca.api.v3.item.ItemComponentInitializer;
+import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.util.collection.DataPool;
+import net.minecraft.util.registry.BuiltinRegistries;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.gen.GenerationStep;
+import net.minecraft.world.gen.feature.ConfiguredFeature;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.RandomPatchFeatureConfig;
+import net.minecraft.world.gen.placer.SimpleBlockPlacer;
+import net.minecraft.world.gen.stateprovider.WeightedBlockStateProvider;
 
 import static com.skilles.cannacraft.Cannacraft.id;
 
 public class ModMisc implements ItemComponentInitializer, EntityComponentInitializer {
     public static final ComponentKey<StrainInterface> STRAIN = ComponentRegistryV3.INSTANCE.getOrCreate(id("strain"), StrainInterface.class);
     public static final ComponentKey<EntityInterface> PLAYER = ComponentRegistryV3.INSTANCE.getOrCreate(id("player"), EntityInterface.class);
-
+    //public static final ConfiguredFeature<?, ?> WEED_CROP_FEATURE_CONFIGURED = WeedCropFeature.RANDOM_PATCH.configure((new net.minecraft.world.gen.feature.RandomPatchFeatureConfig.Builder(new SimpleBlockStateProvider(ModBlocks.WEED_CROP.getDefaultState()), new DoublePlantPlacer())).tries(64).cannotProject().build()).decorate(Decorator.SPREAD_32_ABOVE.configure(DecoratorConfig.DEFAULT));
     @Override
     public void registerItemComponentFactories(ItemComponentFactoryRegistry registry) {
         registry.register(ModItems.WEED_SEED, STRAIN, ItemStrainComponent::new);
@@ -31,14 +42,39 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
         registry.registerForPlayers(PLAYER, player -> new PlayerStrainComponent(), RespawnCopyStrategy.LOSSLESS_ONLY);
     }
 
-    public static void registerRecipes() {
+    private static void registerRecipes() {
         //ANALYZE_RECIPE_SERIALIZER = AnalyzeRecipeSerializer.register("analyze_serializer", new AnalyzeRecipeSerializer(AnalyzeRecipe::new));
     }
 
     public static final StatusEffect HIGH = new HighEffect();
-    public static void registerEffects() {
+    private static void registerEffects() {
         Registry.register(Registry.STATUS_EFFECT, id("high"), HIGH);
     }
 
+    private static final DataPool.Builder<BlockState> WEED_CROP_POOL;
+    private static final RandomPatchFeatureConfig WEED_CROP_CONFIG;
+    public static final ConfiguredFeature<?, ?> WEED_CROP_FEATURE;
+    private static final BlockState WEED_CROP_STATE = ModBlocks.WEED_CROP.getDefaultState();
 
+    static {
+        WEED_CROP_POOL = new DataPool.Builder<BlockState>().add(WEED_CROP_STATE.with(WeedCrop.AGE, 1), 1).add(WEED_CROP_STATE.with(WeedCrop.AGE, 3), 2).add(WEED_CROP_STATE.with(WeedCrop.AGE, 5), 2).add(WEED_CROP_STATE.with(WeedCrop.AGE, 7), 1);
+        WEED_CROP_CONFIG = (new net.minecraft.world.gen.feature.RandomPatchFeatureConfig.Builder(new WeightedBlockStateProvider(WEED_CROP_POOL), SimpleBlockPlacer.INSTANCE)).tries(64).needsWater().build();
+        WEED_CROP_FEATURE = Feature.RANDOM_PATCH.configure(WEED_CROP_CONFIG);
+    }
+
+    private static void registerConfiguredFeature() {
+        Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, id("weed_crop_feature"), WEED_CROP_FEATURE);
+    }
+
+    private static void registerBiomeModifications() {
+        BuiltinRegistries.CONFIGURED_FEATURE.getKey(WEED_CROP_FEATURE)
+                .ifPresent(key -> BiomeModifications.addFeature(ctx -> true,
+                        GenerationStep.Feature.VEGETAL_DECORATION, key));
+    }
+
+    public static void registerMisc() {
+        registerConfiguredFeature();
+        registerBiomeModifications();
+        registerEffects();
+    }
 }
