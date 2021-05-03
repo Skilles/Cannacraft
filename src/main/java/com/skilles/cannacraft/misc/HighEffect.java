@@ -32,10 +32,8 @@ public class HighEffect extends StatusEffect {
 
     @Override
     public void onRemoved(LivingEntity entity, AttributeContainer attributes, int amplifier) {
-        entity.setGlowing(false);
     }
-
-
+    
     @Override
     public void onApplied(LivingEntity entity, AttributeContainer attributes, int amplifier) {
         if(entity instanceof PlayerEntity) {
