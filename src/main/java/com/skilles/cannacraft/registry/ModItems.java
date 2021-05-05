@@ -2,6 +2,7 @@ package com.skilles.cannacraft.registry;
 
 import com.skilles.cannacraft.Cannacraft;
 import com.skilles.cannacraft.items.WeedFruit;
+import com.skilles.cannacraft.items.WeedJoint;
 import com.skilles.cannacraft.items.WeedSeed;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.item.BlockItem;
@@ -15,6 +16,7 @@ public class ModItems {
 
     // Items
     public static final WeedSeed WEED_SEED = new WeedSeed(ModBlocks.WEED_CROP, new Item.Settings().group(Cannacraft.ITEM_GROUP));
+    public static final WeedJoint WEED_JOINT = new WeedJoint(new Item.Settings().group(Cannacraft.ITEM_GROUP).maxDamage(5));
     public static final WeedFruit WEED_FRUIT = new WeedFruit(new FabricItemSettings().group(Cannacraft.ITEM_GROUP).food(new FoodComponent.Builder().alwaysEdible().snack().build()));
     // Block items
     public static final BlockItem STRAIN_ANALYZER = new BlockItem(ModBlocks.STRAIN_ANALYZER, new FabricItemSettings().group(Cannacraft.ITEM_GROUP));
@@ -26,5 +28,6 @@ public class ModItems {
         Registry.register(Registry.ITEM, id( "seed_chest"), SEED_CHEST);
         Registry.register(Registry.ITEM, id( "strain_analyzer"), STRAIN_ANALYZER);
         Registry.register(Registry.ITEM, id( "seed_crosser"), SEED_CROSSER);
+        Registry.register(Registry.ITEM, id("weed_joint"), WEED_JOINT);
     }
 }

@@ -204,7 +204,8 @@ public final class GeneticsManager {
         return random;
     }
     public static void appendTooltips(List<Text> tooltip, NbtCompound tag) {
-        String sex = tag.getBoolean("Male") ? "Male" : "Female";
+        String sex = "";
+        if(tag.contains("Male")) sex = tag.getBoolean("Male") ? "Male" : "Female";
         int id = tag.getInt("ID");
         int thc = tag.getInt("THC");
         NbtList genes = new NbtList();
@@ -213,7 +214,7 @@ public final class GeneticsManager {
             tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText(StrainMap.getStrain(id).name()).formatted(Formatting.GREEN)));
             tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StringUtils.capitalize(StringUtils.lowerCase(StrainMap.getStrain(id).type().name())))).formatted(Formatting.DARK_GREEN)));
             tooltip.add(new LiteralText("THC: ").formatted(Formatting.GRAY).append(new LiteralText(thc + "%").formatted(Formatting.DARK_GREEN)));
-            tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText(sex).formatted(Formatting.DARK_GREEN)));
+            if(!sex.isEmpty()) tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText(sex).formatted(Formatting.DARK_GREEN)));
             if(!genes.isEmpty()) {
                 tooltip.add(new LiteralText("Press ").append( new LiteralText("SHIFT ").formatted(Formatting.GOLD).append( new LiteralText("to view Genes").formatted(Formatting.WHITE))));
             }
@@ -278,12 +279,14 @@ public final class GeneticsManager {
 
     /**
      * @param user entity to
-     * @param index
-     * @param thc
      */
-    public static void applyHigh(LivingEntity user, int index, int thc) {
+    public static void applyHigh(LivingEntity user) {
         int duration;
+        int amplifier;
         int switchNum = 0;
+        assert user.getActiveItem().hasTag();
+        int index = user.getActiveItem().getSubTag("cannacraft:strain").getInt("ID");
+        int thc = user.getActiveItem().getSubTag("cannacraft:strain").getInt("THC");
         ModMisc.PLAYER.get(user).setStrain(index);
         if(thc <= 18) switchNum = 1;
         if(19 <= thc && thc <= 25) switchNum = 2;
@@ -303,7 +306,6 @@ public final class GeneticsManager {
         }
         if(user.hasStatusEffect(ModMisc.HIGH)) {
             StatusEffectInstance currentEffect = user.getStatusEffect(ModMisc.HIGH);
-
             switch(switchNum) {
                 case 1:
                     duration = currentEffect.getDuration() + 600;
@@ -318,7 +320,11 @@ public final class GeneticsManager {
                     duration = 0;
             }
         }
-        int amplifier = durationToAmplifier(duration);
+        amplifier = durationToAmplifier(duration);
+        if(amplifier >  2 && !user.world.isDay()) {
+            //user.setSleepingPosition(user.getBlockPos());
+            user.setSleepingPosition(user.getBlockPos());
+        }
         user.addStatusEffect(new StatusEffectInstance(ModMisc.HIGH, duration, amplifier));
         sendHighMessage((PlayerEntity) user);
     }
@@ -374,6 +380,7 @@ public final class GeneticsManager {
             geneList.add(new Gene(GeneTypes.SPEED, random.nextInt(GeneTypes.SPEED.getMax() - 1) + 1));
         } else if(chance > 0.45F && chance <= 1F) { // 65% chance
         }
+        tag.put("Attributes", toNbtList(geneList));
         tag.putInt("ID", GeneticsManager.random().nextInt((StrainMap.ogStrainCount - 1)) + 1); // random id
     }
     /**
