@@ -30,10 +30,16 @@ public class WeedJoint extends BowItem {
         NbtCompound tag = itemStack.getOrCreateTag();
         if(offhandStack.isOf(Items.FLINT_AND_STEEL) || user.getMainHandStack().isOf(Items.FLINT_AND_STEEL)) {
             tag.putBoolean("Lit", true);
+            user.getInventory().insertStack(user.getOffHandStack());
+            user.getOffHandStack().decrement(1);
+            return TypedActionResult.success(itemStack, true);
+        }
+        if(tag.getBoolean("Lit")) {
+            user.setCurrentHand(hand);
+            return TypedActionResult.consume(itemStack);
+        } else {
             return TypedActionResult.fail(itemStack);
         }
-        user.setCurrentHand(hand);
-        return tag.getBoolean("Lit") ? TypedActionResult.consume(itemStack) : TypedActionResult.fail(itemStack);
     }
 
     @Override
