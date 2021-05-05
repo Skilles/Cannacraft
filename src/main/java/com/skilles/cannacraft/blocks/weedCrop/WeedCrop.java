@@ -221,10 +221,10 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
             }
         }
         int j = getAge(state);
-        float f = getAvailableMoisture(this, world, pos) * blockEntity.multiplier();
+        float f = getAvailableMoisture(this, world, pos);
         if (this.getMaxAge(state) == 5) { // second stage
             if (world.getLightLevel(pos.up()) <= 4 && j < this.getMaxAge(state)) {
-                if (random.nextInt((int) (25.0F / f) + 1) == 0) {
+                if (random.nextFloat() < (f/14)*(blockEntity.multiplier()/2)) {
                     if (blockEntity.hasGene(GeneTypes.YIELD) && this.getAge(state) + 1 >= 5 && i < blockEntity.growLimit()) { // if has yield, about to grow, and below grow limit
                         if (world.isAir(pos.up())) { // if block above is air
                             if(i == blockEntity.growLimit() - 1) { // if should grow final stage
@@ -246,7 +246,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
             }
         } else if (getMaxAge(state) == 7) { // first stage
             if (j < this.getMaxAge(state) && (world.getLightLevel(pos) >= 9)) {
-                if (random.nextInt((int) (25.0F / f) + 1) == 0) {
+                if (random.nextFloat() < (f/14)*(blockEntity.multiplier()/2)) {
                     world.setBlockState(pos, state.with(AGE, j + 1), 2);
                 }
             } else if (j == 7) { // onGrow
@@ -261,7 +261,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
                     }
                 }
                 if (world.isAir(pos.up())) { // if block above is air
-                    if (random.nextInt((int) (25.0F / f) + 1) == 0 && world.getLightLevel(pos) <= 4) {
+                    if (random.nextFloat() < (f/14)*(blockEntity.multiplier()/2) && world.getLightLevel(pos) <= 4) {
                         world.setBlockState(pos.up(), withMaxAge(5), 2);
                         NbtCompound tag = blockEntity.writeNbt(new NbtCompound());
                         blockEntity.readNbt(tag);
@@ -272,7 +272,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
                 }
             }
         } else { // final stage
-            if (random.nextInt((int) (25.0F / f) + 1) == 0) {
+            if (random.nextFloat() < (f/14)*(blockEntity.multiplier()/2)) {
                 world.setBlockState(pos, state.with(AGE, j + 1), 2);
             }
         }
@@ -297,7 +297,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
             }
             blockPos = blockPos.down(k - 1);
         }
-
+        /*
         for(int i = -1; i <= 1; ++i) {
             for(int j = -1; j <= 1; ++j) {
                 float g = 0.0F;
@@ -315,7 +315,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
 
                 f += g;
             }
-        }
+        }*/
 
         BlockPos blockPos2 = pos.north();
         BlockPos blockPos3 = pos.south();

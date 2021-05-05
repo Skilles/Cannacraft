@@ -1,10 +1,13 @@
 package com.skilles.cannacraft.blocks.weedCrop;
 
+import com.skilles.cannacraft.registry.ModConfig;
 import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.strain.Gene;
 import com.skilles.cannacraft.strain.GeneTypes;
 import com.skilles.cannacraft.strain.GeneticsManager;
 import com.skilles.cannacraft.strain.StrainMap;
+import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.ConfigData;
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.BlockState;
@@ -32,7 +35,14 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
     public WeedCropEntity(BlockPos pos, BlockState state) {
         super(ModEntities.WEED_CROP_ENTITY, pos, state);
         setData(0, 0, false, false, new NbtList());
+        config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+        try {
+            config.validatePostLoad();
+        } catch (ConfigData.ValidationException e) {
+            e.printStackTrace();
+        }
     }
+    private final ModConfig config;
     private int index;
     private int thc;
     private int seedThc;
@@ -54,7 +64,11 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
         this.attributes = attributes;
     }
     float multiplier() {
-        return hasGene(GeneTypes.SPEED) ? (((float) getGene(GeneTypes.SPEED).level() / 2) + 1) : 1; // 1: 50%, 2: 100%, 3: 150%
+        float multiplier = 1;
+        if(hasGene(GeneTypes.SPEED)) multiplier *= (1.0F + ((float) getGene(GeneTypes.SPEED).level()) / 2.0F); // 1: 50%, 2: 100%, 3: 150%
+        multiplier *= config.getSpeed();
+        System.out.println(multiplier);
+        return multiplier;
     }
 
     public void startBreeding() {
