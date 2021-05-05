@@ -54,6 +54,8 @@ dependencies {
 	modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}") {
 		exclude(group: "net.fabricmc.fabric-api")
 	}
+	modApi "curse.maven:modmenu-308702:3271132"
+	modImplementation "curse.maven:modmenu-308702:3271132"
 	// run against the full jar
 	//modRuntime "mcp.mobius.waila.wthit-fabric:wthit-fabric-${project.wthit_version}"
 }

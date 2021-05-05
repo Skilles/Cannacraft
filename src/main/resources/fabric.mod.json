@@ -26,6 +26,9 @@
     ],
     "cardinal-components": [
       "com.skilles.cannacraft.registry.ModMisc"
+    ],
+    "modmenu": [
+      "com.skilles.cannacraft.CannacraftClient"
     ]
   },
   "mixins": [

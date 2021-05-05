@@ -18,5 +18,14 @@
   "block.cannacraft.strain_analyzer": "Strain Analyzer",
   "block.cannacraft.seed_crosser": "Seed Crosser",
   "effect.cannacraft.high": "High",
-  "effect.cannacraft.hunger": "Munchies"
+  "effect.cannacraft.hunger": "Munchies",
+  "text.autoconfig.cannacraft.title": "Cannacraft Config",
+  "text.autoconfig.cannacraft.option.australia": "Australia Mode",
+  "text.autoconfig.cannacraft.option.spread": "Spread Horizontally",
+  "text.autoconfig.cannacraft.option.crop": "Cannacraft Config",
+  "text.autoconfig.cannacraft.option.crop.speed": "Speed",
+  "text.autoconfig.cannacraft.option.crop.speed.@Tooltip": "Multiplier for growth speed and breeding",
+  "text.autoconfig.cannacraft.option.crop.yield": "Yield",
+  "text.autoconfig.cannacraft.option.crop.yield.@Tooltip": "TBD",
+  "text.stat.cannacraft.joint": "Joints Smoked"
 }
