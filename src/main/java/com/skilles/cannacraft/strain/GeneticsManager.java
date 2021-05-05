@@ -15,10 +15,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
@@ -322,8 +324,13 @@ public final class GeneticsManager {
         }
         amplifier = durationToAmplifier(duration);
         if(amplifier >  2 && !user.world.isDay()) {
-            //user.setSleepingPosition(user.getBlockPos());
-            user.setSleepingPosition(user.getBlockPos());
+            BlockPos pos = user.getBlockPos();
+            //BlockState blockState = Blocks.GREEN_BED.getDefaultState();
+            //user.world.setBlockState(pos, blockState.with(BedBlock.OCCUPIED, true), 4);
+            user.setSleepingPosition(pos);
+            //((PlayerEntityAccessor)user).setSleepTimer(100);
+            ((ServerWorld) user.world).setTimeOfDay(6000);
+            user.sendSystemMessage(Text.of("You pass out and awake the next day"), Util.NIL_UUID);
         }
         user.addStatusEffect(new StatusEffectInstance(ModMisc.HIGH, duration, amplifier));
         sendHighMessage((PlayerEntity) user);
