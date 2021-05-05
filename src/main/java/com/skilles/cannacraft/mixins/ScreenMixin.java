@@ -35,9 +35,10 @@ public class ScreenMixin {
         if((stack.isOf(ModItems.WEED_SEED) || stack.isOf(ModItems.WEED_FRUIT)) && hasShiftDown() && stack.hasTag()) {
             NbtCompound tag = stack.getSubTag("cannacraft:strain");
             assert tag != null;
-            if(tag.getBoolean("Identified") && tag.contains("Attributes")) {
+            if(tag.getBoolean("Identified") && tag.contains("Attributes") && !tag.getList("Attributes", NbtType.COMPOUND).isEmpty()) {
                 List<Text> tooltip = cir.getReturnValue();
                 NbtList genes = tag.getList("Attributes", NbtType.COMPOUND);
+                assert tooltip.size() >= 6;
                 tooltip.set(5, new LiteralText("Genes: ").formatted(Formatting.GRAY));
                 ArrayList<Gene> geneList = GeneticsManager.fromNbtList(genes);
                 for (int i = 0, geneListSize = geneList.size(); i < geneListSize; i++) {
