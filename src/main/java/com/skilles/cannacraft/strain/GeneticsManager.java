@@ -332,7 +332,7 @@ public final class GeneticsManager {
             ((ServerWorld) user.world).setTimeOfDay(6000);
             user.sendSystemMessage(Text.of("You pass out and awake the next day"), Util.NIL_UUID);
         }
-        user.addStatusEffect(new StatusEffectInstance(ModMisc.HIGH, duration, amplifier));
+        user.addStatusEffect(new StatusEffectInstance(ModMisc.HIGH, duration, amplifier, true, false));
         sendHighMessage((PlayerEntity) user);
     }
     /**
