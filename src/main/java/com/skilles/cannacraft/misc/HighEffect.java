@@ -8,6 +8,7 @@ import net.minecraft.entity.attribute.AttributeContainer;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectType;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class HighEffect extends StatusEffect {
@@ -23,15 +24,21 @@ public class HighEffect extends StatusEffect {
     @Override
     public void applyUpdateEffect(LivingEntity entity, int amplifier) {
         if(entity instanceof PlayerEntity) {
+            PlayerEntity player = (PlayerEntity) entity;
             StatusEffectInstance currentEffect = entity.getStatusEffect(this);
             if(currentEffect.getDuration() % 600 == 0) {
                 ((StatusEffectAccessor) currentEffect).setAmplifier(GeneticsManager.durationToAmplifier(currentEffect.getDuration()));
+            } else if(currentEffect.getAmplifier() >= 1) {
+                for (int i = 0; i < GeneticsManager.random().nextInt(7) * currentEffect.getAmplifier(); i++) {
+                    player.updateTrackedPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.bodyYaw + (GeneticsManager.random().nextInt(20) - 10) * currentEffect.getAmplifier(), player.getPitch() + GeneticsManager.random().nextInt(5) * currentEffect.getAmplifier(), 150, true);
+                }
             }
         }
     }
 
     @Override
     public void onRemoved(LivingEntity entity, AttributeContainer attributes, int amplifier) {
+        entity.applyStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 100));
     }
     
     @Override
