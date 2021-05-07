@@ -14,8 +14,10 @@ import dev.onyxstudios.cca.api.v3.entity.RespawnCopyStrategy;
 import dev.onyxstudios.cca.api.v3.item.ItemComponentFactoryRegistry;
 import dev.onyxstudios.cca.api.v3.item.ItemComponentInitializer;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
+import net.fabricmc.fabric.api.object.builder.v1.client.model.FabricModelPredicateProviderRegistry;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DataPool;
 import net.minecraft.util.registry.BuiltinRegistries;
 import net.minecraft.util.registry.Registry;
@@ -71,10 +73,15 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
                 .ifPresent(key -> BiomeModifications.addFeature(ctx -> true,
                         GenerationStep.Feature.VEGETAL_DECORATION, key));
     }
-
+    private static void registerModelPredicates() {
+        FabricModelPredicateProviderRegistry.register(ModItems.WEED_JOINT, new Identifier("lit"), (itemStack, clientWorld, livingEntity, seed) -> {
+            return itemStack.hasTag() ? itemStack.getTag().getBoolean("Lit") ? 1.0F : 0.0F : 0.0F;
+        });
+    }
     public static void registerMisc() {
         registerConfiguredFeature();
         registerBiomeModifications();
         registerEffects();
+        registerModelPredicates();
     }
 }
