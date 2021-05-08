@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/stem_growth7",
+  "textures": {
+    "stem": "cannacraft:blocks/stage2/weed_crop_bloom2"
+  }
+}
