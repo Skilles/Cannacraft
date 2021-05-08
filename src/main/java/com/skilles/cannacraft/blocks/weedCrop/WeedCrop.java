@@ -158,9 +158,9 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
      */
     private TriState canGrowNext(World world, BlockPos pos) {
         WeedCropEntity blockEntity = (WeedCropEntity) world.getBlockEntity(pos);
-        if(blockEntity.hasGene(GeneTypes.YIELD)) {
-            if (getStage(world.getBlockState(pos)) == 1) // if first stage and has yield, check if block is air
-                return TriState.of(world.isAir(pos.up()));
+        if (getStage(world.getBlockState(pos)) == 1) // if first stage, check if block is air
+            return world.isAir(pos.up()) ? TriState.DEFAULT : TriState.FALSE;
+        if(blockEntity.hasGene(GeneTypes.YIELD)) { // if not first stage and has yield
             return getBelow(world, pos) < blockEntity.growLimit() - 1 ? TriState.TRUE : TriState.DEFAULT; // true if below grow limit, default if next stage is final
         }
         return TriState.FALSE; // false if not first stage and no yield
