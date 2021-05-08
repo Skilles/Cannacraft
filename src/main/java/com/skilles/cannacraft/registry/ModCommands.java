@@ -4,8 +4,10 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.skilles.cannacraft.strain.GeneticsManager;
 import com.skilles.cannacraft.strain.StrainMap;
+import com.skilles.cannacraft.util.CrossUtil;
+import com.skilles.cannacraft.util.MiscUtil;
+import com.skilles.cannacraft.util.StrainUtil;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -72,8 +74,8 @@ public class ModCommands {
 
     public static int addStrain(CommandContext<ServerCommandSource> ctx, String name, String type) throws CommandSyntaxException {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
-        StrainMap.addStrain(name, StrainMap.Type.valueOf(type.toUpperCase()));
-        self.sendSystemMessage(Text.of("Strain added: " + StrainMap.toStrain(name)), Util.NIL_UUID);
+        StrainUtil.addStrain(name, StrainMap.Type.valueOf(type.toUpperCase()));
+        self.sendSystemMessage(Text.of("Strain added: " + StrainUtil.toStrain(name)), Util.NIL_UUID);
         return 1;
     }
     public static int addGene(CommandContext<ServerCommandSource> ctx, String gene, int level) throws CommandSyntaxException {
@@ -95,7 +97,7 @@ public class ModCommands {
     }
     public static int listStrain(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
-        self.sendSystemMessage(Text.of(StrainMap.getStrains().toString()), Util.NIL_UUID);
+        self.sendSystemMessage(Text.of(StrainUtil.getStrains().toString()), Util.NIL_UUID);
         return 1;
     }
 
@@ -127,7 +129,7 @@ public class ModCommands {
                                 return 1;
                             })))
                         .then(literal("set")
-                            .then(argument("index", IntegerArgumentType.integer(0, StrainMap.getStrainCount()))
+                            .then(argument("index", IntegerArgumentType.integer(0, StrainUtil.getStrainCount()))
                             .executes(ctx -> {
                                 setStrain(ctx, getInteger(ctx, "index"));
                                 return 1;
@@ -145,11 +147,11 @@ public class ModCommands {
                                 return 1;
                             }))))
                         .then(literal("remove")
-                            .then(argument("index", IntegerArgumentType.integer(0, StrainMap.getStrainCount()))
+                            .then(argument("index", IntegerArgumentType.integer(0, StrainUtil.getStrainCount()))
                             .executes(ctx -> {
                                 final ServerPlayerEntity self = ctx.getSource().getPlayer();
-                                self.sendSystemMessage(Text.of("Strain removed: "+StrainMap.getStrain(getInteger(ctx, "index"))), Util.NIL_UUID);
-                                StrainMap.removeStrain(getInteger(ctx, "index"));
+                                self.sendSystemMessage(Text.of("Strain removed: "+ StrainUtil.getStrain(getInteger(ctx, "index"))), Util.NIL_UUID);
+                                StrainUtil.removeStrain(getInteger(ctx, "index"));
                                 return 1;
                             })))
                         .then(literal("list")
@@ -162,7 +164,7 @@ public class ModCommands {
                             .then(argument("name2", StringArgumentType.string())
                             .executes(ctx -> {
                                 final ServerPlayerEntity self = ctx.getSource().getPlayer();
-                                self.sendSystemMessage(Text.of(GeneticsManager.crossStrains(getString(ctx, "name1"), getString(ctx, "name2"))), Util.NIL_UUID);
+                                self.sendSystemMessage(Text.of(CrossUtil.crossStrains(getString(ctx, "name1"), getString(ctx, "name2"))), Util.NIL_UUID);
                                 return 1;
                             }))))
                         .then(literal("random")
@@ -170,9 +172,9 @@ public class ModCommands {
                                 final ServerPlayerEntity self = ctx.getSource().getPlayer();
                                 ItemStack stack = new ItemStack(ModItems.WEED_SEED);
                                 NbtCompound tag = stack.getOrCreateSubTag("cannacraft:strain");
-                                GeneticsManager.randomizeTag(tag);
+                                MiscUtil.randomizeTag(tag);
                                 //ModMisc.STRAIN.get(stack).setStrain(Math.abs(GeneticsManager.random().nextInt(StrainMap.getStrainCount() - 1)) + 1);
-                                ModMisc.STRAIN.get(stack).setThc(StrainMap.normalDist(18, 5, 13));
+                                ModMisc.STRAIN.get(stack).setThc(StrainUtil.normalDist(18, 5, 13));
                                 self.giveItemStack(stack);
                                 self.sendSystemMessage(Text.of("Random seed given"), Util.NIL_UUID);
                                 return 1;
@@ -184,7 +186,7 @@ public class ModCommands {
                             })))
                         .then(literal("clear")
                             .executes(ctx -> {
-                                StrainMap.resetStrains();
+                                StrainUtil.resetStrains();
                                 final ServerPlayerEntity self = ctx.getSource().getPlayer();
                                 self.sendSystemMessage(Text.of("Strains reset"), Util.NIL_UUID);
                                 return 1;

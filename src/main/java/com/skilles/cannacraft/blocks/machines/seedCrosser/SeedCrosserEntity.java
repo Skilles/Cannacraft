@@ -4,8 +4,9 @@ import com.skilles.cannacraft.blocks.machines.MachineBlockEntity;
 import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzer;
 import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.registry.ModItems;
-import com.skilles.cannacraft.strain.GeneticsManager;
 import com.skilles.cannacraft.strain.StrainMap;
+import com.skilles.cannacraft.util.CrossUtil;
+import com.skilles.cannacraft.util.StrainUtil;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -138,7 +139,7 @@ public class SeedCrosserEntity extends MachineBlockEntity {
                 );
                 // Sends message to nearby players
                 for (ServerPlayerEntity player : PlayerLookup.tracking((ServerWorld) world, pos)) {
-                    player.sendSystemMessage(Text.of(StrainMap.getStrain(StrainMap.getStrainCount() - 1).name() + " has been created!"), Util.NIL_UUID);
+                    player.sendSystemMessage(Text.of(StrainUtil.getStrain(StrainUtil.getStrainCount() - 1).name() + " has been created!"), Util.NIL_UUID);
                 }
             }
         }
@@ -164,9 +165,9 @@ public class SeedCrosserEntity extends MachineBlockEntity {
                         return true;
                     } else {
                         NbtCompound outputTag = output.getSubTag("cannacraft:strain");
-                        String newName = GeneticsManager.crossStrains(StrainMap.getStrain(tag.getInt("ID")).name(), StrainMap.getStrain(tag2.getInt("ID")).name());
-                        int newThc = GeneticsManager.crossThc(tag.getInt("THC"), tag2.getInt("THC"));
-                        return StrainMap.isPresent(newName) && outputTag.getInt("ID") == StrainMap.indexOf(newName) && newThc == outputTag.getInt("THC");
+                        String newName = CrossUtil.crossStrains(StrainUtil.getStrain(tag.getInt("ID")).name(), StrainUtil.getStrain(tag2.getInt("ID")).name());
+                        int newThc = CrossUtil.crossThc(tag.getInt("THC"), tag2.getInt("THC"));
+                        return StrainUtil.isPresent(newName) && outputTag.getInt("ID") == StrainUtil.indexOf(newName) && newThc == outputTag.getInt("THC");
                     }
                 }
             }
@@ -187,17 +188,17 @@ public class SeedCrosserEntity extends MachineBlockEntity {
         NbtCompound tag = stack.getSubTag("cannacraft:strain");
         NbtCompound tag2 = stack2.getSubTag("cannacraft:strain");
 
-        String newName = GeneticsManager.crossStrains(StrainMap.getStrain(tag.getInt("ID")).name(), StrainMap.getStrain(tag2.getInt("ID")).name());
-        StrainMap.Type newType = GeneticsManager.crossTypes(StrainMap.getStrain(tag.getInt("ID")).type(), StrainMap.getStrain(tag2.getInt("ID")).type());
-        int newThc = GeneticsManager.crossThc(tag.getInt("THC"), tag2.getInt("THC"));
+        String newName = CrossUtil.crossStrains(StrainUtil.getStrain(tag.getInt("ID")).name(), StrainUtil.getStrain(tag2.getInt("ID")).name());
+        StrainMap.Type newType = CrossUtil.crossTypes(StrainUtil.getStrain(tag.getInt("ID")).type(), StrainUtil.getStrain(tag2.getInt("ID")).type());
+        int newThc = CrossUtil.crossThc(tag.getInt("THC"), tag2.getInt("THC"));
 
-        if(!StrainMap.getNames().containsKey(newName)) {
-            StrainMap.addStrain(newName, newType);
-            System.out.println("New strain: "+StrainMap.getStrain(StrainMap.getStrainCount() - 1)); // print latest strain
+        if(!StrainUtil.getNames().containsKey(newName)) {
+            StrainUtil.addStrain(newName, newType);
+            System.out.println("New strain: "+ StrainUtil.getStrain(StrainUtil.getStrainCount() - 1)); // print latest strain
             flag = 1; // flag if strain was added
         }
         NbtCompound strainTag = new NbtCompound();
-        strainTag.putInt("ID", StrainMap.indexOf(newName));
+        strainTag.putInt("ID", StrainUtil.indexOf(newName));
         strainTag.putBoolean("Identified", true);
         strainTag.putInt("THC", newThc);
         NbtCompound outputTag = new NbtCompound();

@@ -1,6 +1,7 @@
 package com.skilles.cannacraft.items;
 
-import com.skilles.cannacraft.strain.GeneticsManager;
+import com.skilles.cannacraft.util.HighUtil;
+import com.skilles.cannacraft.util.MiscUtil;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
@@ -159,7 +160,7 @@ public class WeedJoint extends BowItem {
             if (remainingUseTicks == 1) {
                 if (tag.contains("cannacraft:strain")) {
                     if (!world.isClient) {
-                        GeneticsManager.applyHigh(user);
+                        HighUtil.applyHigh(user);
                         stack.damage(1, user, (p) -> {
                             p.sendToolBreakStatus(user.getActiveHand());
                         });
@@ -183,7 +184,7 @@ public class WeedJoint extends BowItem {
         if(stack.getTag().contains("cannacraft:strain")) {
             NbtCompound tag = stack.getSubTag("cannacraft:strain");
             if (tag.contains("ID") && !(tag.getInt("ID") == 0)) {
-                GeneticsManager.appendTooltips(tooltip, tag);
+                MiscUtil.appendTooltips(tooltip, tag);
             }
         }
     }

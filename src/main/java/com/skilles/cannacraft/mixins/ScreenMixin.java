@@ -2,7 +2,7 @@ package com.skilles.cannacraft.mixins;
 
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.Gene;
-import com.skilles.cannacraft.strain.GeneticsManager;
+import com.skilles.cannacraft.util.MiscUtil;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -40,7 +40,7 @@ public class ScreenMixin {
                 NbtList genes = tag.getList("Attributes", NbtType.COMPOUND);
                 assert tooltip.size() >= 6;
                 tooltip.set(5, new LiteralText("Genes: ").formatted(Formatting.GRAY));
-                ArrayList<Gene> geneList = GeneticsManager.fromNbtList(genes);
+                ArrayList<Gene> geneList = MiscUtil.fromNbtList(genes);
                 for (int i = 0, geneListSize = geneList.size(); i < geneListSize; i++) {
                     Gene gene = geneList.get(i);
                     tooltip.add(6+i, new LiteralText("- ").formatted(Formatting.DARK_GRAY).append(new LiteralText(StringUtils.capitalize(gene.name())).formatted(Formatting.AQUA)).append(new LiteralText(" | ").formatted(Formatting.GRAY)).append(new LiteralText(String.valueOf(gene.level())).formatted(Formatting.GOLD)));

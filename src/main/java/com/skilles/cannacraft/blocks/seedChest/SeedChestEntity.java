@@ -3,7 +3,7 @@ package com.skilles.cannacraft.blocks.seedChest;
 import com.skilles.cannacraft.blocks.ImplementedInventory;
 import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.registry.ModItems;
-import com.skilles.cannacraft.strain.StrainMap;
+import com.skilles.cannacraft.util.StrainUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -79,8 +79,8 @@ public class SeedChestEntity extends BlockEntity implements NamedScreenHandlerFa
                     if(o1.isOf(ModItems.WEED_SEED) && o2.isOf(ModItems.WEED_SEED)) {
                         NbtCompound tag1 = o1.getSubTag("cannacraft:strain");
                         NbtCompound tag2 = o2.getSubTag("cannacraft:strain");
-                        String name1 = StrainMap.getStrain(tag1.getInt("ID")).name();
-                        String name2 = StrainMap.getStrain(tag2.getInt("ID")).name();
+                        String name1 = StrainUtil.getStrain(tag1.getInt("ID")).name();
+                        String name2 = StrainUtil.getStrain(tag2.getInt("ID")).name();
                         return name1.compareTo(name2);
                     }
                     return 0;

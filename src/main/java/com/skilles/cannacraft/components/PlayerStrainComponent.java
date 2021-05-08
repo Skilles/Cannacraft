@@ -1,7 +1,7 @@
 package com.skilles.cannacraft.components;
 
 import com.skilles.cannacraft.strain.Strain;
-import com.skilles.cannacraft.strain.StrainMap;
+import com.skilles.cannacraft.util.StrainUtil;
 import dev.onyxstudios.cca.api.v3.component.ComponentV3;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import dev.onyxstudios.cca.api.v3.entity.PlayerComponent;
@@ -24,7 +24,7 @@ public class PlayerStrainComponent implements EntityInterface, ComponentV3, Auto
 
     @Override
     public void setStrain(int index) {
-        strain = StrainMap.getStrain(index);
+        strain = StrainUtil.getStrain(index);
     }
 
     @Override
