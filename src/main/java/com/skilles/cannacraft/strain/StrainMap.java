@@ -23,8 +23,8 @@ public final class StrainMap {
     private static final Gson gson = builder.create();
 
     public static int ogStrainCount = 4;
-    protected static final BiMap<Integer, Strain> strainArray = HashBiMap.create();
-    protected static final Map<String, Strain> strainList = new HashMap<>(); // for name lookup
+    public static final BiMap<Integer, Strain> strainArray = HashBiMap.create();
+    public static final Map<String, Strain> strainList = new HashMap<>(); // for name lookup
     public enum Type {
         INDICA,
         SATIVA,
@@ -34,6 +34,7 @@ public final class StrainMap {
 
     public static void registerStrains() {
         load();
+        validateStrains();
         System.out.println("Strains initialized: "+ strainArray);
         System.out.println("Strains initialized: "+ strainList);
         //GeneticsManager.test();
@@ -43,17 +44,16 @@ public final class StrainMap {
     public static void save() {
         try (Writer writer = new FileWriter("strains.json")) {
             gson.toJson(strainArray, writer);
-            writer.close();
             System.out.println("Strains saved to file");
         } catch(Exception e) {
+            e.printStackTrace();
             System.out.println("Error saving file");
         }
     }
     public static void load() {
-        try {
+        try (Reader reader = Files.newBufferedReader(Paths.get("strains.json"))) {
             java.lang.reflect.Type type = new TypeToken<Map<Integer, Strain>>() {
             }.getType();
-            Reader reader = Files.newBufferedReader(Paths.get("strains.json"));
             Map<Integer, Strain> strainMap = gson.fromJson(reader, type);
             for (Map.Entry<Integer, Strain> entry : strainMap.entrySet()) {
                 strainArray.put(entry.getKey(), entry.getValue());
@@ -62,7 +62,14 @@ public final class StrainMap {
         } catch(Exception e) {
             System.out.println("Error loading strains");
             StrainUtil.resetStrains();
-            save();
+        }
+    }
+    private static void validateStrains() {
+        for (Strain strain: strainArray.values()) {
+            if(strain.getItem() == null) {
+                strain.init();
+                System.out.println(strain.name()+" corrupted, attempting to fix");
+            }
         }
     }
 }
