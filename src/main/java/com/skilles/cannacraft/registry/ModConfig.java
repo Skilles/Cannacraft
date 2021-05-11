@@ -12,7 +12,6 @@ import net.minecraft.client.gui.screen.Screen;
 public class ModConfig implements ConfigData {
     public static Screen currentScreen = MinecraftClient.getInstance().currentScreen;
 
-
     boolean australia = false;
     boolean spread = false;
     boolean debug = false;
@@ -25,6 +24,8 @@ public class ModConfig implements ConfigData {
         float speed = 1.0F;
         @ConfigEntry.Gui.Tooltip
         int yield = 1;
+        @ConfigEntry.Gui.Tooltip
+        boolean resource = true;
     }
 
     @Override
@@ -39,6 +40,7 @@ public class ModConfig implements ConfigData {
     public float getSpeed() {
         return crop.speed;
     }
+    public boolean resourceCrops() { return crop.resource; }
     /*public static Screen configScreen() {
             ConfigBuilder builder= ConfigBuilder.create()
                     .setParentScreen(ModConfig.currentScreen)

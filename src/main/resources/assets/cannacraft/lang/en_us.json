@@ -28,5 +28,7 @@
   "text.autoconfig.cannacraft.option.crop.speed.@Tooltip": "Multiplier for growth speed and breeding",
   "text.autoconfig.cannacraft.option.crop.yield": "Yield",
   "text.autoconfig.cannacraft.option.crop.yield.@Tooltip": "TBD",
+  "text.autoconfig.cannacraft.option.crop.resource": "Resource Crops",
+  "text.autoconfig.cannacraft.option.crop.resource.@Tooltip": "Toggles resource crops (replaces strain crops, requires restart)",
   "text.stat.cannacraft.joint": "Joints Smoked"
 }
