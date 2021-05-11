@@ -12,6 +12,8 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.minecraft.client.render.RenderLayer;
 
+import static com.skilles.cannacraft.Cannacraft.log;
+
 @Environment(EnvType.CLIENT)
 
 public class CannacraftClient implements ClientModInitializer, ModMenuApi  {
@@ -24,6 +26,6 @@ public class CannacraftClient implements ClientModInitializer, ModMenuApi  {
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.WEED_CROP, RenderLayer.getCutout());
         ModScreens.registerScreens();
         ModConfig.registerConfig();
-        System.out.println("Screens registered!");
+        log("Screens registered!");
     }
 }

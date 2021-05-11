@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static com.skilles.cannacraft.Cannacraft.log;
+
 /**
  * This class contains utilities for modifying strain attributes such as THC, name, and type
  */
@@ -73,10 +75,10 @@ public final class MiscUtil {
                     Block.dropStack(world, pos, toDrop);
                 }
             } else {
-                System.out.println("Error: NULLTAG");
+                log("Error: NULLTAG");
             }
         } else {
-            System.out.println("Error: NULLBENTITY");
+            log("Error: NULLBENTITY");
         }
     }
     public static void dropStack(World world, BlockPos pos, Item type) {

@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
 
+import static com.skilles.cannacraft.Cannacraft.log;
 import static com.skilles.cannacraft.strain.StrainMap.*;
 
 public class StrainUtil {
@@ -90,7 +91,7 @@ public class StrainUtil {
         return strain.getItem();
     }
     public static void testItems() {
-        System.out.println(getItem(new Strain("Purple Lapis", Type.HYBRID)));
+        log(getItem(new Strain("Purple Lapis", Type.HYBRID)));
     }
     public static void addStrain(String name, Type type) {
         Strain strain = new Strain(name, type);
@@ -100,7 +101,7 @@ public class StrainUtil {
             index = strainArray.size();
 
             if (strainList.containsKey(name)) {
-                System.out.println("No duplicate strains!");
+                log("No duplicate strains!");
             } else {
                 strainArray.put(index, strain);
                 strainList.put(strainArray.get(index).name(), strainArray.get(index));
@@ -163,7 +164,7 @@ public class StrainUtil {
         addStrain("Purple Punch", Type.INDICA);
         addStrain("Chem Trix", Type.SATIVA);
         for (int i = 0; strainArray.size() > i; i++) {
-            System.out.println("Strain: "+ strainArray.get(i));
+            log("Strain: "+ strainArray.get(i));
             strainList.put(strainArray.get(i).name(), strainArray.get(i));
             ogStrainCount++;
         }

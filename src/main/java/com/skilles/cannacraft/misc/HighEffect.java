@@ -12,6 +12,8 @@ import net.minecraft.entity.effect.StatusEffectType;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 
+import static com.skilles.cannacraft.Cannacraft.log;
+
 public class HighEffect extends StatusEffect {
 
     public HighEffect() {
@@ -46,12 +48,12 @@ public class HighEffect extends StatusEffect {
     public void onApplied(LivingEntity entity, AttributeContainer attributes, int amplifier) {
         if(entity instanceof PlayerEntity) {
             int id = ModMisc.PLAYER.get(entity).getStrain().id();
-            System.out.println(id);
+            log(id);
             switch (id) {
                 case 0:
                     entity.kill();
                 default:
-                    System.out.println(ModMisc.PLAYER.get(entity).getStrain());
+                    log(ModMisc.PLAYER.get(entity).getStrain());
                     break;
             }
         }

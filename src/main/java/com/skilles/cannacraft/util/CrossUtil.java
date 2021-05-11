@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
+import static com.skilles.cannacraft.Cannacraft.log;
 import static com.skilles.cannacraft.strain.StrainMap.strainList;
 
 public class CrossUtil {
@@ -122,7 +123,7 @@ public class CrossUtil {
                 newName1 = nameOne.get(0);
             }
         }
-        System.out.println(names);
+        log(names);
         return newName1+ " " + newName2;
     }
 

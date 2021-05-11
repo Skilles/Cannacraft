@@ -25,6 +25,8 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
+import static com.skilles.cannacraft.Cannacraft.log;
+
 public class WeedSeed extends AliasedBlockItem {
 
     public WeedSeed(Block block, Settings settings) {
@@ -54,7 +56,7 @@ public class WeedSeed extends AliasedBlockItem {
                         + " Genes: " + clientStackInterface.getGenetics()
                 );
             } else {
-                System.out.println(clientStack.getTag());
+                log(clientStack.getTag());
             }
         }
         return TypedActionResult.success(playerEntity.getStackInHand(hand));
@@ -76,7 +78,7 @@ public class WeedSeed extends AliasedBlockItem {
                     System.out.println("Strain of crop: " + StrainUtil.getStrain(tag.getInt("ID")).name()
                             + " Identified: " + tag.getBoolean("identified")
                             + " THC: " + tag.getInt("THC"));
-                    System.out.println(tag);
+                    log(tag);
                 } else {
                     System.out.println("Max Age: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.MAXAGE)
                             + " Age: " + context.getWorld().getBlockState(context.getBlockPos()).get(WeedCrop.AGE)

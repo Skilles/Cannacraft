@@ -31,6 +31,8 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import static com.skilles.cannacraft.Cannacraft.log;
+
 public class SeedCrosserEntity extends MachineBlockEntity {
     private final double powerMultiplier = 1; // Energy use multiplier
     private final boolean needsPower = true;
@@ -194,7 +196,7 @@ public class SeedCrosserEntity extends MachineBlockEntity {
 
         if(!StrainUtil.getNames().containsKey(newName)) {
             StrainUtil.addStrain(newName, newType);
-            System.out.println("New strain: "+ StrainUtil.getStrain(StrainUtil.getStrainCount() - 1)); // print latest strain
+            log("New strain: "+ StrainUtil.getStrain(StrainUtil.getStrainCount() - 1)); // print latest strain
             flag = 1; // flag if strain was added
         }
         NbtCompound strainTag = new NbtCompound();

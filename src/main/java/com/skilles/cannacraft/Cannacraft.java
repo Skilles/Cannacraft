@@ -7,6 +7,9 @@ import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Cannacraft implements ModInitializer {
 
@@ -19,32 +22,41 @@ public class Cannacraft implements ModInitializer {
     public static Identifier id(String path) {
         return new Identifier(MOD_ID, path);
     }
+    public static Logger LOGGER = LogManager.getLogger();
 
-
+    public static void log(Level level, String message) {
+        LOGGER.log(level, "[Cannacraft] "+message);
+    }
+    public static void log(String message) {
+        log(Level.INFO, message);
+    }
+    public static void log(Object message) {
+        log(String.valueOf(message));
+    }
     @Override
     public void onInitialize() {
         StrainMap.registerStrains();
 
         ModCommands.registerCommands();
-        System.out.println("Commands registered!");
+        log("Commands registered!");
 
         LootTable.registerLoot();
-        System.out.println("LootTables registered!");
+        log("LootTables registered!");
 
         ModItems.registerItems();
-        System.out.println("Items registered!");
+        log("Items registered!");
 
         ModEntities.registerEntities();
-        System.out.println("Entities registered!");
+        log("Entities registered!");
 
         ModBlocks.registerBlocks();
-        System.out.println("Blocks registered!");
+        log("Blocks registered!");
 
         ModMisc.registerMisc();
-        System.out.println("Effects registered!");
+        log("Effects registered!");
 
         ModScreens.registerScreenHandlers();
-        System.out.println("ScreenHandlers registered!");
+        log("ScreenHandlers registered!");
 
 
     }

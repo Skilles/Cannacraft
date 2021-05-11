@@ -14,6 +14,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.skilles.cannacraft.Cannacraft.log;
+
 /**
  * This class is responsible for a lot of strain related data management
  */
@@ -35,8 +38,8 @@ public final class StrainMap {
     public static void registerStrains() {
         load();
         validateStrains();
-        System.out.println("Strains initialized: "+ strainArray);
-        System.out.println("Strains initialized: "+ strainList);
+        log("Strains initialized: "+ strainArray);
+        log("Strains initialized: "+ strainList);
         //GeneticsManager.test();
         save();
     }
@@ -44,10 +47,10 @@ public final class StrainMap {
     public static void save() {
         try (Writer writer = new FileWriter("strains.json")) {
             gson.toJson(strainArray, writer);
-            System.out.println("Strains saved to file");
+            log("Strains saved to file");
         } catch(Exception e) {
             e.printStackTrace();
-            System.out.println("Error saving file");
+            log("Error saving file");
         }
     }
     public static void load() {
@@ -60,7 +63,7 @@ public final class StrainMap {
                 strainList.put(entry.getValue().name(), entry.getValue());
             }
         } catch(Exception e) {
-            System.out.println("Error loading strains");
+            log("Error loading strains");
             StrainUtil.resetStrains();
         }
     }
@@ -68,7 +71,7 @@ public final class StrainMap {
         for (Strain strain: strainArray.values()) {
             if(strain.getItem() == null) {
                 strain.init();
-                System.out.println(strain.name()+" corrupted, attempting to fix");
+                log(strain.name()+" corrupted, attempting to fix");
             }
         }
     }

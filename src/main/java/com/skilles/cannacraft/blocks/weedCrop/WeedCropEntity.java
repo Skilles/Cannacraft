@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static com.skilles.cannacraft.Cannacraft.log;
 import static com.skilles.cannacraft.util.StrainUtil.*;
 
 // TODO: drop seedId, seedThc if male
@@ -181,7 +182,7 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
             }
             // Set thc
             ogTag.putInt("Seed THC", CrossUtil.crossThc(thc, ogTag.getInt("THC")));
-            System.out.println("THC: " + ogTag.getInt("Seed THC"));
+            log("THC: " + ogTag.getInt("Seed THC"));
             // Set name/type
             int randId = random.nextInt(stringArray.size());
             String name1 = getStrain(id).name();
@@ -198,7 +199,7 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
 
             ogTag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
 
-            System.out.println("New tag: " + ogTag);
+            log("New tag: " + ogTag);
 
             world.setBlockState(pos, WeedCrop.withBreeding(world.getBlockState(pos), false), 2);
             world.playSound(
