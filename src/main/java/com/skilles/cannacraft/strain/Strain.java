@@ -1,6 +1,9 @@
 package com.skilles.cannacraft.strain;
 
 
+import com.skilles.cannacraft.util.StrainUtil;
+import net.minecraft.item.Item;
+
 import java.util.Objects;
 
 public final class Strain {
@@ -8,10 +11,12 @@ public final class Strain {
     private String name;
     private StrainMap.Type type;
     private final int id;
+    private StrainUtil.StrainItems strainItem;
 
-    public Strain(String strain, StrainMap.Type type) {
-        setName(strain);
-        setType(type);
+    public Strain(String name, StrainMap.Type type) {
+        this.name = name;
+        this.type = type;
+        this.strainItem = StrainUtil.getStrainItems(this);
         this.id = StrainMap.strainArray.size();
         CLASS_COUNT++;
     }
@@ -21,9 +26,7 @@ public final class Strain {
         return name;
     }
 
-    protected void setName(String name) {
-        this.name = name;
-    }
+    protected void setName(String name) { this.name = name; }
 
     public StrainMap.Type type() {
         return type;
@@ -35,6 +38,15 @@ public final class Strain {
 
     public String toString() {
         return name + " | " + type;
+    }
+
+    public Item getItem() {
+        if(strainItem == null) return null;
+        return strainItem.item;
+    }
+
+    void init() {
+        this.strainItem = StrainUtil.getStrainItems(this);
     }
 
     @Override
