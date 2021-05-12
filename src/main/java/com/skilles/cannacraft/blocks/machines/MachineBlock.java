@@ -9,6 +9,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.world.ServerWorld;
@@ -22,8 +23,11 @@ import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3f;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Random;
 
 public abstract class MachineBlock extends BlockWithEntity {
     public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
@@ -41,6 +45,24 @@ public abstract class MachineBlock extends BlockWithEntity {
             player.openHandledScreen(screenHandler);
         }
         return ActionResult.SUCCESS;
+    }
+    @Override
+    public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
+        if (state.get(ACTIVE)) {
+            Direction direction = state.get(FACING);
+            Direction.Axis axis = direction.getAxis();
+            double h = random.nextDouble() * 0.6D - 0.3D;
+            double i = axis == Direction.Axis.X ? direction.getOffsetX() * 0.52D : h;
+            double j = random.nextDouble() * 6.0D / 16.0D;
+            double k = axis == Direction.Axis.Z ? direction.getOffsetZ() * 0.52D : h;
+
+            float r = random.nextFloat();
+            float g = random.nextFloat();
+            float b = random.nextFloat();
+
+            world.addParticle(new DustParticleEffect(new Vec3f(r, g, b), .7f), pos.getX() + 0.5 + i,
+                    pos.getY() + j, pos.getZ() + 0.5 + k, 0, 0, 0);
+        }
     }
 
     @Nullable

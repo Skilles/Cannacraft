@@ -1,7 +1,7 @@
 package com.skilles.cannacraft.blocks.machines.seedCrosser;
 
+import com.skilles.cannacraft.blocks.machines.MachineBlock;
 import com.skilles.cannacraft.blocks.machines.MachineBlockEntity;
-import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzer;
 import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.StrainMap;
@@ -13,7 +13,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.PropertyDelegate;
@@ -54,7 +53,6 @@ public class SeedCrosserEntity extends MachineBlockEntity {
                         return 0;
                 }
             }
-
             @Override
             public void set(int index, int value) {
                 switch(index) {
@@ -65,7 +63,6 @@ public class SeedCrosserEntity extends MachineBlockEntity {
                         SeedCrosserEntity.this.powerStored = value;
                 }
             }
-
             @Override
             public int size() {
                 return 2;
@@ -74,38 +71,36 @@ public class SeedCrosserEntity extends MachineBlockEntity {
     }
     public static void tick(World world, BlockPos pos, BlockState state, SeedCrosserEntity blockEntity) {
         if (world == null || world.isClient) return;
-        if(isNextTo(world, pos, Blocks.GLOWSTONE) && blockEntity.powerStored < blockEntity.getMaxStoredPower()) {
+        if (isNextTo(world, pos, Blocks.GLOWSTONE) && blockEntity.powerStored < blockEntity.getMaxStoredPower()) {
             blockEntity.addEnergy(2);
             markDirty(world, pos, state);
         }
         if (blockEntity.isWorking()) {
-            state = state.with(StrainAnalyzer.ACTIVE, true);
-            world.setBlockState(pos, state, Block.NOTIFY_ALL);
-            markDirty(world, pos, state);
+            if (!world.isReceivingRedstonePower(pos)) {
+                processTick(blockEntity); // playSound is called here
+                state = state.with(MachineBlock.ACTIVE, true);
+                world.setBlockState(pos, state, Block.NOTIFY_ALL);
+                markDirty(world, pos, state);
+            }
             if (canCraft(blockEntity.inventory) && blockEntity.processingTime == timeToProcess) { // when done crafting
-                blockEntity.playSound(craft(blockEntity.inventory));
+                blockEntity.playSound(craft(blockEntity.inventory)); // craft and play sound if new strain
                 blockEntity.processingTime = 1; // keep working
                 markDirty(world, pos, state);
             } else if (!canCraft(blockEntity.inventory)) {
                 blockEntity.processingTime = 0;
                 markDirty(world, pos, state);
-            } else if (!world.isReceivingRedstonePower(pos)) {
-                processTick(blockEntity); // playSound is called here
-                markDirty(world, pos, state);
             }
-        } else {
-            if (canCraft(blockEntity.inventory) && blockEntity.powerStored != 0) { // start if has power
-                blockEntity.processingTime = 1;
-            } else { // when no items or can't craft
-                blockEntity.processingTime = 0;
-                state = state.with(StrainAnalyzer.ACTIVE, false);
-                world.setBlockState(pos, state, Block.NOTIFY_ALL);
-            }
-            markDirty(world, pos, state);
+        } else if (canCraft(blockEntity.inventory) && blockEntity.powerStored != 0) { // start if has power
+            blockEntity.processingTime = 1;
+        } else { // when no items or can't craft
+            blockEntity.processingTime = 0;
+            state = state.with(MachineBlock.ACTIVE, false);
+            world.setBlockState(pos, state, Block.NOTIFY_ALL);
         }
-
+        markDirty(world, pos, state);
     }
-    private void playSound(int flag) {
+    @Override
+    public void playSound(int flag) {
         World world  = getWorld();
         SoundEvent runSound = SoundEvents.BLOCK_HONEY_BLOCK_SLIDE;
         assert world != null;
@@ -146,13 +141,6 @@ public class SeedCrosserEntity extends MachineBlockEntity {
             }
         }
     }
-    public boolean isWorking() {
-        if(needsPower) { // TODO: use solar power if no generators found
-            return processingTime != 0 && powerStored != 0;
-        } else {
-            return processingTime != 0;
-        }
-    }
     protected static boolean canCraft(DefaultedList<ItemStack> inventory) {
             ItemStack stack = inventory.get(1);
             ItemStack stack2 = inventory.get(2);
@@ -174,11 +162,6 @@ public class SeedCrosserEntity extends MachineBlockEntity {
                 }
             }
         return false;
-    }
-    private static void processTick(SeedCrosserEntity blockEntity) {
-        blockEntity.processingTime++;
-        if(blockEntity.needsPower) blockEntity.useEnergy(1 * blockEntity.powerMultiplier);
-        blockEntity.playSound(0);
     }
     protected static int craft(DefaultedList<ItemStack> inventory) {
         int flag = 0; // flag if no new strain was added
@@ -220,24 +203,6 @@ public class SeedCrosserEntity extends MachineBlockEntity {
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
         return new SeedCrosserScreenHandler(syncId, inv, this, this.propertyDelegate);
-    }
-
-    @Override
-    public NbtCompound writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
-        nbt.putInt("processingTime", this.processingTime);
-        nbt.putInt("powerStored", this.powerStored);
-        Inventories.writeNbt(nbt, this.inventory);
-        return nbt;
-    }
-
-    @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
-        this.inventory = DefaultedList.ofSize(this.inventory.size(), ItemStack.EMPTY);
-        Inventories.readNbt(nbt, this.inventory);
-        this.processingTime = nbt.getInt("processingTime");
-        this.powerStored = nbt.getInt("powerStored");
     }
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
