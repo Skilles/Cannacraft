@@ -5,21 +5,21 @@
       "y": 90
     },
     "facing=east,active=true": {
-      "model": "cannacraft:block/weed_extractor",
+      "model": "cannacraft:block/weed_extractor_active",
       "y": 90
     },
     "facing=north,active=false": {
       "model": "cannacraft:block/weed_extractor"
     },
     "facing=north,active=true": {
-      "model": "cannacraft:block/weed_extractor"
+      "model": "cannacraft:block/weed_extractor_active"
     },
     "facing=south,active=false": {
       "model": "cannacraft:block/weed_extractor",
       "y": 180
     },
     "facing=south,active=true": {
-      "model": "cannacraft:block/weed_extractor",
+      "model": "cannacraft:block/weed_extractor_active",
       "y": 180
     },
     "facing=west,active=false": {
@@ -27,7 +27,7 @@
       "y": 270
     },
     "facing=west,active=true": {
-      "model": "cannacraft:block/weed_extractor",
+      "model": "cannacraft:block/weed_extractor_active",
       "y": 270
     }
   }
