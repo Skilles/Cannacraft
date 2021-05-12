@@ -42,7 +42,9 @@ public abstract class InventoryScreenMixin {
     @Unique
     StatusEffect spriteType;
     @Unique
-    boolean isHigh;
+    boolean isHigh = MinecraftClient.getInstance().player.hasStatusEffect(ModMisc.HIGH);
+    @Unique
+    Collection<StatusEffectInstance> effectCollection = MinecraftClient.getInstance().player.getStatusEffects();
     /**
      * Replaces HungerMixin
      **/
@@ -55,13 +57,14 @@ public abstract class InventoryScreenMixin {
         }
     }
     /**
-     * Checks whether player is high
+     * Sets high to be the first effect
      */
-    @Inject(method = "drawStatusEffects(Lnet/minecraft/client/util/math/MatrixStack;)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderColor(FFFF)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void setHigh(MatrixStack matrices, CallbackInfo ci, int i, Collection<StatusEffectInstance> collection) {
-        if(collection.stream().anyMatch(obj -> obj.getEffectType().equals(ModMisc.HIGH))) {
-            isHigh = true;
-        }
+    @ModifyVariable(method = "drawStatusEffects(Lnet/minecraft/client/util/math/MatrixStack;)V", at = @At("STORE"), ordinal = 0)
+    private Iterable<StatusEffectInstance> setIterable(Iterable<StatusEffectInstance> iterable) {
+        return effectCollection.stream().sorted(
+                Comparator.comparing(StatusEffectInstance::getEffectType,
+                Comparator.comparing((StatusEffect effect) -> !effect.equals(ModMisc.HIGH)))
+                .thenComparing(Ordering.natural())).collect(Collectors.toCollection(LinkedList::new));
     }
     /**
      * Sets the spacing between the effect boxes
