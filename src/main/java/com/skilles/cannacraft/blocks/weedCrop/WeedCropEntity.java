@@ -1,5 +1,6 @@
 package com.skilles.cannacraft.blocks.weedCrop;
 
+import com.skilles.cannacraft.CannacraftClient;
 import com.skilles.cannacraft.registry.ModConfig;
 import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.strain.Gene;
@@ -7,7 +8,6 @@ import com.skilles.cannacraft.strain.GeneTypes;
 import com.skilles.cannacraft.strain.StrainMap;
 import com.skilles.cannacraft.util.CrossUtil;
 import com.skilles.cannacraft.util.MiscUtil;
-import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigData;
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.fabricmc.fabric.api.util.NbtType;
@@ -36,7 +36,7 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
     public WeedCropEntity(BlockPos pos, BlockState state) {
         super(ModEntities.WEED_CROP_ENTITY, pos, state);
         setData(0, 0, false, false, new NbtList());
-        config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+        config = CannacraftClient.config;
         try {
             config.validatePostLoad();
         } catch (ConfigData.ValidationException e) {

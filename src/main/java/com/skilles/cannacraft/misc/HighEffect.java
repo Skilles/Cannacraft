@@ -9,7 +9,6 @@ import net.minecraft.entity.attribute.AttributeContainer;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectType;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 
 import static com.skilles.cannacraft.Cannacraft.log;
@@ -33,7 +32,7 @@ public class HighEffect extends StatusEffect {
                 ((StatusEffectAccessor) currentEffect).setAmplifier(HighUtil.durationToAmplifier(currentEffect.getDuration()));
             } else if(currentEffect.getAmplifier() >= 1) {
                 for (int i = 0; i < MiscUtil.random().nextInt(7) * currentEffect.getAmplifier(); i++) {
-                    player.updateTrackedPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.bodyYaw + (MiscUtil.random().nextInt(20) - 10) * currentEffect.getAmplifier(), player.getPitch() + MiscUtil.random().nextInt(5) * currentEffect.getAmplifier(), 150, true);
+                    player.updateTrackedPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.bodyYaw + (MiscUtil.random().nextInt(20) - 10) * currentEffect.getAmplifier(), player.getPitch() + MiscUtil.random().nextInt(5) * currentEffect.getAmplifier(), 100, true);
                 }
             }
         }
@@ -41,7 +40,6 @@ public class HighEffect extends StatusEffect {
 
     @Override
     public void onRemoved(LivingEntity entity, AttributeContainer attributes, int amplifier) {
-        entity.applyStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 100));
     }
     
     @Override

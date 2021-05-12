@@ -1,8 +1,10 @@
 package com.skilles.cannacraft.mixins;
 
 import com.google.common.annotations.Beta;
+import com.google.common.collect.Ordering;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.skilles.cannacraft.registry.ModMisc;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.texture.Sprite;
@@ -22,7 +24,10 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.stream.Collectors;
 
 /**
  * Minify status effect icons if high (god why)
@@ -43,13 +48,12 @@ public abstract class InventoryScreenMixin {
      **/
     @ModifyVariable(method = "drawStatusEffectDescriptions(Lnet/minecraft/client/util/math/MatrixStack;IILjava/lang/Iterable;)V", at = @At(value = "STORE"), ordinal = 0)
     private String munchies(String string) {
-        if(string.equalsIgnoreCase(I18n.translate("effect.minecraft.hunger"))) {
+        if(isHigh && string.equalsIgnoreCase(I18n.translate("effect.minecraft.hunger"))) {
             return I18n.translate("effect.cannacraft.hunger");
         } else {
             return string;
         }
     }
-
     /**
      * Checks whether player is high
      */
@@ -59,7 +63,6 @@ public abstract class InventoryScreenMixin {
             isHigh = true;
         }
     }
-
     /**
      * Sets the spacing between the effect boxes
      */
@@ -87,44 +90,37 @@ public abstract class InventoryScreenMixin {
         if(isHigh && !backgroundType.equals(ModMisc.HIGH)) RenderSystem.setShaderTexture(0, new Identifier("cannacraft","textures/gui/container/background.png"));
     }
     /**
-     * These injects adjust the offset for the sprite, background, and texts
+     * These methods adjust the offset for the sprite, background, and texts
      */
     @ModifyArgs(method = "drawStatusEffectBackgrounds(Lnet/minecraft/client/util/math/MatrixStack;IILjava/lang/Iterable;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/AbstractInventoryScreen;drawTexture(Lnet/minecraft/client/util/math/MatrixStack;IIIIII)V"))
     private void background(Args args) {
-        if (isHigh) {
+        if (isHigh && !backgroundType.equals(ModMisc.HIGH)) {
             int k = args.get(2);
-            if (!backgroundType.equals(ModMisc.HIGH)) {
-                args.set(2, k + 5);
-                args.set(4, 0);
-                args.set(5, 110);
-                args.set(6, 26);
-            }
+            args.set(2, k + 5);
+            args.set(4, 0);
+            args.set(5, 110);
+            args.set(6, 26);
         }
     }
     @ModifyArgs(method = "drawStatusEffectSprites(Lnet/minecraft/client/util/math/MatrixStack;IILjava/lang/Iterable;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/AbstractInventoryScreen;drawSprite(Lnet/minecraft/client/util/math/MatrixStack;IIIIILnet/minecraft/client/texture/Sprite;)V"))
     private void sprite(Args args) {
-        if(isHigh) {
+        if(isHigh && !spriteType.equals(ModMisc.HIGH)) {
             int width = args.get(4);
             int height = args.get(5);
             int y = args.get(2);
             int x = args.get(1);
-            if (!spriteType.equals(ModMisc.HIGH)) {
-                {
-                    args.set(4, width / 2);
-                    args.set(5, height / 2);
-                    args.set(2, y + 7);
-                    args.set(1, x + 2);
-                }
-            }
+            args.set(4, width / 2);
+            args.set(5, height / 2);
+            args.set(2, y + 7);
+            args.set(1, x + 2);
         }
     }
-
     /**
      * This offset modifier requires more logic in order to also offset the duration
      * Not sure if better than redirect
      */
     @Unique
-    int runTime = 0;
+    int runTime = 0; // run instance
     @Unique
     boolean contains = false;
     @ModifyArgs(method = "drawStatusEffectDescriptions(Lnet/minecraft/client/util/math/MatrixStack;IILjava/lang/Iterable;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/font/TextRenderer;drawWithShadow(Lnet/minecraft/client/util/math/MatrixStack;Ljava/lang/String;FFI)I"))
@@ -147,11 +143,11 @@ public abstract class InventoryScreenMixin {
             if(!contains){
                 args.set(2, x-5);
                 args.set(3, y + 4);
-            }
-            if(runTime == 2 && !contains) {
-                args.set(2, x-5);
-                args.set(3, y + 4);
-                contains = false;
+                if(runTime == 2) {
+                    args.set(2, x-5);
+                    args.set(3, y + 4);
+                    contains = false;
+                }
             }
         }
     }

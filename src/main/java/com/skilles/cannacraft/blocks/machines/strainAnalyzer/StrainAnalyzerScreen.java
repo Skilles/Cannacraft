@@ -12,6 +12,7 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+
 @Environment(EnvType.CLIENT)
 public class StrainAnalyzerScreen extends HandledScreen<StrainAnalyzerScreenHandler> {
     private static final Identifier TEXTURE = Cannacraft.id("textures/gui/container/strain_analyzer.png");
@@ -19,7 +20,6 @@ public class StrainAnalyzerScreen extends HandledScreen<StrainAnalyzerScreenHand
     public StrainAnalyzerScreen(StrainAnalyzerScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
     }
-    int newEnergy = 0;
     @Override
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -35,11 +35,6 @@ public class StrainAnalyzerScreen extends HandledScreen<StrainAnalyzerScreenHand
         // power bar
         this.drawTexture(matrices, i + 150, j + 9,177, 33, 18, 62);
         this.drawTexture(matrices, i + 151, j + 9, 151, 9, 16, 62-energy);
-
-        if(energy != newEnergy) {
-            System.out.println(energy);
-        }
-        newEnergy = energy;
     }
 
     @Override

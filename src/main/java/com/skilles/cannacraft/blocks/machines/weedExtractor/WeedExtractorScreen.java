@@ -20,7 +20,6 @@ public class WeedExtractorScreen extends HandledScreen<WeedExtractorScreenHandle
     public WeedExtractorScreen(WeedExtractorScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
     }
-    int newEnergy = 0;
     @Override
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -36,11 +35,6 @@ public class WeedExtractorScreen extends HandledScreen<WeedExtractorScreenHandle
         // power bar
         this.drawTexture(matrices, i + 150, j + 9,177, 33, 18, 62);
         this.drawTexture(matrices, i + 151, j + 9, 151, 9, 16, 62-energy);
-
-        if(energy != newEnergy) {
-            System.out.println(energy);
-        }
-        newEnergy = energy;
     }
 
     @Override

@@ -20,9 +20,9 @@ public class LootTable {
     private static final Identifier FERN_LOOT_TABLE_ID = new Identifier("minecraft", "blocks/fern");
     private static final Identifier LARGE_FERN_LOOT_TABLE_ID = new Identifier("minecraft", "blocks/large_fern");
 
-    static final boolean enable = true;
-    static float chestLootChance = .04f;
-    static final float dropLootChance = 0.5f;
+    private static final boolean enable = true;
+    private static final float chestLootChance = .04f;
+    private static final float dropLootChance = 0.5f;
 
     private static final List<LootTableInsert> INSERTS = Lists.newArrayList();
     static FabricLootPoolBuilder lootPool() {

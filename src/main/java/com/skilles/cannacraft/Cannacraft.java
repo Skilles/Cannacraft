@@ -36,28 +36,12 @@ public class Cannacraft implements ModInitializer {
     @Override
     public void onInitialize() {
         StrainMap.registerStrains();
-
         ModCommands.registerCommands();
-        log("Commands registered!");
-
         LootTable.registerLoot();
-        log("LootTables registered!");
-
         ModItems.registerItems();
-        log("Items registered!");
-
         ModEntities.registerEntities();
-        log("Entities registered!");
-
         ModBlocks.registerBlocks();
-        log("Blocks registered!");
-
         ModMisc.registerMisc();
-        log("Effects registered!");
-
         ModScreens.registerScreenHandlers();
-        log("ScreenHandlers registered!");
-
-
     }
 }
