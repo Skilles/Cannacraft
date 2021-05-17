@@ -1,24 +1,31 @@
 package com.skilles.cannacraft.util;
 
+import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.Gene;
 import com.skilles.cannacraft.strain.GeneTypes;
 import com.skilles.cannacraft.strain.StrainMap;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -176,5 +183,32 @@ public final class MiscUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * @param pos position of the block you want to check
+     * @param blocks the block(s) to compare against
+     * @param toGrow check if adjacent block has nothing above
+     * @return null if no block was found, otherwise returns direction of the found block
+     */
+    public static @Nullable Direction isAdjacentTo(ServerWorld world, BlockPos pos, boolean toGrow, Block... blocks) {
+        // TODO: select random direction from valid directions
+        List<Direction> validDirections = new ArrayList<>();
+        for (Direction direction : Direction.Type.HORIZONTAL) {
+            BlockState neighborState = world.getBlockState(pos.offset(direction));
+            for (Block block : blocks) {
+                if (neighborState.isOf(block) && (!toGrow || world.getBlockState(pos.offset(direction).up()).isOf(Blocks.AIR))) validDirections.add(direction);
+            }
+        }
+        if(!validDirections.isEmpty()) return Util.getRandom(validDirections, random());
+        return null;
+    }
+
+    public static void copyNbt(ServerWorld world, BlockPos originalPos, BlockPos copyToPos) {
+        if(world.getBlockEntity(originalPos) != null && world.getBlockEntity(copyToPos) != null) {
+            world.getBlockEntity(copyToPos, ModEntities.WEED_CROP_ENTITY).get().readNbt(
+                    world.getBlockEntity(originalPos, ModEntities.WEED_CROP_ENTITY).get().writeNbt(new NbtCompound()));
+            world.markDirty(copyToPos);
+        }
     }
 }

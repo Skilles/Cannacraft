@@ -31,6 +31,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
+import static com.skilles.cannacraft.CannacraftClient.config;
+import static com.skilles.cannacraft.util.MiscUtil.*;
 import static com.skilles.cannacraft.util.MiscUtil.trimTag;
 
 // TODO: use networking/scheduler, migrate tick to BE
@@ -108,19 +110,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     }
     @Override
     public void grow(ServerWorld world, Random random, BlockPos pos, BlockState state) {
-        /*if(world.isAir(pos.up())) { // if block above is air
-            if(getStage(state) == 1) { // if block is 1st stage
-                if (isMature(state)) { // fully grown, set above to stage 2
-                    world.setBlockState(pos.up(), withStage(2), 2);
-                    world.getBlockEntity(pos.up()).readNbt(world.getBlockEntity(pos).writeNbt(new NbtCompound()));
-                    world.markDirty(pos.up());
-                } else {
-                    this.applyGrowth(world, pos, state);
-                }
-            } else {
-                this.applyGrowth(world, pos, state);
-            }
-        } else*/ if (!world.isAir(pos.up()) && isMature(state)) { // if block is above and is fully grown
+        if (!world.isAir(pos.up()) && isMature(state)) { // if block is above and is fully grown
             if(world.getBlockState(pos.up()).isOf(this)) { // if block above is stage 2
                 BlockState aboveState = world.getBlockState(pos.up());
                 if(isMature(aboveState)) {// if stage 2 is fully grown
@@ -133,13 +123,12 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
             this.applyGrowth(world, pos, state);
         }
     }
-    public void applyGrowth(World world, BlockPos pos, BlockState state) {
+    public void applyGrowth(ServerWorld world, BlockPos pos, BlockState state) {
         int i = this.getAge(state) + this.getGrowthAmount(world);
         int maxAge = getMaxAge(state);
         if (i > maxAge) {
             world.setBlockState(pos.up(), withStage(2).with(AGE,i - maxAge + 5), 2);
-            world.getBlockEntity(pos.up()).readNbt(world.getBlockEntity(pos).writeNbt(new NbtCompound()));
-            world.markDirty(pos.up());
+            copyNbt(world, pos, pos.up());
             i = maxAge;
         }
         world.setBlockState(pos, this.withAge(i).with(MAXAGE, maxAge), 2);
@@ -349,7 +338,19 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     @Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) { // grows the first stage, then grows the second stage (at night)
         this.applyGrowTick(state, world, pos, random);
+        this.applySpreadTick(state, world, pos, random);
     }
+    private void applySpreadTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+       if((!config.getDebug().spreadGrown || state.get(AGE) == 3) && config.getCrop().spread && random.nextFloat() <= config.getCrop().spreadChance) {
+           Direction direction = isAdjacentTo(world, pos.down(), true, Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.FARMLAND);
+           if(direction != null) {
+               BlockPos neighborPos = pos.down().offset(direction);
+               world.setBlockState(neighborPos.up(), state.with(AGE, 0));
+               copyNbt(world, pos, neighborPos.up());
+           }
+       }
+    }
+
     private void growStage(BlockPos pos, ServerWorld world, TriState canGrow) {
         WeedCropEntity blockEntity = (WeedCropEntity) world.getBlockEntity(pos);
         if (canGrow.equals(TriState.DEFAULT)) { // if should grow final stage
@@ -357,9 +358,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         } else { // grow intermediate stage
             world.setBlockState(pos.up(), withStage(2), 2);
         }
-        NbtCompound tag = blockEntity.writeNbt(new NbtCompound());
-        world.getBlockEntity(pos.up()).readNbt(tag);
-        world.markDirty(pos.up());
+        copyNbt(world, pos, pos.up());
     }
     private void growStage(BlockPos pos, ServerWorld world) {
         growStage(pos, world, canGrowNext(world, pos));
