@@ -16,7 +16,7 @@ public class BundleUtil {
             if(grams > 0 && grams % 28 != 0) return ounces + " oz " + new DecimalFormat("0.#").format(grams % 28) + " g";
             return ounces + " oz";
         } else if(grams != 0) {
-            return grams + " g";
+            return new DecimalFormat("0.#").format(grams % 28) + " g";
         }
         return "null g";
     }
