@@ -30,5 +30,6 @@
   "text.autoconfig.cannacraft.option.debug": "Debug Config",
   "text.autoconfig.cannacraft.option.debug.spreadGrown": "Spread Grown",
   "text.autoconfig.cannacraft.option.debug.spreadGrown.@Tooltip": "Toggles spread based on age",
-  "text.stat.cannacraft.joint": "Joints Smoked"
+  "text.stat.cannacraft.joint": "Joints Smoked",
+  "entity.minecraft.villager.stoner" : "Stoner"
 }

@@ -1,7 +1,10 @@
 package com.skilles.cannacraft.registry;
 
 import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
-import com.skilles.cannacraft.components.*;
+import com.skilles.cannacraft.components.EntityInterface;
+import com.skilles.cannacraft.components.ItemStrainComponent;
+import com.skilles.cannacraft.components.PlayerStrainComponent;
+import com.skilles.cannacraft.components.StrainInterface;
 import com.skilles.cannacraft.misc.HighEffect;
 import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistryV3;
@@ -13,12 +16,16 @@ import dev.onyxstudios.cca.api.v3.item.ItemComponentInitializer;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.object.builder.v1.client.model.FabricModelPredicateProviderRegistry;
+import net.fabricmc.fabric.api.object.builder.v1.villager.VillagerProfessionBuilder;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DataPool;
 import net.minecraft.util.registry.BuiltinRegistries;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.village.VillagerProfession;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.gen.GenerationStep;
 import net.minecraft.world.gen.decorator.Decorator;
@@ -28,6 +35,7 @@ import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.RandomPatchFeatureConfig;
 import net.minecraft.world.gen.placer.SimpleBlockPlacer;
 import net.minecraft.world.gen.stateprovider.SimpleBlockStateProvider;
+import net.minecraft.world.poi.PointOfInterestType;
 
 import static com.skilles.cannacraft.Cannacraft.id;
 
@@ -78,10 +86,15 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
     private static void registerModelPredicates() {
         FabricModelPredicateProviderRegistry.register(ModItems.WEED_JOINT, new Identifier("lit"), (itemStack, clientWorld, livingEntity, seed) -> itemStack.hasTag() ? itemStack.getTag().getBoolean("Lit") ? 1.0F : 0.0F : 0.0F);
     }
+    private static final VillagerProfession STONER = VillagerProfessionBuilder.create().id(new Identifier("stoner")).workstation(PointOfInterestType.FARMER).harvestableItems(ModItems.WEED_SEED).secondaryJobSites(Blocks.FARMLAND).workSound(SoundEvents.ENTITY_VILLAGER_WORK_FARMER).build();
+    private static void registerVillagers() {
+        Registry.register(Registry.VILLAGER_PROFESSION, id("stoner"), STONER);
+    }
     public static void registerMisc() {
         registerConfiguredFeature();
         registerBiomeModifications();
         registerEffects();
         registerModelPredicates();
+        registerVillagers();
     }
 }
