@@ -37,7 +37,7 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
         this.stack = stack;
         if(stack.isOf(ModItems.WEED_SEED)) {
             this.type = SEED;
-        } else if(stack.isOf(ModItems.WEED_FRUIT)) {
+        } else if(stack.isOf(ModItems.WEED_BUNDLE)) {
             this.type = FRUIT;
         }
     }
@@ -50,7 +50,6 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
     @Override
     public int getIndex() {
         if(!this.hasTag("ID")) this.setStrain(UNKNOWN_ID);
-
         return this.getInt("ID");
     }
     @Override

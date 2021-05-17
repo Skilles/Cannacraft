@@ -1,10 +1,7 @@
 package com.skilles.cannacraft.registry;
 
 import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
-import com.skilles.cannacraft.components.EntityInterface;
-import com.skilles.cannacraft.components.ItemStrainComponent;
-import com.skilles.cannacraft.components.PlayerStrainComponent;
-import com.skilles.cannacraft.components.StrainInterface;
+import com.skilles.cannacraft.components.*;
 import com.skilles.cannacraft.misc.HighEffect;
 import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistryV3;
@@ -16,28 +13,21 @@ import dev.onyxstudios.cca.api.v3.item.ItemComponentInitializer;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.object.builder.v1.client.model.FabricModelPredicateProviderRegistry;
-import net.fabricmc.fabric.impl.biome.modification.BuiltInRegistryKeys;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DataPool;
 import net.minecraft.util.registry.BuiltinRegistries;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.gen.GenerationStep;
 import net.minecraft.world.gen.decorator.Decorator;
 import net.minecraft.world.gen.decorator.HeightmapDecoratorConfig;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
-import net.minecraft.world.gen.feature.ConfiguredFeatures;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.RandomPatchFeatureConfig;
 import net.minecraft.world.gen.placer.SimpleBlockPlacer;
 import net.minecraft.world.gen.stateprovider.SimpleBlockStateProvider;
-import net.minecraft.world.gen.stateprovider.WeightedBlockStateProvider;
-
-import java.security.KeyStore;
-import java.util.Map;
 
 import static com.skilles.cannacraft.Cannacraft.id;
 
@@ -48,7 +38,7 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
     @Override
     public void registerItemComponentFactories(ItemComponentFactoryRegistry registry) {
         registry.register(ModItems.WEED_SEED, STRAIN, ItemStrainComponent::new);
-        registry.register(ModItems.WEED_FRUIT, STRAIN, ItemStrainComponent::new);
+        registry.register(ModItems.WEED_BUNDLE, STRAIN, ItemStrainComponent::new);
     }
     @Override
     public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
@@ -84,16 +74,9 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
         BuiltinRegistries.CONFIGURED_FEATURE.getKey(WEED_CROP_FEATURE)
                 .ifPresent(key -> BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(),
                         GenerationStep.Feature.VEGETAL_DECORATION, key));
-        //BiomeModifications.addFeature(ctx -> true, GenerationStep.Feature.VEGETAL_DECORATION, BuiltInRegistryKeys.get(WEED_CROP_FEATURE));
-        for (Map.Entry<RegistryKey<ConfiguredFeature<?, ?>>, ConfiguredFeature<?, ?>> entry: BuiltinRegistries.CONFIGURED_FEATURE.getEntries()) {
-            System.out.println(entry.getKey());
-        }
-        //System.out.println(BuiltinRegistries.CONFIGURED_FEATURE.getEntries());
     }
     private static void registerModelPredicates() {
-        FabricModelPredicateProviderRegistry.register(ModItems.WEED_JOINT, new Identifier("lit"), (itemStack, clientWorld, livingEntity, seed) -> {
-            return itemStack.hasTag() ? itemStack.getTag().getBoolean("Lit") ? 1.0F : 0.0F : 0.0F;
-        });
+        FabricModelPredicateProviderRegistry.register(ModItems.WEED_JOINT, new Identifier("lit"), (itemStack, clientWorld, livingEntity, seed) -> itemStack.hasTag() ? itemStack.getTag().getBoolean("Lit") ? 1.0F : 0.0F : 0.0F);
     }
     public static void registerMisc() {
         registerConfiguredFeature();

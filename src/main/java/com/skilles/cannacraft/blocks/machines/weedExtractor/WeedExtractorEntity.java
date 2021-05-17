@@ -92,7 +92,7 @@ public class WeedExtractorEntity extends MachineBlockEntity {
             ItemStack stack = inventory.get(1);
             ItemStack output = inventory.get(0);
             if(stack.equals(ItemStack.EMPTY)) return false;
-                if (stack.isOf(ModItems.WEED_FRUIT) && stack.getCount() >= 1 && stack.hasTag()) {
+                if (stack.isOf(ModItems.WEED_BUNDLE) && stack.getCount() >= 1 && stack.hasTag()) {
                     if(output.equals(ItemStack.EMPTY)) return true;
                     return StrainUtil.getOutputStack(stack).isItemEqual(output);
             }
@@ -119,6 +119,6 @@ public class WeedExtractorEntity extends MachineBlockEntity {
     }
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
-        return stack.isOf(ModItems.WEED_FRUIT);
+        return stack.isOf(ModItems.WEED_BUNDLE);
     }
 }

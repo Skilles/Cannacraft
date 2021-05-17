@@ -27,7 +27,7 @@ public abstract class ShapelessRecipeMixin {
         if(this.id.equals(new Identifier("cannacraft:weed_joint"))) {
             int slotId = 0;
             for(int i = 0; i < craftingInventory.size(); i++) {
-                if(craftingInventory.getStack(i).isOf(ModItems.WEED_FRUIT)) slotId = i;
+                if(craftingInventory.getStack(i).isOf(ModItems.WEED_BUNDLE)) slotId = i;
             }
             ItemStack input = craftingInventory.getStack(slotId).copy();
             ItemStack output = this.getOutput().copy();

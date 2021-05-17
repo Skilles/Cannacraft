@@ -55,7 +55,7 @@ public class StrainUtil {
     }
     public static ItemStack getOutputStack(ItemStack stack) {
         if(AutoConfig.getConfigHolder(ModConfig.class).getConfig().getCrop().resource) {
-            if (stack.isOf(ModItems.WEED_FRUIT) && stack.hasTag()) {
+            if (stack.isOf(ModItems.WEED_BUNDLE) && stack.hasTag()) {
                 return getStrain(stack.getTag()).getItem().getDefaultStack();
             }
         } else {
@@ -200,7 +200,7 @@ public class StrainUtil {
         return strainArray;
     }
     public enum StrainItems {
-        WEED(ModItems.WEED_FRUIT),
+        WEED(ModItems.WEED_BUNDLE),
         COPPER(Items.RAW_COPPER),
         IRON(Items.IRON_NUGGET),
         DIAMOND(Items.DIAMOND),

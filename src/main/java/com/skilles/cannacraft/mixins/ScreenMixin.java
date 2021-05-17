@@ -32,7 +32,7 @@ public class ScreenMixin {
 
     @Inject(method = "getTooltipFromItem", at = @At(value = "RETURN", target = "Lnet/minecraft/client/gui/screen/Screen;getTooltipFromItem(Lnet/minecraft/item/ItemStack;)Ljava/util/List;"), cancellable = true)
     private void keyTooltip(ItemStack stack, CallbackInfoReturnable<List<Text>> cir) {
-        if((stack.isOf(ModItems.WEED_SEED) || stack.isOf(ModItems.WEED_FRUIT)) && hasShiftDown() && stack.hasTag()) {
+        if((stack.isOf(ModItems.WEED_SEED) || stack.isOf(ModItems.WEED_BUNDLE)) && hasShiftDown() && stack.hasTag()) {
             NbtCompound tag = stack.getSubTag("cannacraft:strain");
             assert tag != null;
             if(tag.getBoolean("Identified") && tag.contains("Attributes") && !tag.getList("Attributes", NbtType.COMPOUND).isEmpty()) {

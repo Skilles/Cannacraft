@@ -114,7 +114,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
             if(world.getBlockState(pos.up()).isOf(this)) { // if block above is stage 2
                 BlockState aboveState = world.getBlockState(pos.up());
                 if(isMature(aboveState)) {// if stage 2 is fully grown
-                    MiscUtil.dropStack(world, pos, ModItems.WEED_FRUIT);
+                    MiscUtil.dropStack(world, pos, ModItems.WEED_BUNDLE);
                 } else { // apply growth to stage 2
                     this.applyGrowth(world, pos.up(), aboveState);
                 }
@@ -195,14 +195,14 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
            int i;
            MiscUtil.dropStack(world, pos, ModItems.WEED_SEED, brokenWithShears);
            if (isBloomed(state)) {
-               MiscUtil.dropStack(world, pos, ModItems.WEED_FRUIT, brokenWithShears);
+               MiscUtil.dropStack(world, pos, ModItems.WEED_BUNDLE, brokenWithShears);
            }
            for(i = 1; world.getBlockState(pos.up(i)).isOf(ModBlocks.WEED_CROP); i++){
                BlockState aboveState = world.getBlockState(pos.up(i));
                //WeedCropEntity aboveEntity = (WeedCropEntity) world.getBlockEntity(pos.up(i));
                if(isBloomed(aboveState)) {
                    MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_SEED);
-                   MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_FRUIT, brokenWithShears);
+                   MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_BUNDLE, brokenWithShears);
                    world.breakBlock(pos.up(i), false, player);
                }
            }

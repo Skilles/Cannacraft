@@ -25,7 +25,7 @@ public abstract class ItemEntityMixin {
 
     @Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/world/World;DDDLnet/minecraft/item/ItemStack;)V")
     public void ItemEntity(World world, double x, double y, double z, ItemStack stack, CallbackInfo ci) {
-        if(stack.getItem().equals(ModItems.WEED_SEED) || stack.getItem().equals(ModItems.WEED_FRUIT)) {
+        if(stack.getItem().equals(ModItems.WEED_SEED) || stack.getItem().equals(ModItems.WEED_BUNDLE)) {
             NbtCompound tag = stack.getSubTag("cannacraft:strain");
             if(tag != null && tag.contains("ID")) {
                 if(tag.getInt("ID") == 0) MiscUtil.randomizeTag(tag);

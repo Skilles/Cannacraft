@@ -130,6 +130,6 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
     }
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
-        return stack.isOf(ModItems.WEED_FRUIT);
+        return stack.isOf(ModItems.WEED_BUNDLE);
     }
 }

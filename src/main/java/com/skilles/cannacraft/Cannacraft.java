@@ -17,7 +17,7 @@ public class Cannacraft implements ModInitializer {
 
     public static final ItemGroup ITEM_GROUP = FabricItemGroupBuilder.build(
             id("general"),
-            () -> new ItemStack(ModItems.WEED_FRUIT));
+            () -> new ItemStack(ModItems.WEED_JOINT));
 
     public static Identifier id(String path) {
         return new Identifier(MOD_ID, path);
