@@ -34,16 +34,13 @@ public class ScreenMixin {
     private void keyTooltip(ItemStack stack, CallbackInfoReturnable<List<Text>> cir) {
         if((stack.isOf(ModItems.WEED_SEED) || stack.isOf(ModItems.WEED_BUNDLE)) && hasShiftDown() && stack.hasTag()) {
             NbtCompound tag = stack.getSubTag("cannacraft:strain");
-            assert tag != null;
             if(tag.getBoolean("Identified") && tag.contains("Attributes") && !tag.getList("Attributes", NbtType.COMPOUND).isEmpty()) {
                 List<Text> tooltip = cir.getReturnValue();
                 NbtList genes = tag.getList("Attributes", NbtType.COMPOUND);
-                assert tooltip.size() >= 6;
-                tooltip.set(5, new LiteralText("Genes: ").formatted(Formatting.GRAY));
+                tooltip.set(tooltip.size()-1, new LiteralText("Genes: ").formatted(Formatting.GRAY));
                 ArrayList<Gene> geneList = MiscUtil.fromNbtList(genes);
-                for (int i = 0, geneListSize = geneList.size(); i < geneListSize; i++) {
-                    Gene gene = geneList.get(i);
-                    tooltip.add(6+i, new LiteralText("- ").formatted(Formatting.DARK_GRAY).append(new LiteralText(StringUtils.capitalize(gene.name())).formatted(Formatting.AQUA)).append(new LiteralText(" | ").formatted(Formatting.GRAY)).append(new LiteralText(String.valueOf(gene.level())).formatted(Formatting.GOLD)));
+                for (Gene gene : geneList) {
+                    tooltip.add(new LiteralText("- ").formatted(Formatting.DARK_GRAY).append(new LiteralText(StringUtils.capitalize(gene.name())).formatted(Formatting.AQUA)).append(new LiteralText(" | ").formatted(Formatting.GRAY)).append(new LiteralText(String.valueOf(gene.level())).formatted(Formatting.GOLD)));
                 }
                 cir.setReturnValue(tooltip);
             }
