@@ -11,7 +11,7 @@ import net.minecraft.text.Text;
 import net.minecraft.world.World;
 
 import java.util.List;
-
+@Deprecated
 public class WeedFruit extends Item {
     public WeedFruit(Settings settings) {
         super(settings);

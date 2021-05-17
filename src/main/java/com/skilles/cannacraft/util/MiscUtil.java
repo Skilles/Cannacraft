@@ -77,7 +77,7 @@ public final class MiscUtil {
                 if (type.equals(ModItems.WEED_SEED) && !tag.getBoolean("Male")) {
                     toDrop.putSubTag("cannacraft:strain", trimTag(tag, type));
                     Block.dropStack(world, pos, toDrop);
-                } else if (brokenWithShears && type.equals(ModItems.WEED_FRUIT)) {
+                } else if (brokenWithShears && type.equals(ModItems.WEED_BUNDLE)) {
                     toDrop.putSubTag("cannacraft:strain", trimTag(tag));
                     Block.dropStack(world, pos, toDrop);
                 }
