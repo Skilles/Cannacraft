@@ -3,8 +3,9 @@ package com.skilles.cannacraft.components;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.Gene;
 import com.skilles.cannacraft.strain.GeneTypes;
-import com.skilles.cannacraft.strain.GeneticsManager;
 import com.skilles.cannacraft.strain.StrainMap;
+import com.skilles.cannacraft.util.MiscUtil;
+import com.skilles.cannacraft.util.StrainUtil;
 import dev.onyxstudios.cca.api.v3.component.CopyableComponent;
 import dev.onyxstudios.cca.api.v3.item.CcaNbtType;
 import dev.onyxstudios.cca.api.v3.item.ItemComponent;
@@ -19,7 +20,7 @@ import java.util.List;
 
 import static com.skilles.cannacraft.components.ItemStrainComponent.StrainType.FRUIT;
 import static com.skilles.cannacraft.components.ItemStrainComponent.StrainType.SEED;
-import static com.skilles.cannacraft.strain.StrainMap.normalDist;
+import static com.skilles.cannacraft.util.StrainUtil.normalDist;
 
 
 public class ItemStrainComponent extends ItemComponent implements StrainInterface, CopyableComponent<ItemStrainComponent> {
@@ -36,7 +37,7 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
         this.stack = stack;
         if(stack.isOf(ModItems.WEED_SEED)) {
             this.type = SEED;
-        } else if(stack.isOf(ModItems.WEED_FRUIT)) {
+        } else if(stack.isOf(ModItems.WEED_BUNDLE)) {
             this.type = FRUIT;
         }
     }
@@ -49,7 +50,6 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
     @Override
     public int getIndex() {
         if(!this.hasTag("ID")) this.setStrain(UNKNOWN_ID);
-
         return this.getInt("ID");
     }
     @Override
@@ -73,7 +73,7 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
     public void addGene(String name, int level) {
         ArrayList<Gene> currentList = new ArrayList<>();
         if(hasGenes()){
-            currentList = GeneticsManager.fromNbtList(getGenetics());
+            currentList = MiscUtil.fromNbtList(getGenetics());
             for(int i = 0; i < currentList.size(); i++) {
                 Gene entry = currentList.get(i);
                 if(entry.name().equalsIgnoreCase(name)) {
@@ -82,7 +82,7 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
             }
         }
         currentList.add(new Gene(GeneTypes.byName(name), level));
-        setGenetics(GeneticsManager.toNbtList(currentList));
+        setGenetics(MiscUtil.toNbtList(currentList));
     }
     @Override
     public void setStrain(int index) { // sets strain and type NBT based on index
@@ -93,12 +93,12 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
     @Override
     public String getStrain() {
         if(!this.hasTag("ID")) setStrain(getIndex());
-        return StrainMap.getStrain(this.getInt("ID")).name();
+        return StrainUtil.getStrain(this.getInt("ID")).name();
     }
     @Override
     public StrainMap.Type getType() {
         if(!this.hasTag("Type")) setStrain(getIndex());
-        return StrainMap.getStrain(this.getInt("ID")).type();
+        return StrainUtil.getStrain(this.getInt("ID")).type();
     }
     @Override
     public int getThc() {

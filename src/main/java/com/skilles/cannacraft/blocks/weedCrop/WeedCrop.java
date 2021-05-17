@@ -3,8 +3,9 @@ package com.skilles.cannacraft.blocks.weedCrop;
 import com.skilles.cannacraft.registry.ModBlocks;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.GeneTypes;
-import com.skilles.cannacraft.strain.GeneticsManager;
+import com.skilles.cannacraft.util.MiscUtil;
 import net.fabricmc.fabric.api.util.NbtType;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
@@ -18,7 +19,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.IntProperty;
-import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -31,19 +31,39 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
-import static com.skilles.cannacraft.strain.GeneticsManager.trimTag;
+import static com.skilles.cannacraft.CannacraftClient.config;
+import static com.skilles.cannacraft.util.MiscUtil.*;
+import static com.skilles.cannacraft.util.MiscUtil.trimTag;
 
+// TODO: use networking/scheduler, migrate tick to BE
 public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertilizable {
 
     //public static final IntProperty STRAIN = IntProperty.of("strain", 0, 2); // maybe add custom textures per strain
-    public static final IntProperty MAXAGE = IntProperty.of("maxage", 0, 7);
+    public static final IntProperty MAXAGE = IntProperty.of("maxage", 3, 9);
     public static final BooleanProperty BREEDING = BooleanProperty.of("breeding");
-    public static final IntProperty AGE = Properties.AGE_7;
-    private static final VoxelShape[] AGE_TO_SHAPE = new VoxelShape[]{Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D), Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 4.0D, 16.0D), Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 6.0D, 16.0D), Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D), Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 10.0D, 16.0D), Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 12.0D, 16.0D), Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D), Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D)};
+    public static final IntProperty AGE = IntProperty.of("age", 0, 10); // age 0-3 is 1st stage, age 4 is connector; age 5-8 is 2nd stage; age 9 is final stage flowering, age 10 is 1st stage flowering TODO: add more age
+    private static final int CONNECTOR_AGE = 4;
+    private static final int FIRST_BLOOM = 10;
+    private static final int FINAL_BLOOM = 9;
+    private static final int STAGE_ONE_MAX = 3;
+    private static final int STAGE_TWO_MAX = 8;
+    private static final VoxelShape[] AGE_TO_SHAPE = new VoxelShape[]{
+            Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D),
+            Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 6.0D, 16.0D),
+            Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 10.0D, 16.0D),
+            Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D),
+            Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D),
+            Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D),
+            Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 6.0D, 16.0D),
+            Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 10.0D, 16.0D),
+            Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D),
+            Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D),
+            Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D),
+    };
 
     public WeedCrop(Settings settings) {
         super(settings);
-        this.setDefaultState(withMaxAge(7).with(AGE, 0).with(BREEDING, false));
+        this.setDefaultState(withMaxAge(STAGE_ONE_MAX).with(AGE, 0).with(BREEDING, false));
     }
     public BlockState withMaxAge(int age) {
         return this.getDefaultState().with(MAXAGE, age);
@@ -56,7 +76,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
         if(pos.down().equals(neighborPos) && neighborState.isOf(Blocks.DIRT))
-            GeneticsManager.dropStack(world, pos, ModItems.WEED_SEED);
+            MiscUtil.dropStack(world, pos, ModItems.WEED_SEED);
         return !state.canPlaceAt(world, pos) && neighborState.isOf(Blocks.DIRT) ? Blocks.AIR.getDefaultState() : state;
     }
     @Override
@@ -65,8 +85,6 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     }
     @Override
     protected boolean canPlantOnTop(BlockState floor, BlockView world, BlockPos pos) {
-        BlockPos blockPos = pos.down();
-        //if(world.getBlockState(blockPos).isOf(this)) return true;
         return floor.isOf(Blocks.FARMLAND) || floor.isOf(Blocks.GRASS_BLOCK);
     }
 
@@ -78,7 +96,6 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     }
 
     public boolean isMature(BlockState state) {
-        //if(!state.get(MATURE)) return false;
         return (state.get((this.getAgeProperty())) >= getMaxAge(state));
     }
 
@@ -93,50 +110,54 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     }
     @Override
     public void grow(ServerWorld world, Random random, BlockPos pos, BlockState state) {
-        System.out.println("grow method");
-        if(world.isAir(pos.up())) { // if block above is air
-            if(getMaxAge(state) ==  7) { // if block is 1st stage
-                if (state.get((this.getAgeProperty())) >= getMaxAge(state)) { // fully grown, set above to stage 2
-                    world.setBlockState(pos.up(), withMaxAge(5), 2);
-                    world.getBlockEntity(pos.up()).readNbt(world.getBlockEntity(pos).writeNbt(new NbtCompound()));
-                    world.markDirty(pos.up());
-                } else {
-                    this.applyGrowth(world, pos, state, 7);
-                }
-            } else {
-                this.applyGrowth(world, pos, state, 5);
-            }
-        } else if(state.get((this.getAgeProperty())) >= getMaxAge(state)) { // if block is above and is fully grown
+        if (!world.isAir(pos.up()) && isMature(state)) { // if block is above and is fully grown
             if(world.getBlockState(pos.up()).isOf(this)) { // if block above is stage 2
                 BlockState aboveState = world.getBlockState(pos.up());
-                if(world.getBlockState(pos.up()).get(AGE) >= world.getBlockState(pos.up()).get(MAXAGE)) {// if stage 2 is fully grown
-                    NbtCompound tag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
-                    ItemStack itemStack = new ItemStack(ModItems.WEED_FRUIT);
-                    itemStack.putSubTag("cannacraft:strain", trimTag(tag));
-                    dropStack(world, pos, itemStack);
+                if(isMature(aboveState)) {// if stage 2 is fully grown
+                    MiscUtil.dropStack(world, pos, ModItems.WEED_BUNDLE);
                 } else { // apply growth to stage 2
-                    this.applyGrowth(world, pos.up(), aboveState, 5);
+                    this.applyGrowth(world, pos.up(), aboveState);
                 }
             }
+        } else {
+            this.applyGrowth(world, pos, state);
         }
     }
-
-
-    public void applyGrowth(World world, BlockPos pos, BlockState state, int maxAge) {
-        System.out.println("apply growth method");
+    public void applyGrowth(ServerWorld world, BlockPos pos, BlockState state) {
         int i = this.getAge(state) + this.getGrowthAmount(world);
-        int j = maxAge;
-        if (i > j) {
-            i = j;
+        int maxAge = getMaxAge(state);
+        if (i > maxAge) {
+            world.setBlockState(pos.up(), withStage(2).with(AGE,i - maxAge + 5), 2);
+            copyNbt(world, pos, pos.up());
+            i = maxAge;
         }
-        world.setBlockState(pos, this.withAge(i).with(MAXAGE, getMaxAge(state)), 2);
+        world.setBlockState(pos, this.withAge(i).with(MAXAGE, maxAge), 2);
+    }
+    private int getBelow(World world, BlockPos pos) {
+        int i = 1;
+        if (!world.getBlockState(pos.down()).isOf(Blocks.FARMLAND) && !world.getBlockState(pos.down()).isOf(Blocks.GRASS_BLOCK)) {
+            for (i = 1; world.getBlockState(pos.down(i)).isOf(this); ++i) { // i = how many stages
+            }
+        }
+        return i;
     }
 
+    /**
+     * @return DEFAULT if next stage is final
+     */
+    private TriState canGrowNext(World world, BlockPos pos) {
+        WeedCropEntity blockEntity = (WeedCropEntity) world.getBlockEntity(pos);
+        if(blockEntity.hasGene(GeneTypes.YIELD)) // if not first stage and has yield
+            return getBelow(world, pos) < blockEntity.growLimit() - 1 ? TriState.TRUE : TriState.DEFAULT; // true if below grow limit, default if next stage is final
+        if (getStage(world.getBlockState(pos)) == 1) // if first stage, check if block is air
+            return world.isAir(pos.up()) ? TriState.DEFAULT : TriState.FALSE;
+        return TriState.FALSE; // false if not first stage and no yield
+    }
     protected int getGrowthAmount(World world) {
-        return MathHelper.nextInt(world.random, 2, 5);
+        return MathHelper.nextInt(world.random, 1, 2);
     }
     public boolean hasRandomTicks(BlockState state) {
-        if(getMaxAge(state) == 7) return true;
+        if(getMaxAge(state) == STAGE_ONE_MAX) return true;
         return !this.isMature(state);
     }
     protected int getAge(BlockState state) {
@@ -172,16 +193,16 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
        if(player.getMainHandStack().isOf(Items.SHEARS)) brokenWithShears = true;
        if(!world.isClient) {
            int i;
-           GeneticsManager.dropStack(world, pos, ModItems.WEED_SEED, brokenWithShears);
-           if (getAge(state) == getMaxAge(state)) {
-               GeneticsManager.dropStack(world, pos, ModItems.WEED_FRUIT, brokenWithShears);
+           MiscUtil.dropStack(world, pos, ModItems.WEED_SEED, brokenWithShears);
+           if (isBloomed(state)) {
+               MiscUtil.dropStack(world, pos, ModItems.WEED_BUNDLE, brokenWithShears);
            }
            for(i = 1; world.getBlockState(pos.up(i)).isOf(ModBlocks.WEED_CROP); i++){
                BlockState aboveState = world.getBlockState(pos.up(i));
                //WeedCropEntity aboveEntity = (WeedCropEntity) world.getBlockEntity(pos.up(i));
-               if(getAge(aboveState) == getMaxAge(aboveState)) {
-                   GeneticsManager.dropStack(world, pos.up(i), ModItems.WEED_SEED);
-                   GeneticsManager.dropStack(world, pos.up(i), ModItems.WEED_FRUIT, brokenWithShears);
+               if(isBloomed(aboveState)) {
+                   MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_SEED);
+                   MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_BUNDLE, brokenWithShears);
                    world.breakBlock(pos.up(i), false, player);
                }
            }
@@ -190,7 +211,45 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         super.onBreak(world, pos, state, player);
     }
 
-
+    /**
+     * @return 1 = stage one, 2 = intermediate stage, 3 = final stage, 4 = connector
+     */
+    private int getStage(BlockState state) {
+        if(state.get(AGE) == CONNECTOR_AGE) return 4;
+        switch (state.get(MAXAGE)) {
+            case STAGE_ONE_MAX:
+                return 1;
+            case STAGE_TWO_MAX:
+                return 2;
+            default:
+                return 3;
+        }
+    }
+    private BlockState withStage(int stage) {
+        switch (stage) {
+            default:
+                return this.getDefaultState();
+            case 2:
+                return withMaxAge(8).with(AGE, 5);
+            case 3:
+                return withMaxAge(FINAL_BLOOM).with(AGE, 5);
+            case 4:
+                return withAge(CONNECTOR_AGE);
+        }
+    }
+    /**
+     * Blooms 1st, 2nd/medium, or final stages
+     */
+    private void bloomAll(World world, BlockPos pos) {
+        if(getStage(world.getBlockState(pos)) != 3) {
+            world.setBlockState(pos, withAge(FIRST_BLOOM));
+        } else {
+            world.setBlockState(pos, withAge(FINAL_BLOOM));
+        }
+    }
+    private boolean isBloomed(BlockState state) {
+        return state.get(AGE) == FIRST_BLOOM || state.get(AGE) == FINAL_BLOOM;
+    }
     @Override
     public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
         super.randomDisplayTick(state, world, pos, random);
@@ -211,71 +270,98 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
                 }
         }
     }
-    // TODO: use realistic grow time
-    @Override
-    public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) { // grows the first stage, then grows the second stage (at night)
+    private boolean finalGrow(BlockState state) {
+        return this.getAge(state) + 1 >= STAGE_TWO_MAX;
+    }
+    protected void applyGrowTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         WeedCropEntity blockEntity = (WeedCropEntity) world.getBlockEntity(pos);
-        int i = 1;
-        if (!world.getBlockState(pos.down()).isOf(Blocks.FARMLAND) && !world.getBlockState(pos.down()).isOf(Blocks.GRASS_BLOCK)) {
-            for (i = 1; world.getBlockState(pos.down(i)).isOf(this); ++i) { // i = how many stages
-            }
-        }
+        assert blockEntity != null;
+        assert (getStage(state) == 2 && state.get(AGE) < 5);
         int j = getAge(state);
-        float f = getAvailableMoisture(this, world, pos) * blockEntity.multiplier();
-        if (this.getMaxAge(state) == 5) { // second stage
+        float f = getAvailableMoisture(this, world, pos);
+        if (getStage(state) == 2) { // second stage
             if (world.getLightLevel(pos.up()) <= 4 && j < this.getMaxAge(state)) {
-                if (random.nextInt((int) (25.0F / f) + 1) == 0) {
-                    if (blockEntity.hasGene(GeneTypes.YIELD) && this.getAge(state) + 1 >= 5 && i < blockEntity.growLimit()) { // if has yield, about to grow, and below grow limit
-                        if (world.isAir(pos.up())) { // if block above is air
-                            if(i == blockEntity.growLimit() - 1) { // if should grow final stage
-                                world.setBlockState(pos.up(), withMaxAge(3), 2);
-                            } else { // grow 3rd stage
-                                world.setBlockState(pos.up(), withMaxAge(5), 2);
-                            }
-                            world.setBlockState(pos, state.with(AGE, j + 1), 2);
-                            NbtCompound tag = blockEntity.writeNbt(new NbtCompound());
-                            blockEntity.readNbt(tag);
-                            world.getBlockEntity(pos.up()).readNbt(tag);
-                            world.markDirty(pos.up());
-                            world.markDirty(pos);
-                        }
+                TriState canGrow = canGrowNext(world, pos);
+                if (random.nextFloat() < (f/14)*(blockEntity.multiplier()/2)) {
+                    if (finalGrow(state) && canGrow.orElse(true)) { // if has yield, about to grow, and below grow limit
+                        growStage(pos, world, canGrow);
+                        world.markDirty(pos);
+                        world.setBlockState(pos, withStage(4), 2); // convert 2nd stage to connector
                     } else {
                         world.setBlockState(pos, state.with(AGE, j + 1), 2);
                     }
                 }
             }
-        } else if (getMaxAge(state) == 7) { // first stage
+        } else if (getStage(state) == 1) { // first stage
             if (j < this.getMaxAge(state) && (world.getLightLevel(pos) >= 9)) {
-                if (random.nextInt((int) (25.0F / f) + 1) == 0) {
+                if (random.nextFloat() < (f/14)*(blockEntity.multiplier()/2)) {
                     world.setBlockState(pos, state.with(AGE, j + 1), 2);
                 }
-            } else if (j == 7) { // onGrow
+            } else if (getAge(state) == STAGE_ONE_MAX) { // onGrow
                 if (blockEntity.canBreed()) { // if can breed
-                    if (!blockEntity.isBreeding()) { // if not currently breeding
-                        if (!blockEntity.hasBred()) { // if hasn't bred before, then start breeding
-                            world.setBlockState(pos, world.getBlockState(pos).with(BREEDING, true), 2);
-                            blockEntity.startBreeding();
-                        }
-                    } else { // if is currently breeding
-                        blockEntity.incrementBreedTick();
-                    }
+                    this.breedTick(world, pos, blockEntity);
                 }
-                if (world.isAir(pos.up())) { // if block above is air
-                    if (random.nextInt((int) (25.0F / f) + 1) == 0 && world.getLightLevel(pos) <= 4) {
-                        world.setBlockState(pos.up(), withMaxAge(5), 2);
-                        NbtCompound tag = blockEntity.writeNbt(new NbtCompound());
-                        blockEntity.readNbt(tag);
-                        world.getBlockEntity(pos.up()).readNbt(tag);
-                        world.markDirty(pos.up());
+                TriState canGrow = canGrowNext(world, pos);
+                if (canGrow.orElse(true)) { // if true OR default
+                    if (random.nextFloat() < (f/14)*(blockEntity.multiplier()/2) && world.getLightLevel(pos) <= 4) {
+                        growStage(pos, world, canGrow);
+                        world.setBlockState(pos, withStage(4), 2); // set to connector
                         world.markDirty(pos);
                     }
                 }
             }
-        } else { // final stage
-            if (random.nextInt((int) (25.0F / f) + 1) == 0) {
+        } else if (getStage(state) == 3){ // final stage
+            if (random.nextFloat() < (f/14)*(blockEntity.multiplier()/2)) {
+                if(this.getAge(state) + 1 >= FINAL_BLOOM) { // if about to flower, flower all other stages
+                    for(int z = 1; z < getBelow(world, pos); z++) { // will only run if z is 1,2,3
+                        BlockPos bloomPos = pos.down(z);
+                        this.bloomAll(world, bloomPos);
+                    }
+                }
                 world.setBlockState(pos, state.with(AGE, j + 1), 2);
             }
         }
+    }
+
+    private void breedTick(ServerWorld world, BlockPos pos, WeedCropEntity blockEntity) {
+        if (!blockEntity.isBreeding()) { // if not currently breeding
+            if (!blockEntity.hasBred()) { // if hasn't bred before, then start breeding
+                world.setBlockState(pos, world.getBlockState(pos).with(BREEDING, true), 2);
+                blockEntity.startBreeding();
+            }
+        } else { // if is currently breeding
+            blockEntity.incrementBreedTick();
+        }
+    }
+
+    // TODO: use realistic grow time
+    @Override
+    public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) { // grows the first stage, then grows the second stage (at night)
+        this.applyGrowTick(state, world, pos, random);
+        this.applySpreadTick(state, world, pos, random);
+    }
+    private void applySpreadTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+       if((!config.getDebug().spreadGrown || state.get(AGE) == 3) && config.getCrop().spread && random.nextFloat() <= config.getCrop().spreadChance) {
+           Direction direction = isAdjacentTo(world, pos.down(), true, Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.FARMLAND);
+           if(direction != null) {
+               BlockPos neighborPos = pos.down().offset(direction);
+               world.setBlockState(neighborPos.up(), state.with(AGE, 0));
+               copyNbt(world, pos, neighborPos.up());
+           }
+       }
+    }
+
+    private void growStage(BlockPos pos, ServerWorld world, TriState canGrow) {
+        WeedCropEntity blockEntity = (WeedCropEntity) world.getBlockEntity(pos);
+        if (canGrow.equals(TriState.DEFAULT)) { // if should grow final stage
+            world.setBlockState(pos.up(), withStage(3), 2);
+        } else { // grow intermediate stage
+            world.setBlockState(pos.up(), withStage(2), 2);
+        }
+        copyNbt(world, pos, pos.up());
+    }
+    private void growStage(BlockPos pos, ServerWorld world) {
+        growStage(pos, world, canGrowNext(world, pos));
     }
     /* BlockState flags:
     1 NOTIFY_NEIGHBORS
@@ -297,7 +383,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
             }
             blockPos = blockPos.down(k - 1);
         }
-
+        /*
         for(int i = -1; i <= 1; ++i) {
             for(int j = -1; j <= 1; ++j) {
                 float g = 0.0F;
@@ -315,7 +401,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
 
                 f += g;
             }
-        }
+        }*/
 
         BlockPos blockPos2 = pos.north();
         BlockPos blockPos3 = pos.south();

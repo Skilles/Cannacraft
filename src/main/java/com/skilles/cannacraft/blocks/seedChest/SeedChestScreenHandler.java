@@ -17,7 +17,7 @@ public class SeedChestScreenHandler extends ScreenHandler {
     //The client will call the other constructor with an empty Inventory and the screenHandler will automatically
     //sync this empty inventory with the inventory on the server.
     public SeedChestScreenHandler(int syncId, PlayerInventory playerInventory) {
-        this(syncId, playerInventory, new SimpleInventory(9));
+        this(syncId, playerInventory, new SimpleInventory(36));
     }
 
     //This constructor gets called from the BlockEntity on the server without calling the other constructor first, the server knows the inventory of the container
@@ -25,7 +25,7 @@ public class SeedChestScreenHandler extends ScreenHandler {
     public SeedChestScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory) {
         super(ModScreens.SEED_CHEST_SCREEN_HANDLER, syncId);
         this.inventory = inventory;
-        checkSize(inventory, 9);
+        checkSize(inventory, 36);
         //some inventories do custom logic when a player opens it.
         inventory.onOpen(playerInventory.player);
 
@@ -35,11 +35,11 @@ public class SeedChestScreenHandler extends ScreenHandler {
         int l;
         //Our inventory
         for (m = 0; m < 3; ++m) {
-            for (l = 0; l < 3; ++l) {
-                this.addSlot(new Slot(inventory, l + m * 3, 62 + l * 18, 17 + m * 18) {
+            for (l = 0; l < 9; ++l) {
+                this.addSlot(new Slot(inventory, l + m * 9, 8 + l * 18, 17 + m * 18) {
                     public boolean canInsert(ItemStack stack) {
                         // Only allow tagged seeds
-                        return stack.getItem() == ModItems.WEED_SEED && stack.hasTag();
+                        return stack.getItem() == ModItems.WEED_SEED && stack.hasTag() && stack.getOrCreateSubTag("cannacraft:strain").getBoolean("Identified");
                     }
                 });
             }

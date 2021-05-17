@@ -1,18 +1,18 @@
 package com.skilles.cannacraft.blocks.machines.seedCrosser;
 
+import com.skilles.cannacraft.blocks.machines.MachineBlock;
 import com.skilles.cannacraft.blocks.machines.MachineBlockEntity;
-import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzer;
 import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.registry.ModItems;
-import com.skilles.cannacraft.strain.GeneticsManager;
 import com.skilles.cannacraft.strain.StrainMap;
+import com.skilles.cannacraft.util.CrossUtil;
+import com.skilles.cannacraft.util.StrainUtil;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.PropertyDelegate;
@@ -29,6 +29,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+
+import static com.skilles.cannacraft.Cannacraft.log;
 
 public class SeedCrosserEntity extends MachineBlockEntity {
     private final double powerMultiplier = 1; // Energy use multiplier
@@ -51,7 +53,6 @@ public class SeedCrosserEntity extends MachineBlockEntity {
                         return 0;
                 }
             }
-
             @Override
             public void set(int index, int value) {
                 switch(index) {
@@ -62,7 +63,6 @@ public class SeedCrosserEntity extends MachineBlockEntity {
                         SeedCrosserEntity.this.powerStored = value;
                 }
             }
-
             @Override
             public int size() {
                 return 2;
@@ -71,38 +71,36 @@ public class SeedCrosserEntity extends MachineBlockEntity {
     }
     public static void tick(World world, BlockPos pos, BlockState state, SeedCrosserEntity blockEntity) {
         if (world == null || world.isClient) return;
-        if(isNextTo(world, pos, Blocks.GLOWSTONE) && blockEntity.powerStored < blockEntity.getMaxStoredPower()) {
+        if (isNextTo(world, pos, Blocks.GLOWSTONE) && blockEntity.powerStored < blockEntity.getMaxStoredPower()) {
             blockEntity.addEnergy(2);
             markDirty(world, pos, state);
         }
         if (blockEntity.isWorking()) {
-            state = state.with(StrainAnalyzer.ACTIVE, true);
-            world.setBlockState(pos, state, Block.NOTIFY_ALL);
-            markDirty(world, pos, state);
+            if (!world.isReceivingRedstonePower(pos)) {
+                processTick(blockEntity); // playSound is called here
+                state = state.with(MachineBlock.ACTIVE, true);
+                world.setBlockState(pos, state, Block.NOTIFY_ALL);
+                markDirty(world, pos, state);
+            }
             if (canCraft(blockEntity.inventory) && blockEntity.processingTime == timeToProcess) { // when done crafting
-                blockEntity.playSound(craft(blockEntity.inventory));
+                blockEntity.playSound(craft(blockEntity.inventory)); // craft and play sound if new strain
                 blockEntity.processingTime = 1; // keep working
                 markDirty(world, pos, state);
             } else if (!canCraft(blockEntity.inventory)) {
                 blockEntity.processingTime = 0;
                 markDirty(world, pos, state);
-            } else if (!world.isReceivingRedstonePower(pos)) {
-                processTick(blockEntity); // playSound is called here
-                markDirty(world, pos, state);
             }
-        } else {
-            if (canCraft(blockEntity.inventory) && blockEntity.powerStored != 0) { // start if has power
-                blockEntity.processingTime = 1;
-            } else { // when no items or can't craft
-                blockEntity.processingTime = 0;
-                state = state.with(StrainAnalyzer.ACTIVE, false);
-                world.setBlockState(pos, state, Block.NOTIFY_ALL);
-            }
-            markDirty(world, pos, state);
+        } else if (canCraft(blockEntity.inventory) && blockEntity.powerStored != 0) { // start if has power
+            blockEntity.processingTime = 1;
+        } else { // when no items or can't craft
+            blockEntity.processingTime = 0;
+            state = state.with(MachineBlock.ACTIVE, false);
+            world.setBlockState(pos, state, Block.NOTIFY_ALL);
         }
-
+        markDirty(world, pos, state);
     }
-    private void playSound(int flag) {
+    @Override
+    public void playSound(int flag) {
         World world  = getWorld();
         SoundEvent runSound = SoundEvents.BLOCK_HONEY_BLOCK_SLIDE;
         assert world != null;
@@ -138,16 +136,9 @@ public class SeedCrosserEntity extends MachineBlockEntity {
                 );
                 // Sends message to nearby players
                 for (ServerPlayerEntity player : PlayerLookup.tracking((ServerWorld) world, pos)) {
-                    player.sendSystemMessage(Text.of(StrainMap.getStrain(StrainMap.getStrainCount() - 1).name() + " has been created!"), Util.NIL_UUID);
+                    player.sendSystemMessage(Text.of(StrainUtil.getStrain(StrainUtil.getStrainCount() - 1).name() + " has been created!"), Util.NIL_UUID);
                 }
             }
-        }
-    }
-    public boolean isWorking() {
-        if(needsPower) { // TODO: use solar power if no generators found
-            return processingTime != 0 && powerStored != 0;
-        } else {
-            return processingTime != 0;
         }
     }
     protected static boolean canCraft(DefaultedList<ItemStack> inventory) {
@@ -164,18 +155,13 @@ public class SeedCrosserEntity extends MachineBlockEntity {
                         return true;
                     } else {
                         NbtCompound outputTag = output.getSubTag("cannacraft:strain");
-                        String newName = GeneticsManager.crossStrains(StrainMap.getStrain(tag.getInt("ID")).name(), StrainMap.getStrain(tag2.getInt("ID")).name());
-                        int newThc = GeneticsManager.crossThc(tag.getInt("THC"), tag2.getInt("THC"));
-                        return StrainMap.isPresent(newName) && outputTag.getInt("ID") == StrainMap.indexOf(newName) && newThc == outputTag.getInt("THC");
+                        String newName = CrossUtil.crossStrains(StrainUtil.getStrain(tag.getInt("ID")).name(), StrainUtil.getStrain(tag2.getInt("ID")).name());
+                        int newThc = CrossUtil.crossThc(tag.getInt("THC"), tag2.getInt("THC"));
+                        return StrainUtil.isPresent(newName) && outputTag.getInt("ID") == StrainUtil.indexOf(newName) && newThc == outputTag.getInt("THC");
                     }
                 }
             }
         return false;
-    }
-    private static void processTick(SeedCrosserEntity blockEntity) {
-        blockEntity.processingTime++;
-        if(blockEntity.needsPower) blockEntity.useEnergy(1 * blockEntity.powerMultiplier);
-        blockEntity.playSound(0);
     }
     protected static int craft(DefaultedList<ItemStack> inventory) {
         int flag = 0; // flag if no new strain was added
@@ -187,17 +173,17 @@ public class SeedCrosserEntity extends MachineBlockEntity {
         NbtCompound tag = stack.getSubTag("cannacraft:strain");
         NbtCompound tag2 = stack2.getSubTag("cannacraft:strain");
 
-        String newName = GeneticsManager.crossStrains(StrainMap.getStrain(tag.getInt("ID")).name(), StrainMap.getStrain(tag2.getInt("ID")).name());
-        StrainMap.Type newType = GeneticsManager.crossTypes(StrainMap.getStrain(tag.getInt("ID")).type(), StrainMap.getStrain(tag2.getInt("ID")).type());
-        int newThc = GeneticsManager.crossThc(tag.getInt("THC"), tag2.getInt("THC"));
+        String newName = CrossUtil.crossStrains(StrainUtil.getStrain(tag.getInt("ID")).name(), StrainUtil.getStrain(tag2.getInt("ID")).name());
+        StrainMap.Type newType = CrossUtil.crossTypes(StrainUtil.getStrain(tag.getInt("ID")).type(), StrainUtil.getStrain(tag2.getInt("ID")).type());
+        int newThc = CrossUtil.crossThc(tag.getInt("THC"), tag2.getInt("THC"));
 
-        if(!StrainMap.getNames().containsKey(newName)) {
-            StrainMap.addStrain(newName, newType);
-            System.out.println("New strain: "+StrainMap.getStrain(StrainMap.getStrainCount() - 1)); // print latest strain
+        if(!StrainUtil.getNames().containsKey(newName)) {
+            StrainUtil.addStrain(newName, newType);
+            log("New strain: "+ StrainUtil.getStrain(StrainUtil.getStrainCount() - 1)); // print latest strain
             flag = 1; // flag if strain was added
         }
         NbtCompound strainTag = new NbtCompound();
-        strainTag.putInt("ID", StrainMap.indexOf(newName));
+        strainTag.putInt("ID", StrainUtil.indexOf(newName));
         strainTag.putBoolean("Identified", true);
         strainTag.putInt("THC", newThc);
         NbtCompound outputTag = new NbtCompound();
@@ -217,24 +203,6 @@ public class SeedCrosserEntity extends MachineBlockEntity {
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
         return new SeedCrosserScreenHandler(syncId, inv, this, this.propertyDelegate);
-    }
-
-    @Override
-    public NbtCompound writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
-        nbt.putInt("processingTime", this.processingTime);
-        nbt.putInt("powerStored", this.powerStored);
-        Inventories.writeNbt(nbt, this.inventory);
-        return nbt;
-    }
-
-    @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
-        this.inventory = DefaultedList.ofSize(this.inventory.size(), ItemStack.EMPTY);
-        Inventories.readNbt(nbt, this.inventory);
-        this.processingTime = nbt.getInt("processingTime");
-        this.powerStored = nbt.getInt("powerStored");
     }
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {

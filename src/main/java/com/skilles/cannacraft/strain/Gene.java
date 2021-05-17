@@ -4,6 +4,8 @@ import net.minecraft.nbt.NbtCompound;
 
 import java.util.Objects;
 
+import static com.skilles.cannacraft.Cannacraft.log;
+
 public class Gene {
     private String name;
     private boolean recessive;
@@ -29,7 +31,7 @@ public class Gene {
             }
             this.id = GeneTypes.byName(this.name).getId();
         } else {
-            System.out.println("ERROR: no gene/level in constructor compound");
+            log("ERROR: no gene/level in constructor compound");
         }
     }
     public int id() { return id; }

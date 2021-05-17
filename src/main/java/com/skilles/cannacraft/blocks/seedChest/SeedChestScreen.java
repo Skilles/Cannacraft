@@ -24,12 +24,12 @@ public class SeedChestScreen extends HandledScreen<SeedChestScreenHandler> {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, TEXTURE);
-        int x = this.field_2776;
-        int y = this.field_2800;
+        int x = this.x;
+        int y = this.y;
         drawTexture(matrices, x, y, 0, 0, backgroundWidth, backgroundHeight);
 
         Inventory inventory = this.handler.getInventory();
-        drawCenteredString(matrices, this.textRenderer, "Seeds: "+inventory.count(ModItems.WEED_SEED), x+30, 65, 255);
+        drawCenteredText(matrices, this.textRenderer, "Seeds: "+inventory.count(ModItems.WEED_SEED), x+30, 65, 255);
     }
 
     @Override

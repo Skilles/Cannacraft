@@ -2,9 +2,11 @@
   "required": true,
   "minVersion": "0.8",
   "package": "com.skilles.cannacraft.mixins",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_16",
   "mixins": [
     "ItemEntityMixin",
+    "PlayerInventoryMixin",
+    "ShapelessRecipeMixin",
     "StatusEffectAccessor"
   ],
   "client": [
