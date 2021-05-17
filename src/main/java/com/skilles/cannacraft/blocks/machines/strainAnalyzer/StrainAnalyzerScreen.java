@@ -25,8 +25,8 @@ public class StrainAnalyzerScreen extends HandledScreen<StrainAnalyzerScreenHand
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, TEXTURE);
-        int i = this.field_2776;
-        int j = this.field_2800;
+        int i = this.x;
+        int j = this.y;
         this.drawTexture(matrices, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight);
         int l = this.handler.getArrowWidth();
         int energy = this.handler.powerStored() / 161; // 62 max
@@ -39,10 +39,10 @@ public class StrainAnalyzerScreen extends HandledScreen<StrainAnalyzerScreenHand
 
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        int i = this.field_2776;
-        int j = this.field_2800;
+        int i = this.x;
+        int j = this.y;
         if(mouseX >= i + 150 && mouseX < i + 168 && mouseY >= j + 8 && mouseY < j + 70) { // if hovering over power bar
-            renderTooltip(matrices, new LiteralText("Energy: "+this.handler.powerStored()).formatted(Formatting.GOLD), field_2776 + 168, field_2800 + 20);
+            renderTooltip(matrices, new LiteralText("Energy: "+this.handler.powerStored()).formatted(Formatting.GOLD), x + 168, y + 20);
         }
         this.renderBackground(matrices);
         super.render(matrices, mouseX, mouseY, delta);
