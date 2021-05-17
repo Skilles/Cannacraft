@@ -1,6 +1,6 @@
 package com.skilles.cannacraft.util;
 
-import com.skilles.cannacraft.registry.ModConfig;
+import com.skilles.cannacraft.config.ModConfig;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.Strain;
 import me.shedaniel.autoconfig.AutoConfig;
@@ -54,7 +54,7 @@ public class StrainUtil {
         return Arrays.stream(words).anyMatch(input::contains);
     }
     public static ItemStack getOutputStack(ItemStack stack) {
-        if(AutoConfig.getConfigHolder(ModConfig.class).getConfig().resourceCrops()) {
+        if(AutoConfig.getConfigHolder(ModConfig.class).getConfig().getCrop().resource) {
             if (stack.isOf(ModItems.WEED_FRUIT) && stack.hasTag()) {
                 return getStrain(stack.getTag()).getItem().getDefaultStack();
             }

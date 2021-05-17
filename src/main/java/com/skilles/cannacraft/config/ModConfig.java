@@ -1,32 +1,21 @@
-package com.skilles.cannacraft.registry;
+package com.skilles.cannacraft.config;
 
-import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
-import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
 
 @Config(name = "cannacraft")
 public class ModConfig implements ConfigData {
-    public static Screen currentScreen = MinecraftClient.getInstance().currentScreen;
-
-    boolean australia = false;
-    boolean spread = false;
-    boolean debug = false;
 
     @ConfigEntry.Gui.CollapsibleObject
-    InnerStuff crop = new InnerStuff();
+    CropSection crop = new CropSection();
 
-    static class InnerStuff {
-        @ConfigEntry.Gui.Tooltip
-        float speed = 1.0F;
-        @ConfigEntry.Gui.Tooltip
-        int yield = 1;
-        @ConfigEntry.Gui.Tooltip
-        boolean resource = true;
-    }
+    @ConfigEntry.Gui.CollapsibleObject
+    MiscSection misc = new MiscSection();
+
+
+    @ConfigEntry.Gui.CollapsibleObject
+    DebugSection debug = new DebugSection();
 
     @Override
     public void validatePostLoad() throws ValidationException {
@@ -37,10 +26,9 @@ public class ModConfig implements ConfigData {
         }
         ConfigData.super.validatePostLoad();
     }
-    public float getSpeed() {
-        return crop.speed;
-    }
-    public boolean resourceCrops() { return crop.resource; }
+    public CropSection getCrop() { return crop; }
+    public DebugSection getDebug() { return debug; }
+    public MiscSection getMisc() { return misc; }
     /*public static Screen configScreen() {
             ConfigBuilder builder= ConfigBuilder.create()
                     .setParentScreen(ModConfig.currentScreen)
@@ -54,7 +42,4 @@ public class ModConfig implements ConfigData {
                     .build()); // Builds the option entry for cloth config
             return builder.setFallbackCategory(general).build();
         }*/
-    public static void registerConfig() {
-        AutoConfig.register(ModConfig.class, GsonConfigSerializer::new);
-    }
 }

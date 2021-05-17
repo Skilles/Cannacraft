@@ -1,5 +1,6 @@
 package com.skilles.cannacraft.items;
 
+import com.skilles.cannacraft.CannacraftClient;
 import com.skilles.cannacraft.util.HighUtil;
 import com.skilles.cannacraft.util.MiscUtil;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
@@ -94,7 +95,7 @@ public class WeedJoint extends BowItem {
         return laserPos;
     }
     private void spawnSmoke(Entity entity) {
-        if (entity instanceof PlayerEntity) {
+        if (entity instanceof PlayerEntity && CannacraftClient.config.getMisc().smoke) {
             PlayerEntity player = (PlayerEntity) entity;
             if (!player.world.isClient()) {
                 Vec3d laserPos = itemVector(player, 1);
@@ -170,10 +171,12 @@ public class WeedJoint extends BowItem {
                     user.sendSystemMessage(Text.of("...what did you pack in here?"), Util.NIL_UUID);
                 }
             }
-            Random random = new Random();
-            BlockPos pos = user.getBlockPos().up(1);
-            for(int i = 0; i < random.nextInt(2) + (getMaxUseTime(stack) - remainingUseTicks)/5; ++i) {
-                world.addImportantParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, true, (double)pos.getX() + 0.5D + random.nextDouble() / 3.0D * (double)(random.nextBoolean() ? 1 : -1), (double)pos.getY() + random.nextDouble() + random.nextDouble(), (double)pos.getZ() + 0.5D + random.nextDouble() / 3.0D * (double)(random.nextBoolean() ? 1 : -1), 0.0D, 0.07D, 0.0D);
+            if(CannacraftClient.config.getMisc().smoke) {
+                Random random = new Random();
+                BlockPos pos = user.getBlockPos().up(1);
+                for (int i = 0; i < random.nextInt(2) + (getMaxUseTime(stack) - remainingUseTicks) / 5; ++i) {
+                    world.addImportantParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, true, (double) pos.getX() + 0.5D + random.nextDouble() / 3.0D * (double) (random.nextBoolean() ? 1 : -1), (double) pos.getY() + random.nextDouble() + random.nextDouble(), (double) pos.getZ() + 0.5D + random.nextDouble() / 3.0D * (double) (random.nextBoolean() ? 1 : -1), 0.0D, 0.07D, 0.0D);
+                }
             }
         }
     }

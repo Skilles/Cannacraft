@@ -1,7 +1,7 @@
 package com.skilles.cannacraft.blocks.weedCrop;
 
 import com.skilles.cannacraft.CannacraftClient;
-import com.skilles.cannacraft.registry.ModConfig;
+import com.skilles.cannacraft.config.ModConfig;
 import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.strain.Gene;
 import com.skilles.cannacraft.strain.GeneTypes;
@@ -67,7 +67,7 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
     float multiplier() {
         float multiplier = 1;
         if(hasGene(GeneTypes.SPEED)) multiplier *= (1.0F + ((float) getGene(GeneTypes.SPEED).level()) / 2.0F); // 1: 50%, 2: 100%, 3: 150%
-        multiplier *= config.getSpeed();
+        multiplier *= config.getCrop().speed;
         return multiplier;
     }
 
@@ -145,6 +145,7 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
         } else {
             cachedLimit = 2;
         }
+        cachedLimit += config.getCrop().yield;
         return cachedLimit;
     }
     /**

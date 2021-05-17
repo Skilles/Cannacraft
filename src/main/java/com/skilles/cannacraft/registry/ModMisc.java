@@ -14,19 +14,30 @@ import dev.onyxstudios.cca.api.v3.entity.RespawnCopyStrategy;
 import dev.onyxstudios.cca.api.v3.item.ItemComponentFactoryRegistry;
 import dev.onyxstudios.cca.api.v3.item.ItemComponentInitializer;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
+import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.object.builder.v1.client.model.FabricModelPredicateProviderRegistry;
+import net.fabricmc.fabric.impl.biome.modification.BuiltInRegistryKeys;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DataPool;
 import net.minecraft.util.registry.BuiltinRegistries;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.gen.GenerationStep;
+import net.minecraft.world.gen.decorator.Decorator;
+import net.minecraft.world.gen.decorator.HeightmapDecoratorConfig;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
+import net.minecraft.world.gen.feature.ConfiguredFeatures;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.RandomPatchFeatureConfig;
 import net.minecraft.world.gen.placer.SimpleBlockPlacer;
+import net.minecraft.world.gen.stateprovider.SimpleBlockStateProvider;
 import net.minecraft.world.gen.stateprovider.WeightedBlockStateProvider;
+
+import java.security.KeyStore;
+import java.util.Map;
 
 import static com.skilles.cannacraft.Cannacraft.id;
 
@@ -60,8 +71,9 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
 
     static {
         WEED_CROP_POOL = new DataPool.Builder<BlockState>().add(WEED_CROP_STATE.with(WeedCrop.AGE, 1), 1).add(WEED_CROP_STATE.with(WeedCrop.AGE, 3), 2).add(WEED_CROP_STATE.with(WeedCrop.AGE, 5), 2).add(WEED_CROP_STATE.with(WeedCrop.AGE, 7), 1);
-        WEED_CROP_CONFIG = (new net.minecraft.world.gen.feature.RandomPatchFeatureConfig.Builder(new WeightedBlockStateProvider(WEED_CROP_POOL), SimpleBlockPlacer.INSTANCE)).tries(64).needsWater().build();
-        WEED_CROP_FEATURE = Feature.RANDOM_PATCH.configure(WEED_CROP_CONFIG);
+        //WEED_CROP_CONFIG = (new RandomPatchFeatureConfig.Builder(new WeightedBlockStateProvider(WEED_CROP_POOL), SimpleBlockPlacer.INSTANCE)).tries(64).needsWater().build();
+        WEED_CROP_CONFIG = (new net.minecraft.world.gen.feature.RandomPatchFeatureConfig.Builder(new SimpleBlockStateProvider(ModBlocks.STRAIN_ANALYZER.getDefaultState()), SimpleBlockPlacer.INSTANCE)).tries(32).build();
+        WEED_CROP_FEATURE = Feature.RANDOM_PATCH.configure(WEED_CROP_CONFIG).decorate(Decorator.HEIGHTMAP_SPREAD_DOUBLE.configure(new HeightmapDecoratorConfig(Heightmap.Type.MOTION_BLOCKING)).spreadHorizontally().repeat(5));
     }
 
     private static void registerConfiguredFeature() {
@@ -70,8 +82,13 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
 
     private static void registerBiomeModifications() {
         BuiltinRegistries.CONFIGURED_FEATURE.getKey(WEED_CROP_FEATURE)
-                .ifPresent(key -> BiomeModifications.addFeature(ctx -> true,
+                .ifPresent(key -> BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(),
                         GenerationStep.Feature.VEGETAL_DECORATION, key));
+        //BiomeModifications.addFeature(ctx -> true, GenerationStep.Feature.VEGETAL_DECORATION, BuiltInRegistryKeys.get(WEED_CROP_FEATURE));
+        for (Map.Entry<RegistryKey<ConfiguredFeature<?, ?>>, ConfiguredFeature<?, ?>> entry: BuiltinRegistries.CONFIGURED_FEATURE.getEntries()) {
+            System.out.println(entry.getKey());
+        }
+        //System.out.println(BuiltinRegistries.CONFIGURED_FEATURE.getEntries());
     }
     private static void registerModelPredicates() {
         FabricModelPredicateProviderRegistry.register(ModItems.WEED_JOINT, new Identifier("lit"), (itemStack, clientWorld, livingEntity, seed) -> {
