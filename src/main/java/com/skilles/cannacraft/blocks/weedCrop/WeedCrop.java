@@ -137,9 +137,11 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     }
     private int getBelow(World world, BlockPos pos) {
         int i = 1;
-        if (!world.getBlockState(pos.down()).isOf(Blocks.FARMLAND) && !world.getBlockState(pos.down()).isOf(Blocks.GRASS_BLOCK)) {
+        if (getStage(world.getBlockState(pos)) != 1) {
             for (i = 1; world.getBlockState(pos.down(i)).isOf(this); ++i) { // i = how many stages
             }
+        } else {
+            i = 0;
         }
         return i;
     }
@@ -217,28 +219,21 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     /**
      * @return 1 = stage one, 2 = intermediate stage, 3 = final stage, 4 = connector
      */
-    private int getStage(BlockState state) {
+    private static int getStage(BlockState state) {
         if(state.get(AGE) == CONNECTOR_AGE) return 4;
-        switch (state.get(MAXAGE)) {
-            case STAGE_ONE_MAX:
-                return 1;
-            case STAGE_TWO_MAX:
-                return 2;
-            default:
-                return 3;
-        }
+        return switch (state.get(MAXAGE)) {
+            case STAGE_ONE_MAX -> 1;
+            case STAGE_TWO_MAX -> 2;
+            default -> 3;
+        };
     }
     private BlockState withStage(int stage) {
-        switch (stage) {
-            default:
-                return this.getDefaultState();
-            case 2:
-                return withMaxAge(8).with(AGE, 5);
-            case 3:
-                return withMaxAge(FINAL_BLOOM).with(AGE, 5);
-            case 4:
-                return withAge(CONNECTOR_AGE);
-        }
+        return switch (stage) {
+            default -> this.getDefaultState();
+            case 2 -> withMaxAge(8).with(AGE, 5);
+            case 3 -> withMaxAge(FINAL_BLOOM).with(AGE, 5);
+            case 4 -> withAge(CONNECTOR_AGE);
+        };
     }
     /**
      * Blooms 1st, 2nd/medium, or final stages
@@ -250,7 +245,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
             world.setBlockState(pos, withAge(FINAL_BLOOM));
         }
     }
-    private boolean isBloomed(BlockState state) {
+    public boolean isBloomed(BlockState state) {
         return state.get(AGE) == FIRST_BLOOM || state.get(AGE) == FINAL_BLOOM;
     }
     @Override
@@ -288,17 +283,18 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
                 if (random.nextFloat() < (f/14)*(blockEntity.multiplier()/2)) {
                     if (finalGrow(state) && canGrow.orElse(true)) { // if has yield, about to grow, and below grow limit
                         growStage(pos, world, canGrow);
-                        world.markDirty(pos);
                         world.setBlockState(pos, withStage(4), 2); // convert 2nd stage to connector
                     } else {
                         world.setBlockState(pos, state.with(AGE, j + 1), 2);
                     }
+                    world.markDirty(pos);
                 }
             }
         } else if (getStage(state) == 1) { // first stage
             if (j < this.getMaxAge(state) && (world.getLightLevel(pos) >= 9)) {
                 if (random.nextFloat() < (f/14)*(blockEntity.multiplier()/2)) {
                     world.setBlockState(pos, state.with(AGE, j + 1), 2);
+                    world.markDirty(pos);
                 }
             } else if (getAge(state) == STAGE_ONE_MAX) { // onGrow
                 if (blockEntity.canBreed()) { // if can breed
@@ -322,6 +318,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
                     }
                 }
                 world.setBlockState(pos, state.with(AGE, j + 1), 2);
+                world.markDirty(pos);
             }
         }
     }
@@ -344,7 +341,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         this.applySpreadTick(state, world, pos, random);
     }
     private void applySpreadTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-       if((!config.getDebug().spreadGrown || isBloomed(state)) && config.getCrop().spread && random.nextFloat() <= config.getCrop().spreadChance) {
+       if((!config.getDebug().spreadGrown || isBloomed(state)) && config.getCrop().spread && random.nextFloat() <= config.getCrop().spreadChance/100F) {
            BlockPos spreadPos = getValidSpreadPos(world, pos, random);
            if(spreadPos != null) {
                world.setBlockState(spreadPos, this.getDefaultState());
