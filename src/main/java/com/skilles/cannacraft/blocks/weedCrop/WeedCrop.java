@@ -75,6 +75,8 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     }
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
+        if(pos.down().equals(neighborPos) && neighborState.isOf(Blocks.AIR))
+            return Blocks.AIR.getDefaultState();
         if(pos.down().equals(neighborPos) && neighborState.isOf(Blocks.DIRT))
             MiscUtil.dropStack(world, pos, ModItems.WEED_SEED);
         return !state.canPlaceAt(world, pos) && neighborState.isOf(Blocks.DIRT) ? Blocks.AIR.getDefaultState() : state;
@@ -192,25 +194,26 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
        boolean brokenWithShears = false;
        if(player.getMainHandStack().isOf(Items.SHEARS)) brokenWithShears = true;
        if(!world.isClient) {
-           int i;
-           MiscUtil.dropStack(world, pos, ModItems.WEED_SEED, brokenWithShears);
-           if (isBloomed(state)) {
-               MiscUtil.dropStack(world, pos, ModItems.WEED_BUNDLE, brokenWithShears);
-           }
-           for(i = 1; world.getBlockState(pos.up(i)).isOf(ModBlocks.WEED_CROP); i++){
-               BlockState aboveState = world.getBlockState(pos.up(i));
-               //WeedCropEntity aboveEntity = (WeedCropEntity) world.getBlockEntity(pos.up(i));
-               if(isBloomed(aboveState)) {
-                   MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_SEED);
-                   MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_BUNDLE, brokenWithShears);
-                   world.breakBlock(pos.up(i), false, player);
-               }
-           }
-
+           dropItems(world, pos, state, brokenWithShears);
        }
         super.onBreak(world, pos, state, player);
     }
-
+    private void dropItems(World world, BlockPos pos, BlockState state, boolean brokenWithShears) {
+        int i;
+        MiscUtil.dropStack(world, pos, ModItems.WEED_SEED, brokenWithShears);
+        if (isBloomed(state)) {
+            MiscUtil.dropStack(world, pos, ModItems.WEED_BUNDLE, brokenWithShears);
+        }
+        for(i = 1; world.getBlockState(pos.up(i)).isOf(ModBlocks.WEED_CROP); i++){
+            BlockState aboveState = world.getBlockState(pos.up(i));
+            //WeedCropEntity aboveEntity = (WeedCropEntity) world.getBlockEntity(pos.up(i));
+            if(isBloomed(aboveState)) {
+                MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_SEED);
+                MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_BUNDLE, brokenWithShears);
+                //world.breakBlock(pos.up(i), false, player);
+            }
+        }
+    }
     /**
      * @return 1 = stage one, 2 = intermediate stage, 3 = final stage, 4 = connector
      */
