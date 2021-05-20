@@ -341,12 +341,11 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         this.applySpreadTick(state, world, pos, random);
     }
     private void applySpreadTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-       if((!config.getDebug().spreadGrown || state.get(AGE) == 3) && config.getCrop().spread && random.nextFloat() <= config.getCrop().spreadChance) {
-           Direction direction = isAdjacentTo(world, pos.down(), true, Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.FARMLAND);
-           if(direction != null) {
-               BlockPos neighborPos = pos.down().offset(direction);
-               world.setBlockState(neighborPos.up(), state.with(AGE, 0));
-               copyNbt(world, pos, neighborPos.up());
+       if((!config.getDebug().spreadGrown || isBloomed(state)) && config.getCrop().spread && random.nextFloat() <= config.getCrop().spreadChance) {
+           BlockPos spreadPos = getValidSpreadPos(world, pos, random);
+           if(spreadPos != null) {
+               world.setBlockState(spreadPos, this.getDefaultState());
+               copyNbt(world, pos, spreadPos);
            }
        }
     }

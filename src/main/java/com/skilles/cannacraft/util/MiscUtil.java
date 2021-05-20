@@ -191,6 +191,7 @@ public final class MiscUtil {
      * @param toGrow check if adjacent block has nothing above
      * @return null if no block was found, otherwise returns direction of the found block
      */
+    @Deprecated
     public static @Nullable Direction isAdjacentTo(ServerWorld world, BlockPos pos, boolean toGrow, Block... blocks) {
         // TODO: select random direction from valid directions
         List<Direction> validDirections = new ArrayList<>();
@@ -202,6 +203,28 @@ public final class MiscUtil {
         }
         if(!validDirections.isEmpty()) return Util.getRandom(validDirections, random());
         return null;
+    }
+
+    /**
+     * @param parentPos position of the crop
+     * @return null if not found
+     */
+    public static @Nullable BlockPos getValidSpreadPos(ServerWorld world, BlockPos parentPos, Random random) {
+        List<BlockPos> validPosList = new ArrayList<>();
+        for (Direction direction : Direction.Type.HORIZONTAL) {
+            addValidPos(world, parentPos, validPosList, direction); // spread above
+            addValidPos(world, parentPos.down(), validPosList, direction); // spread same level
+            addValidPos(world, parentPos.down(2), validPosList, direction); // spread below
+        }
+        if(!validPosList.isEmpty()) return Util.getRandom(validPosList, random);
+        return null;
+    }
+    private static void addValidPos(ServerWorld world, BlockPos parentPos, List<BlockPos> validPos, Direction direction) {
+        BlockPos neighborPos = parentPos.offset(direction);
+        BlockState neighborState = world.getBlockState(neighborPos);
+        if ((neighborState.isOf(Blocks.GRASS_BLOCK) || neighborState.isOf(Blocks.FARMLAND) || neighborState.isOf(Blocks.DIRT)) && world.getBlockState(neighborPos.up()).isOf(Blocks.AIR)) {
+            validPos.add(neighborPos.up());
+        }
     }
 
     public static void copyNbt(ServerWorld world, BlockPos originalPos, BlockPos copyToPos) {
