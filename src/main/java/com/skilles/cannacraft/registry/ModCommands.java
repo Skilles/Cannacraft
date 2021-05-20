@@ -61,12 +61,12 @@ public class ModCommands {
                 int j = 0;
                 for (i = 0; self.getInventory().size() > i; i++) {
                     ItemStack itemStack = self.getInventory().getStack(i);
-                    if (itemStack != null && itemStack.getItem().equals(ModItems.WEED_SEED) && !ModMisc.STRAIN.get(itemStack).identified()) {
+                    if (itemStack != null && (itemStack.isOf(ModItems.WEED_SEED) || itemStack.isOf(ModItems.WEED_BUNDLE)) && !ModMisc.STRAIN.get(itemStack).identified()) {
                         ModMisc.STRAIN.get(itemStack).identify();
                         j++;
                     }
                 }
-                self.sendSystemMessage(Text.of(j + " seeds identified"), Util.NIL_UUID);
+                self.sendSystemMessage(Text.of(j + " items identified"), Util.NIL_UUID);
             }
         }
         return 1;
