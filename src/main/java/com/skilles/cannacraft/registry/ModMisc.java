@@ -6,6 +6,7 @@ import com.skilles.cannacraft.components.ItemStrainComponent;
 import com.skilles.cannacraft.components.PlayerStrainComponent;
 import com.skilles.cannacraft.components.StrainInterface;
 import com.skilles.cannacraft.misc.HighEffect;
+import com.skilles.cannacraft.util.BundleUtil;
 import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistryV3;
 import dev.onyxstudios.cca.api.v3.entity.EntityComponentFactoryRegistry;
@@ -85,6 +86,7 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
     }
     private static void registerModelPredicates() {
         FabricModelPredicateProviderRegistry.register(ModItems.WEED_JOINT, new Identifier("lit"), (itemStack, clientWorld, livingEntity, seed) -> itemStack.hasTag() ? itemStack.getTag().getBoolean("Lit") ? 1.0F : 0.0F : 0.0F);
+        FabricModelPredicateProviderRegistry.register(ModItems.WEED_BUNDLE, new Identifier("count"), (itemStack, clientWorld, livingEntity, seed) -> BundleUtil.getTexture(itemStack));
     }
     public static final VillagerProfession STONER = VillagerProfessionBuilder.create().id(new Identifier("stoner")).workstation(PointOfInterestType.FARMER).harvestableItems(ModItems.WEED_SEED).secondaryJobSites(Blocks.FARMLAND).workSound(SoundEvents.ENTITY_VILLAGER_WORK_FARMER).build();
     private static void registerVillagers() {

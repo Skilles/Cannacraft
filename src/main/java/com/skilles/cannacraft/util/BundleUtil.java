@@ -23,6 +23,9 @@ public class BundleUtil {
     public static double getGrams(ItemStack stack) {
         return stack.getCount() * 3.5;
     }
+    public static float getTexture(ItemStack stack) {
+        return (float) (int)(stack.getCount() - 1)/11;
+    }
     public static void appendBundleTooltip(List<Text> tooltip, int count) {
         tooltip.add(new LiteralText("Amount: ").formatted(Formatting.GRAY).append(new LiteralText(getAmountString(count*3.5)).formatted(Formatting.GREEN)));
     }

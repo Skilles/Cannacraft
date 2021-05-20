@@ -2,5 +2,25 @@
   "parent": "item/generated",
   "textures": {
     "layer0": "cannacraft:items/weed_fruit"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "count": 1
+      },
+      "model": "cannacraft:item/weed_fruit/weed_fruit1"
+    },
+    {
+      "predicate": {
+        "count": 2
+      },
+      "model": "cannacraft:item/weed_fruit/weed_fruit2"
+    },
+    {
+      "predicate": {
+        "count": 3
+      },
+      "model": "cannacraft:item/weed_fruit/weed_fruit3"
+    }
+  ]
 }
