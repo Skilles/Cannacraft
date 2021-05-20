@@ -6,6 +6,7 @@ import com.skilles.cannacraft.blocks.machines.weedExtractor.WeedExtractor;
 import com.skilles.cannacraft.blocks.seedChest.SeedChest;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
+import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.Material;
@@ -32,6 +33,7 @@ public class ModBlocks {
     public static void registerBlocks() {
         Registry.register(Registry.BLOCK, id( "seed_chest"), SEED_CHEST);
         Registry.register(Registry.BLOCK, id( "weed_crop"), WEED_CROP);
+        FlammableBlockRegistry.getDefaultInstance().add(WEED_CROP, 60, 60);
         Registry.register(Registry.BLOCK, id( "strain_analyzer"), STRAIN_ANALYZER);
         Registry.register(Registry.BLOCK, id( "weed_extractor"), WEED_EXTRACTOR);
         Registry.register(Registry.BLOCK, id( "seed_crosser"), SEED_CROSSER);
