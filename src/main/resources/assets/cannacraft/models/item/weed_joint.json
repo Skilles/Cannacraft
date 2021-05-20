@@ -30,7 +30,7 @@
       "predicate": {
         "lit": 1
       },
-      "model": "cannacraft:item/weed_joint_lit"
+      "model": "cannacraft:item/weed_joint/weed_joint_lit"
     }
   ]
 }
