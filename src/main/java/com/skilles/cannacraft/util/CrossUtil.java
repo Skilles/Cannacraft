@@ -2,14 +2,20 @@ package com.skilles.cannacraft.util;
 
 import com.google.common.collect.Lists;
 import com.skilles.cannacraft.strain.GeneTypes;
+import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.strain.StrainMap;
 import net.minecraft.util.Pair;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 import static com.skilles.cannacraft.Cannacraft.log;
+import static com.skilles.cannacraft.strain.StrainMap.strainArray;
 import static com.skilles.cannacraft.strain.StrainMap.strainList;
+import static com.skilles.cannacraft.util.StrainUtil.addStrain;
+import static com.skilles.cannacraft.util.StrainUtil.indexOf;
 
 public class CrossUtil {
     private static final Map<String, Integer> suffixesMap = new HashMap<String, Integer>() {{
@@ -58,11 +64,12 @@ public class CrossUtil {
 
     /**
      * TODO: follow standard of mother + father
+     * TODO: return Strain instead of string
      * @param name1 by default is the first word
      * @param name2 by default is the second word
-     * @return returns the crossed name of strains according to the prefix list
+     * @return the crossed name of strains according to the prefix list
      */
-    public static String crossStrains(String name1, String name2) {
+    public static String crossNames(String name1, String name2) {
         List<String> nameOneFinal = Arrays.asList(StringUtils.split(name1));
         List<String> nameTwoFinal = Arrays.asList(StringUtils.split(name2));
         final List<String> finalNames = new ArrayList<String>() {{
@@ -91,13 +98,13 @@ public class CrossUtil {
         }};
         // Set suffix and remove from names
         Map<String, Integer> tempSuffixMap = new HashMap<>();
-        for(int i = 0; i < finalNames.size(); i++) {
-            if(suffixesMap.containsKey(finalNames.get(i))) {
-                tempSuffixMap.put(finalNames.get(i), suffixesMap.get(finalNames.get(i)));
+        for (String finalName : finalNames) {
+            if (suffixesMap.containsKey(finalName)) {
+                tempSuffixMap.put(finalName, suffixesMap.get(finalName));
                 // Checks if suffix is part of name1 or name2, then removes if it is
-                if(nameOne.contains(finalNames.get(i))) {
+                if (nameOne.contains(finalName)) {
                     filterName(nameOne, tempSuffixMap, names);
-                } else if(nameTwo.contains(finalNames.get(i))){
+                } else if (nameTwo.contains(finalName)) {
                     filterName(nameTwo, tempSuffixMap, names);
                 }
             }
@@ -123,10 +130,24 @@ public class CrossUtil {
                 newName1 = nameOne.get(0);
             }
         }
-        log(names);
         return newName1+ " " + newName2;
     }
 
+    /**
+     * Crosses two strains (name and type) and adds them to the list if not present
+     * @param female strain of female
+     * @param male strain of male
+     * @return crossed strain
+     */
+    public static Strain crossStrains(Strain female, Strain male) {
+        Strain crossedStrain = new Strain(crossNames(female.name(), male.name()), crossTypes(female.type(), male.type()));
+        if(!StrainUtil.isPresent(crossedStrain)) {
+            addStrain(crossedStrain);
+            log(crossedStrain);
+            return crossedStrain;
+        }
+        return strainList.get(crossedStrain.name());
+    }
     /**
      * This method eventually sorts the output list to only contain names that are not part of the suffix name
      * @param name name to filter
@@ -193,14 +214,13 @@ public class CrossUtil {
                 break;
             case 1:
                 int i = random.nextInt(2); // 0 - 1
-                switch(i) {
-                    case 0: // 50%
-                        newLevel = Integer.min(level1, level2);
-                        break;
-                    case 1: // 50%
-                        newLevel = Integer.max(level1, level2);
-                        break;
-                }
+                newLevel = switch (i) {
+                    case 0 -> // 50%
+                            Integer.min(level1, level2);
+                    case 1 -> // 50%
+                            Integer.max(level1, level2);
+                    default -> newLevel;
+                };
             case 2:
                 i = random.nextInt(4); // 0 - 3
                 if(i == 0) { // 0 25%

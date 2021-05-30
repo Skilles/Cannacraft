@@ -14,4 +14,6 @@ public class CropSection {
     public boolean spread = true;
     @ConfigEntry.BoundedDiscrete(max = 100)
     public int spreadChance = 75;
+    @ConfigEntry.Gui.Tooltip(count = 2)
+    public boolean randomBreed;
 }

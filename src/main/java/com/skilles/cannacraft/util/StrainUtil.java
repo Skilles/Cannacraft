@@ -3,6 +3,7 @@ package com.skilles.cannacraft.util;
 import com.skilles.cannacraft.config.ModConfig;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.Strain;
+import com.skilles.cannacraft.strain.StrainMap.Type;
 import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.Item;
@@ -111,7 +112,16 @@ public class StrainUtil {
             strainArray.put(0, strain);
         }
     }
-
+    public static void addStrain(Strain strain) {
+        if(!strain.type().equals(Type.UNKNOWN)) {
+            if(!strainArray.containsValue(strain)) {
+                strainArray.put(strainArray.size(), strain);
+                strainList.put(strain.name(), strain);
+            } else {
+                log("No duplicate strains!");
+            }
+        }
+    }
     /**
      * @param type the type to find
      * @return returns true if the type is present in the strain list, false otherwise
@@ -200,7 +210,7 @@ public class StrainUtil {
         return strainArray;
     }
     public enum StrainItems {
-        WEED(ModItems.WEED_BUNDLE),
+        WEED(ModItems.WEED_DISTILLATE),
         COPPER(Items.RAW_COPPER),
         IRON(Items.IRON_NUGGET),
         DIAMOND(Items.DIAMOND),
