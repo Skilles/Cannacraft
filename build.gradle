@@ -62,6 +62,7 @@ dependencies {
 
 	// run against the full jar
 	//modRuntime "mcp.mobius.waila.wthit-fabric:wthit-fabric-${project.wthit_version}"
+	modImplementation "com.ptsmods:devlogin:1.0.0"
 }
 
 processResources {
