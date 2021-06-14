@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "cannacraft:brownie_mix"
+  },
+  "result": "cannacraft:weed_brownie",
+  "experience": 2,
+  "cookingtime": 400
+}

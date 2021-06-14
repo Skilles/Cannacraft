@@ -6,6 +6,8 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.skilles.cannacraft.util.StrainUtil;
+import net.minecraft.util.registry.Registry;
+import org.apache.logging.log4j.Level;
 
 import java.io.FileWriter;
 import java.io.Reader;
@@ -26,8 +28,9 @@ public final class StrainMap {
     private static final Gson gson = builder.create();
 
     public static int ogStrainCount = 4;
-    public static final BiMap<Integer, Strain> strainArray = HashBiMap.create();
-    public static final Map<String, Strain> strainList = new HashMap<>(); // for name lookup
+    public static BiMap<Integer, Strain> strainArray = HashBiMap.create();
+    public static BiMap<Integer, Strain> resourceStrainArray = HashBiMap.create(StrainUtil.defaultResourceStrains.size());
+    public static Map<String, Strain> strainList = new HashMap<>(); // for name lookup
     public enum Type {
         INDICA,
         SATIVA,
@@ -37,7 +40,7 @@ public final class StrainMap {
 
     public static void registerStrains() {
         load();
-        validateStrains();
+        StrainUtil.validateStrains();
         log("Strains initialized: "+ strainArray);
         log("Strains initialized: "+ strainList);
         //GeneticsManager.test();
@@ -50,7 +53,7 @@ public final class StrainMap {
             log("Strains saved to file");
         } catch(Exception e) {
             e.printStackTrace();
-            log("Error saving file");
+            log(Level.ERROR,"Error saving file");
         }
     }
     public static void load() {
@@ -63,16 +66,8 @@ public final class StrainMap {
                 strainList.put(entry.getValue().name(), entry.getValue());
             }
         } catch(Exception e) {
-            log("Error loading strains");
+            log(Level.ERROR, "Error loading strains");
             StrainUtil.resetStrains();
-        }
-    }
-    private static void validateStrains() {
-        for (Strain strain: strainArray.values()) {
-            if(strain.getItem() == null) {
-                strain.init();
-                log(strain.name()+" corrupted, attempting to fix");
-            }
         }
     }
 }

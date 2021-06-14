@@ -4,12 +4,13 @@
   "package": "com.skilles.cannacraft.mixins",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "CompostableMixin",
     "ItemEntityMixin",
     "PlayerInventoryMixin",
     "ShapelessRecipeMixin",
+    "SmeltingRecipeMixin",
     "StatusEffectAccessor",
-    "TaskProviderMixin",
-    "CompostableMixin"
+    "TaskProviderMixin"
   ],
   "client": [
     "HudMixin",

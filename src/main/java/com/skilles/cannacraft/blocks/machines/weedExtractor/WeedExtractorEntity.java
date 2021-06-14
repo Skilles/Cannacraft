@@ -32,14 +32,11 @@ public class WeedExtractorEntity extends MachineBlockEntity {
         this.propertyDelegate = new PropertyDelegate() {
             @Override
             public int get(int index) {
-                switch(index) {
-                    case 0:
-                        return WeedExtractorEntity.this.processingTime;
-                    case 1:
-                        return WeedExtractorEntity.this.powerStored;
-                    default:
-                        return 0;
-                }
+                return switch (index) {
+                    case 0 -> WeedExtractorEntity.this.processingTime;
+                    case 1 -> WeedExtractorEntity.this.powerStored;
+                    default -> 0;
+                };
             }
 
             @Override

@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "cannacraft:items/fruit/ground/weed_fruit2"
+  }
+}

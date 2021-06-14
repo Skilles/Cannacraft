@@ -4,12 +4,14 @@ import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.Gene;
 import com.skilles.cannacraft.strain.GeneTypes;
 import com.skilles.cannacraft.strain.StrainMap;
+import com.skilles.cannacraft.util.BundleUtil;
 import com.skilles.cannacraft.util.MiscUtil;
 import com.skilles.cannacraft.util.StrainUtil;
 import dev.onyxstudios.cca.api.v3.component.CopyableComponent;
 import dev.onyxstudios.cca.api.v3.item.CcaNbtType;
 import dev.onyxstudios.cca.api.v3.item.ItemComponent;
 import net.fabricmc.fabric.api.util.NbtType;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
@@ -21,6 +23,8 @@ import java.util.List;
 import static com.skilles.cannacraft.components.ItemStrainComponent.StrainType.FRUIT;
 import static com.skilles.cannacraft.components.ItemStrainComponent.StrainType.SEED;
 import static com.skilles.cannacraft.util.StrainUtil.normalDist;
+
+import com.skilles.cannacraft.components.ItemStrainComponent.StrainType;
 
 
 public class ItemStrainComponent extends ItemComponent implements StrainInterface, CopyableComponent<ItemStrainComponent> {
@@ -89,6 +93,7 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
         this.getOrCreateRootTag().putInt("ID", index);
         this.putInt("THC", getThc());
         if(seed()) this.putBoolean("Male", isMale());
+        if(fruit()) this.putInt("Status", BundleUtil.convertStatus(getStatus()));
     }
     @Override
     public String getStrain() {
@@ -145,5 +150,21 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
     public void copyFrom(ItemStrainComponent other) {
         stack.setTag(other.stack.getTag());
         //setStrain(other.getIndex());
+    }
+
+    @Override
+    public TriState getStatus() {
+        if(!this.hasTag("Status")) {
+            if(fruit())
+            setStatus(TriState.TRUE); // default is WET
+            else putInt("Status", 0); // should not run unless called explicitly on non-fruit
+        }
+        return BundleUtil.convertStatus(getInt("Status"));
+    }
+    @Override
+    public void setStatus(TriState status) {
+        if(fruit()) {
+            putInt("Status", BundleUtil.convertStatus(status));
+        } 
     }
 }

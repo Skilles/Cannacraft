@@ -37,30 +37,30 @@ public class HighUtil {
         int amplifier = currentEffect.getAmplifier();
         switch(amplifier) {
             case 0:
-                player.applyStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, currentEffect.getDuration(), 0, true,false));
+                player.applyStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, currentEffect.getDuration(), 0, true,false), null);
                 player.sendMessage(new LiteralText("The buzz has made you resistant to fire").formatted(Formatting.GREEN), true);
                 break;
             case 1:
-                player.applyStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, currentEffect.getDuration(), 0, true, false));
+                player.applyStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, currentEffect.getDuration(), 0, true, false), null);
                 player.sendMessage(new LiteralText("Why are your hands shaking").formatted(Formatting.GREEN), true);
                 break;
             case 2:
                 if (MiscUtil.random().nextInt(2) == 0) {
-                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, currentEffect.getDuration(), 0, true,false));
+                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, currentEffect.getDuration(), 0, true,false), null);
                     player.sendMessage(new LiteralText("You feel stronger for some reason").formatted(Formatting.GREEN), true);
                 } else {
-                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, currentEffect.getDuration(), 0, true, false));
-                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.SLOW_FALLING, currentEffect.getDuration(), 0, true, false));
+                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, currentEffect.getDuration(), 0, true, false), null);
+                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.SLOW_FALLING, currentEffect.getDuration(), 0, true, false), null);
                     player.sendMessage(new LiteralText("You feel like you're floating").formatted(Formatting.GREEN), true);
                 }
                 break;
             case 3:
                 if (MiscUtil.random().nextInt(2) == 0) {
-                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, currentEffect.getDuration(), 0, true, false));
+                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, currentEffect.getDuration(), 0, true, false), null);
                     player.sendMessage(new LiteralText("Sonic").formatted(Formatting.GREEN), true);
                 } else {
-                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, currentEffect.getDuration(), 0, true, false));
-                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.HUNGER, currentEffect.getDuration(), 0, true, false));
+                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, currentEffect.getDuration(), 0, true, false), null);
+                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.HUNGER, currentEffect.getDuration(), 0, true, false), null);
                     player.sendMessage(new LiteralText("You could really use some oreos").formatted(Formatting.GREEN), true);
                 }
                 break;
@@ -83,34 +83,20 @@ public class HighUtil {
         if(thc <= 18) switchNum = 1;
         if(19 <= thc && thc <= 25) switchNum = 2;
         if(26 <= thc) switchNum = 3;
-        switch(switchNum) {
-            case 1:
-                duration = 1200;
-                break;
-            case 2:
-                duration = 1800;
-                break;
-            case 3:
-                duration = 2400;
-                break;
-            default:
-                duration = 0;
-        }
+        duration = switch (switchNum) {
+            case 1 -> 1200;
+            case 2 -> 1800;
+            case 3 -> 2400;
+            default -> 0;
+        };
         if(user.hasStatusEffect(ModMisc.HIGH)) {
             StatusEffectInstance currentEffect = user.getStatusEffect(ModMisc.HIGH);
-            switch(switchNum) {
-                case 1:
-                    duration = currentEffect.getDuration() + 600;
-                    break;
-                case 2:
-                    duration = currentEffect.getDuration() + 1200;
-                    break;
-                case 3:
-                    duration = currentEffect.getDuration() + 1800;
-                    break;
-                default:
-                    duration = 0;
-            }
+            duration = switch (switchNum) {
+                case 1 -> currentEffect.getDuration() + 600;
+                case 2 -> currentEffect.getDuration() + 1200;
+                case 3 -> currentEffect.getDuration() + 1800;
+                default -> 0;
+            };
         }
         amplifier = durationToAmplifier(duration);
         if(amplifier >  2 && !user.world.isDay()) {

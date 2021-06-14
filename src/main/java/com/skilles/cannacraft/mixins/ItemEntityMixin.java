@@ -1,6 +1,7 @@
 package com.skilles.cannacraft.mixins;
 
 import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.util.MiscUtil;
 import com.skilles.cannacraft.util.StrainUtil;
 import net.minecraft.entity.ItemEntity;
@@ -29,7 +30,8 @@ public abstract class ItemEntityMixin {
             NbtCompound tag = stack.getSubTag("cannacraft:strain");
             if(tag != null && tag.contains("ID")) {
                 if(tag.getInt("ID") == 0) MiscUtil.randomizeTag(tag);
-                if(!tag.contains("THC") || (tag.contains("THC") && tag.getInt("THC") < 13)) tag.putInt("THC", StrainUtil.normalDist(15, 5, 13));
+                Strain strain = StrainUtil.getStrain(tag.getInt("ID"));
+                if(!tag.contains("THC") || (tag.contains("THC") && tag.getInt("THC") < StrainUtil.MIN_THC)) tag.putInt("THC", StrainUtil.randThc(strain));
             }
         }
     }

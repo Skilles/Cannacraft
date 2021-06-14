@@ -1,22 +1,17 @@
 package com.skilles.cannacraft.items;
 
-import com.skilles.cannacraft.Cannacraft;
+import com.skilles.cannacraft.registry.ModMisc;
 import com.skilles.cannacraft.strain.StrainMap;
 import com.skilles.cannacraft.util.BundleUtil;
 import com.skilles.cannacraft.util.StrainUtil;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.CommandItemSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
-import net.minecraft.util.ClickType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -35,6 +30,13 @@ public class WeedBundle extends Item {
                 name += StrainUtil.getStrain(strainTag.getInt("ID")).name();
             } else {
                 name += "Unidentified Cannabis";
+            }
+            if(strainTag.contains("Status")) {
+                if(strainTag.getInt("Status") == 1) {
+                    StringUtils.prependIfMissing(name, "Ground ");
+                } else if(strainTag.getInt("Status") == 2) {
+                    StringUtils.prependIfMissing(name, "Wet ");
+                }
             }
             return Text.of(name);
         }

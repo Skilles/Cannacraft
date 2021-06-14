@@ -19,6 +19,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.stat.Stats;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -48,6 +49,7 @@ public class WeedJoint extends BowItem {
             tag.putBoolean("Lit", true);
             user.getInventory().insertStack(user.getOffHandStack());
             user.getOffHandStack().decrement(1);
+            user.incrementStat(Stats.USED.getOrCreateStat(this));
             return TypedActionResult.success(itemStack, true);
         }
         if(tag.getBoolean("Lit")) {

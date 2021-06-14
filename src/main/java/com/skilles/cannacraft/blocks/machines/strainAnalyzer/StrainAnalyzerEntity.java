@@ -32,14 +32,11 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
         this.propertyDelegate = new PropertyDelegate() {
             @Override
             public int get(int index) {
-                switch(index) {
-                    case 0:
-                        return StrainAnalyzerEntity.this.processingTime;
-                    case 1:
-                        return StrainAnalyzerEntity.this.powerStored;
-                    default:
-                        return 0;
-                }
+                return switch (index) {
+                    case 0 -> StrainAnalyzerEntity.this.processingTime;
+                    case 1 -> StrainAnalyzerEntity.this.powerStored;
+                    default -> 0;
+                };
             }
 
             @Override

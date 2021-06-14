@@ -1,5 +1,6 @@
 package com.skilles.cannacraft.util;
 
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -48,5 +49,42 @@ public class BundleUtil {
             name = StringUtils.prependIfMissingIgnoreCase(name, "Pound");
         }
         return name;
+    }
+
+    /**
+     * Converts from TriState to int for NBT tags
+     * @param status of the bundle
+     * @return 0 if DRY, 1 if GROUND, 2 if WET
+     */
+    public static int convertStatus(TriState status) {
+        if(status.equals(TriState.TRUE)) {
+            return 2;
+        } else if(status.equals(TriState.FALSE)) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+    /**
+     * Converts from int to TriState status
+     */
+    public static TriState convertStatus(int status) {
+        if(status == 1) {
+            return TriState.FALSE; // GROUND
+        } else if(status == 2){
+            return TriState.TRUE; // WET
+        } else {
+            return TriState.DEFAULT; // DRY
+        }
+    }
+
+    /**
+     * Used to convert to float for model predicate
+     */
+    public static float getStatus(ItemStack stack) {
+        if(stack.hasTag()) {
+            return (float) stack.getSubTag("cannacraft:strain").getInt("Status");
+        }
+        return 2.0F; // wet
     }
 }

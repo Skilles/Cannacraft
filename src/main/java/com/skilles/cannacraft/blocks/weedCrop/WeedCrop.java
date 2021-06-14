@@ -193,9 +193,8 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
 
     @Override
     public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) { // drops cannabis with BE's NBT
-       boolean brokenWithShears = false;
-       if(player.getMainHandStack().isOf(Items.SHEARS)) brokenWithShears = true;
-       if(!world.isClient) {
+       boolean brokenWithShears = player.getMainHandStack().isOf(Items.SHEARS);
+        if(!world.isClient) {
            dropItems(world, pos, state, brokenWithShears);
        }
         super.onBreak(world, pos, state, player);

@@ -1,5 +1,7 @@
 package com.skilles.cannacraft.util;
 
+import com.skilles.cannacraft.Cannacraft;
+import com.skilles.cannacraft.CannacraftClient;
 import com.skilles.cannacraft.config.ModConfig;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.Strain;
@@ -10,8 +12,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.Rarity;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Level;
+import org.jetbrains.annotations.TestOnly;
 
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
@@ -20,10 +26,12 @@ import static com.skilles.cannacraft.Cannacraft.log;
 import static com.skilles.cannacraft.strain.StrainMap.*;
 
 public class StrainUtil {
+    static final Strain UNKNOWN_STRAIN = new Strain("Unknown", Type.UNKNOWN);
+    public static final int MIN_THC = 13;
+
     public static int getStrainCount() {
         return strainArray.size();
     }
-
     public static Strain getStrain(int index) {
         if(!strainArray.containsKey(index)) return strainArray.get(0);
         return strainArray.get(index);
@@ -51,25 +59,25 @@ public class StrainUtil {
         if(!strainList.containsKey(name)) return 0;
         return indexOf(toStrain(name));
     }
-    private static boolean containsWords(String input, String[] words) {
-        return Arrays.stream(words).anyMatch(input::contains);
-    }
     public static ItemStack getOutputStack(ItemStack stack) {
         if(AutoConfig.getConfigHolder(ModConfig.class).getConfig().getCrop().resource) {
             if (stack.isOf(ModItems.WEED_BUNDLE) && stack.hasTag()) {
                 return getStrain(stack.getTag()).getItem().getDefaultStack();
             }
         } else {
-            return StrainItems.WEED.item.getDefaultStack();
+            return StrainItems.DISTILLATE.item.getDefaultStack();
         }
         return Items.AIR.getDefaultStack();
     }
-    public static StrainItems getStrainItems(Strain strain) {
+    private static boolean containsWords(String input, String[] words) {
+        return Arrays.stream(words).anyMatch(input::contains);
+    }
+    public static StrainItems getStrainItem(Strain strain) {
         String name = strain.name();
         for(StrainItems item: StrainItems.values()) {
             if (containsWords(name, StringUtils.split(item.getName())) || name.contains(item.getName())) return item;
         }
-        return StrainItems.WEED;
+        return StrainItems.DISTILLATE;
     }
     public static Item getItem(Strain strain) {
         // TODO: add other mod metals
@@ -91,35 +99,48 @@ public class StrainUtil {
         }*/
         return strain.getItem();
     }
+    @TestOnly
     public static void testItems() {
         log(getItem(new Strain("Purple Lapis", Type.HYBRID)));
     }
+    @Deprecated
     public static void addStrain(String name, Type type) {
-        Strain strain = new Strain(name, type);
-        if (!type.equals(Type.UNKNOWN)) {
-            int index;
-
-            index = strainArray.size();
-
-            if (strainList.containsKey(name)) {
-                log("No duplicate strains!");
-            } else {
-                strainArray.put(index, strain);
-                strainList.put(strainArray.get(index).name(), strainArray.get(index));
-                save();
-            }
-        } else {
-            strainArray.put(0, strain);
-        }
+        addStrain(new Strain(name, type));
     }
     public static void addStrain(Strain strain) {
-        if(!strain.type().equals(Type.UNKNOWN)) {
-            if(!strainArray.containsValue(strain)) {
-                strainArray.put(strainArray.size(), strain);
-                strainList.put(strain.name(), strain);
-            } else {
-                log("No duplicate strains!");
+        if(!isPresent(strain)) {
+            strainArray.put(strainArray.size(), strain);
+            if(strain.type() != Type.UNKNOWN) strainList.put(strain.name(), strain);
+            save();
+        } else {
+            log("No duplicate strains!");
+        }
+    }
+    public static void initDefaultStrains() {
+        strainArray.putAll(defaultStrains);
+    }
+    public static void validateStrains() {
+        boolean needsInit = false;
+        for(Strain strain : strainArray.values()) {
+            if(strain.type() != Type.UNKNOWN) {
+                if (strain.getItem() == null || strain.getRarity() ==  null) {
+                    log(Level.ERROR, strain.name() + " corrupted, reinitializing");
+                    strain.init();
+                    needsInit = true;
+                }
+                if (!strainList.containsKey(strain.name())) {
+                    log(Level.ERROR, "Strain name mismatch, resetting strains");
+                    resetStrains();
+                }
             }
+        }
+        if(needsInit) initNames();
+    }
+    private static void initNames() {
+        log( "Strain name mismatch, reinitializing names");
+        strainList.clear();
+        for(Strain strain : strainArray.values()) {
+            if(strain.type() != Type.UNKNOWN) strainList.put(strain.name(), strain);
         }
     }
     /**
@@ -150,16 +171,6 @@ public class StrainUtil {
 
     public static void removeStrain(int index) {
         if(strainArray.containsKey(index)) {
-            /*boolean cascade = false;
-            strainList.remove(strainArray.get(index).name());
-            for (int i = index; strainArray.size() - 1 > index; i++) {
-                strainArray.forcePut(i, strainArray.get(i + 1));
-                strainArray.remove(i + 1);
-                cascade = true;
-            }
-            if (!cascade) {
-                strainArray.remove(index);
-            }*/
             strainList.remove(strainArray.get(index).name());
             strainArray.remove(index);
         }
@@ -168,22 +179,52 @@ public class StrainUtil {
     public static void resetStrains() {
         strainArray.clear();
         strainList.clear();
-        ogStrainCount = 4;
-        addStrain("Unknown", Type.UNKNOWN);
-        addStrain("OG Kush", Type.HYBRID);
-        addStrain("Purple Punch", Type.INDICA);
-        addStrain("Chem Trix", Type.SATIVA);
-        for (int i = 0; strainArray.size() > i; i++) {
-            log("Strain: "+ strainArray.get(i));
-            strainList.put(strainArray.get(i).name(), strainArray.get(i));
-            ogStrainCount++;
+        /*for(Strain strain : defaultStrains.values()) {
+            addStrain(strain);
+        }*/
+        strainArray.putAll(defaultStrains);
+        if(CannacraftClient.config.getCrop().resource) {
+            resourceStrainArray.putAll(defaultResourceStrains);
         }
         save();
     }
 
-    public static boolean isPresent(Strain strain) {
-        return strainArray.containsValue(strain);
-    }
+    /**
+     * Immutable map of default strains
+     * TODO: add default rarities
+     */
+    public static Map<Integer, Strain> defaultStrains = Map.ofEntries(
+            defaultStrain(0, UNKNOWN_STRAIN),
+            defaultStrain(1, new Strain("OG Kush", Type.HYBRID)),
+            defaultStrain(2, new Strain("Purple Punch", Type.INDICA)),
+            defaultStrain(3, new Strain("Chem Trix", Type.SATIVA)),
+            defaultStrain(4, new Strain("Blue Dream", Type.HYBRID)),
+            defaultStrain(5, new Strain("Bubba Kush", Type.INDICA)),
+            defaultStrain(6, new Strain("Grandaddy Purple", Type.INDICA)),
+            defaultStrain(7, new Strain("Green Crack", Type.SATIVA)),
+            defaultStrain(8, new Strain("Northern Lights", Type.INDICA)),
+            defaultStrain(9, new Strain("Pineapple Express", Type.HYBRID)),
+            defaultStrain(10, new Strain("Girl Scout Cookies", Type.HYBRID)),
+            defaultStrain(11, new Strain("Blueberry", Type.INDICA))
+
+    );
+    /**
+     * Immutable map of resource strains
+     */
+    public static Map<Integer, Strain> defaultResourceStrains = Map.ofEntries(
+            defaultStrain(defaultStrains.size(), new Strain("Iron OG", Type.HYBRID, Rarity.UNCOMMON)),
+            defaultStrain(1, new Strain("Diamond Kush", Type.INDICA, Rarity.RARE)),
+            defaultStrain( 2, new Strain("Lapis Dream", Type.SATIVA, Rarity.COMMON)),
+            defaultStrain( 3, new Strain("Alaskan Emerald", Type.HYBRID, Rarity.RARE)),
+            defaultStrain( 4, new Strain("Cherrystone", Type.INDICA, Rarity.UNCOMMON)),
+            defaultStrain( 5, new Strain("Copper Haze", Type.INDICA, Rarity.COMMON)),
+            defaultStrain(defaultStrains.size() + 6, new Strain("Coal Crack", Type.SATIVA, Rarity.COMMON)),
+            defaultStrain(defaultStrains.size() + 7, new Strain("Goldberry", Type.INDICA, Rarity.UNCOMMON)),
+            defaultStrain(defaultStrains.size() + 8, new Strain("Nether Lights", Type.INDICA, Rarity.EPIC))
+
+    );
+    private static AbstractMap.SimpleEntry<Integer, Strain> defaultStrain(int index, Strain strain) { return new AbstractMap.SimpleEntry<Integer, Strain>(index, strain); }
+    public static boolean isPresent(Strain strain) { return strainArray.containsValue(strain); }
 
     public static boolean isPresent(String name) {
         return strainList.containsKey(name);
@@ -197,9 +238,12 @@ public class StrainUtil {
         }
         return newThc;
     }
+    public static int randThc(Strain strain) {
+        return (int) (normalDist(15, 5, MIN_THC) * strain.thcMultiplier());
+    }
 
     public static Strain toStrain(String name) {
-        return strainList.get(name);
+        return strainList.getOrDefault(name, UNKNOWN_STRAIN);
     }
 
     public static Map<String, Strain> getNames() {
@@ -209,8 +253,27 @@ public class StrainUtil {
     public static Map<Integer, Strain> getStrains() {
         return strainArray;
     }
+
+    public static float getThcMultiplier(Strain strain) {
+        switch(strain.getRarity()) {
+            case UNCOMMON -> {
+                return 1.2F;
+            }
+            case RARE -> {
+                return 1.5F;
+            }
+            case EPIC -> {
+                return 1.8F;
+            }
+            default -> {
+                return 1.0F;
+            }
+        }
+    }
+
     public enum StrainItems {
-        WEED(ModItems.WEED_DISTILLATE),
+        DISTILLATE(ModItems.WEED_DISTILLATE),
+        COAL(Items.COAL),
         COPPER(Items.RAW_COPPER),
         IRON(Items.IRON_NUGGET),
         DIAMOND(Items.DIAMOND),
@@ -218,6 +281,7 @@ public class StrainUtil {
         REDSTONE(Items.REDSTONE),
         LAPIS(Items.LAPIS_LAZULI),
         EMERALD(Items.EMERALD),
+        // TODO: add to resource crops
         ENDER_PEARL(Items.ENDER_PEARL),
         BLAZE(Items.BLAZE_POWDER),
         NETHERITE(Items.NETHERITE_SCRAP);

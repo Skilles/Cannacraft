@@ -25,8 +25,7 @@ public class HighEffect extends StatusEffect {
     }
     @Override
     public void applyUpdateEffect(LivingEntity entity, int amplifier) {
-        if(entity instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) entity;
+        if(entity instanceof PlayerEntity player) {
             StatusEffectInstance currentEffect = entity.getStatusEffect(this);
             if(currentEffect.getDuration() % 600 == 0) {
                 ((StatusEffectAccessor) currentEffect).setAmplifier(HighUtil.durationToAmplifier(currentEffect.getDuration()));

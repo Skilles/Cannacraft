@@ -164,7 +164,7 @@ public class ModCommands {
                             .then(argument("name2", StringArgumentType.string())
                             .executes(ctx -> {
                                 final ServerPlayerEntity self = ctx.getSource().getPlayer();
-                                self.sendSystemMessage(Text.of(CrossUtil.crossStrains(getString(ctx, "name1"), getString(ctx, "name2"))), Util.NIL_UUID);
+                                self.sendSystemMessage(Text.of(CrossUtil.crossNames(getString(ctx, "name1"), getString(ctx, "name2"))), Util.NIL_UUID);
                                 return 1;
                             }))))
                         .then(literal("random")

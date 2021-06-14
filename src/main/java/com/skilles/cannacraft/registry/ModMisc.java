@@ -48,6 +48,8 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
     public void registerItemComponentFactories(ItemComponentFactoryRegistry registry) {
         registry.register(ModItems.WEED_SEED, STRAIN, ItemStrainComponent::new);
         registry.register(ModItems.WEED_BUNDLE, STRAIN, ItemStrainComponent::new);
+        registry.register(ModItems.WEED_DISTILLATE, STRAIN, ItemStrainComponent::new);
+        registry.register(ModItems.WEED_BROWNIE, STRAIN, ItemStrainComponent::new);
     }
     @Override
     public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
@@ -87,6 +89,7 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
     private static void registerModelPredicates() {
         FabricModelPredicateProviderRegistry.register(ModItems.WEED_JOINT, new Identifier("lit"), (itemStack, clientWorld, livingEntity, seed) -> itemStack.hasTag() ? itemStack.getTag().getBoolean("Lit") ? 1.0F : 0.0F : 0.0F);
         FabricModelPredicateProviderRegistry.register(ModItems.WEED_BUNDLE, new Identifier("count"), (itemStack, clientWorld, livingEntity, seed) -> BundleUtil.getTexture(itemStack));
+        FabricModelPredicateProviderRegistry.register(ModItems.WEED_BUNDLE, new Identifier("status"), (itemStack, clientWorld, livingEntity, seed) -> itemStack.hasTag() ? itemStack.getSubTag("cannacraft:strain").getInt("Status") : 2); // WET is default
     }
     public static final VillagerProfession STONER = VillagerProfessionBuilder.create().id(new Identifier("stoner")).workstation(PointOfInterestType.FARMER).harvestableItems(ModItems.WEED_SEED).secondaryJobSites(Blocks.FARMLAND).workSound(SoundEvents.ENTITY_VILLAGER_WORK_FARMER).build();
     private static void registerVillagers() {

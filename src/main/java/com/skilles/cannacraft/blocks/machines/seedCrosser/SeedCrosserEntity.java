@@ -44,14 +44,11 @@ public class SeedCrosserEntity extends MachineBlockEntity {
         this.propertyDelegate = new PropertyDelegate() {
             @Override
             public int get(int index) {
-                switch(index) {
-                    case 0:
-                        return SeedCrosserEntity.this.processingTime;
-                    case 1:
-                        return SeedCrosserEntity.this.powerStored;
-                    default:
-                        return 0;
-                }
+                return switch (index) {
+                    case 0 -> SeedCrosserEntity.this.processingTime;
+                    case 1 -> SeedCrosserEntity.this.powerStored;
+                    default -> 0;
+                };
             }
             @Override
             public void set(int index, int value) {
@@ -155,7 +152,7 @@ public class SeedCrosserEntity extends MachineBlockEntity {
                         return true;
                     } else {
                         NbtCompound outputTag = output.getSubTag("cannacraft:strain");
-                        String newName = CrossUtil.crossStrains(StrainUtil.getStrain(tag.getInt("ID")).name(), StrainUtil.getStrain(tag2.getInt("ID")).name());
+                        String newName = CrossUtil.crossNames(StrainUtil.getStrain(tag.getInt("ID")).name(), StrainUtil.getStrain(tag2.getInt("ID")).name());
                         int newThc = CrossUtil.crossThc(tag.getInt("THC"), tag2.getInt("THC"));
                         return StrainUtil.isPresent(newName) && outputTag.getInt("ID") == StrainUtil.indexOf(newName) && newThc == outputTag.getInt("THC");
                     }
@@ -173,7 +170,7 @@ public class SeedCrosserEntity extends MachineBlockEntity {
         NbtCompound tag = stack.getSubTag("cannacraft:strain");
         NbtCompound tag2 = stack2.getSubTag("cannacraft:strain");
 
-        String newName = CrossUtil.crossStrains(StrainUtil.getStrain(tag.getInt("ID")).name(), StrainUtil.getStrain(tag2.getInt("ID")).name());
+        String newName = CrossUtil.crossNames(StrainUtil.getStrain(tag.getInt("ID")).name(), StrainUtil.getStrain(tag2.getInt("ID")).name());
         StrainMap.Type newType = CrossUtil.crossTypes(StrainUtil.getStrain(tag.getInt("ID")).type(), StrainUtil.getStrain(tag2.getInt("ID")).type());
         int newThc = CrossUtil.crossThc(tag.getInt("THC"), tag2.getInt("THC"));
 

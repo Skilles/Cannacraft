@@ -1,5 +1,6 @@
 package com.skilles.cannacraft.util;
 
+import com.skilles.cannacraft.blocks.ImplementedInventory;
 import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.Gene;
@@ -9,6 +10,8 @@ import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -19,12 +22,17 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
+import net.minecraft.util.Rarity;
 import net.minecraft.util.Util;
+import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -52,8 +60,10 @@ public final class MiscUtil {
         if(tag.contains("Attributes")) genes = tag.getList("Attributes", NbtType.COMPOUND);
         if(tag.getBoolean("Identified")) {
             tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText(StrainUtil.getStrain(id).name()).formatted(Formatting.GREEN)));
-            tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StringUtils.capitalize(StringUtils.lowerCase(StrainUtil.getStrain(id).type().name())))).formatted(Formatting.DARK_GREEN)));
+            tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StringUtils.lowerCase(StrainUtil.getStrain(id).type().name()))).formatted(Formatting.DARK_GREEN)));
             tooltip.add(new LiteralText("THC: ").formatted(Formatting.GRAY).append(new LiteralText(thc + "%").formatted(Formatting.DARK_GREEN)));
+            Rarity rarity = StrainUtil.getStrain(id).getRarity();
+            tooltip.add(new LiteralText("Rarity: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StringUtils.lowerCase(rarity.toString()))).formatted(rarity.formatting)));
             if(!sex.isEmpty()) tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText(sex).formatted(Formatting.DARK_GREEN)));
             if(!genes.isEmpty()) {
                 tooltip.add(new LiteralText("Press ").append( new LiteralText("SHIFT ").formatted(Formatting.GOLD).append( new LiteralText("to view Genes").formatted(Formatting.WHITE))));
@@ -61,12 +71,13 @@ public final class MiscUtil {
         } else {
             tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText("Unidentified").formatted(Formatting.GREEN)));
             tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText("Unknown").formatted(Formatting.DARK_GREEN)));
-            tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText("Unknown").formatted(Formatting.DARK_GREEN)));
+            if(!sex.isEmpty()) tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText("Unknown").formatted(Formatting.DARK_GREEN)));
         }
     }
 
     /**
      * Drops an itemstack with NBT
+     * TODO: use BE and check if fully grown before dropping bred seed
      */
     public static void dropStack(World world, BlockPos pos, Item type, boolean brokenWithShears) {
         ItemStack toDrop = new ItemStack(type);
@@ -104,21 +115,22 @@ public final class MiscUtil {
      */
     public static void randomizeTag(NbtCompound tag) {
         Random random = random();
+        tag.put("Attributes", toNbtList(randGenes()));
+        tag.putInt("ID", random.nextInt(StrainUtil.defaultStrains.size() - 1) + 1); // random id
+    }
+    public static ArrayList<Gene> randGenes() {
         float chance = random.nextFloat();
-        NbtList nbtList = new NbtList();
         ArrayList<Gene> geneList = new ArrayList<>();
         if(chance <= 0.1F) { // 10% chance
             geneList.add(new Gene(GeneTypes.SPEED, random.nextInt(GeneTypes.SPEED.getMax()) + 1));
             geneList.add(new Gene(GeneTypes.YIELD, random.nextInt(GeneTypes.YIELD.getMax()) + 1));
-            tag.put("Attributes", nbtList);
         } else if(chance > 0.1F && chance <= 0.25F) { // 15% chance
             geneList.add(new Gene(GeneTypes.YIELD, random.nextInt(GeneTypes.YIELD.getMax() - 1) + 1));
         } else if(chance > 0.25F && chance <= 0.45F) { // 20% chance
             geneList.add(new Gene(GeneTypes.SPEED, random.nextInt(GeneTypes.SPEED.getMax() - 1) + 1));
         } else if(chance > 0.45F && chance <= 1F) { // 65% chance
         }
-        tag.put("Attributes", toNbtList(geneList));
-        tag.putInt("ID", MiscUtil.random().nextInt((StrainMap.ogStrainCount - 1)) + 1); // random id
+        return geneList;
     }
     /**
      * Format Block NBT to conform with ItemStack
@@ -126,9 +138,9 @@ public final class MiscUtil {
      * @param type type of format
      * @return tag with trimmed NBT
      */
-    public static NbtCompound trimTag(NbtCompound tag, Item type){
-        NbtCompound newTag = tag;
-        if(tag != null) {
+    public static NbtCompound trimTag(NbtCompound tag, @Nullable Item type){
+        NbtCompound newTag = tag.copy();
+        if(newTag != null) {
             newTag.remove("id");
             newTag.remove("x");
             newTag.remove("y");
@@ -233,5 +245,54 @@ public final class MiscUtil {
                     world.getBlockEntity(originalPos, ModEntities.WEED_CROP_ENTITY).get().writeNbt(new NbtCompound()));
             world.markDirty(copyToPos);
         }
+    }
+
+    public static DefaultedList<ItemStack> getItemsFromNbt(ItemStack stack) {
+        if(stack.isOf(ModItems.SEED_BAG) && stack.hasTag()) {
+            NbtCompound tag = stack.getTag();
+            assert tag != null;
+            NbtList nbtList = tag.getList("Items", NbtElement.LIST_TYPE);
+            List<ItemStack> itemList = new ArrayList<>();
+            for(NbtElement element : nbtList) {
+                NbtCompound compound = (NbtCompound) element;
+                ItemStack seedStack = ModItems.WEED_SEED.getDefaultStack();
+                NbtCompound bagTag = new NbtCompound();
+                bagTag.putInt("ID", compound.getInt("ID"));
+                bagTag.putInt("THC", compound.getInt("THC"));
+                bagTag.put("Attrbiutes", compound.getList("Attributes", NbtElement.LIST_TYPE));
+                seedStack.putSubTag("cannacraft:strain", bagTag);
+                itemList.add(seedStack);
+            }
+            return ImplementedInventory.of(DefaultedList.copyOf(ItemStack.EMPTY, itemList.toArray(new ItemStack[27]))).getItems();
+        }
+        return ImplementedInventory.ofSize(27).getItems();
+    }
+
+    public static Text getItemName(ItemStack stack) {
+        if(stack.hasTag()) {
+            NbtCompound tag = stack.getSubTag("cannacraft:strain");
+            if (StrainUtil.getStrain(tag.getInt("ID")).type().equals(StrainMap.Type.UNKNOWN)) tag.putInt("ID", 0);
+            String name = tag.getBoolean("Identified") ? StrainUtil.getStrain(tag.getInt("ID")).name() : "Unidentified";
+            if(stack.isOf(ModItems.WEED_SEED)) {
+
+            } else if(stack.isOf(ModItems.WEED_BROWNIE)) {
+                name += stack.getCount() > 1 ? " Brownie": " Brownies";
+            } else if(stack.isOf(ModItems.WEED_DISTILLATE)) {
+
+            } else if(stack.isOf(ModItems.WEED_BUNDLE)) {
+
+            }
+            return Text.of(name);
+        }
+        return (Text) Text.EMPTY;
+    }
+    @Nullable
+    public static ItemStack getCrosshairItem() {
+        if(MinecraftClient.getInstance().crosshairTarget.getType().equals(HitResult.Type.ENTITY)) {
+            if(((EntityHitResult) MinecraftClient.getInstance().crosshairTarget).getEntity() instanceof ItemEntity itemEntity) {
+                return itemEntity.getStack();
+            }
+        }
+        return null;
     }
 }
