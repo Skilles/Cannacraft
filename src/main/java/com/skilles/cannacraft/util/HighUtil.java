@@ -37,30 +37,30 @@ public class HighUtil {
         int amplifier = currentEffect.getAmplifier();
         switch(amplifier) {
             case 0:
-                player.applyStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, currentEffect.getDuration(), 0, true,false), null);
+                player.addStatusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, currentEffect.getDuration(), 0, true,false), null);
                 player.sendMessage(new LiteralText("The buzz has made you resistant to fire").formatted(Formatting.GREEN), true);
                 break;
             case 1:
-                player.applyStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, currentEffect.getDuration(), 0, true, false), null);
+                player.addStatusEffect(new StatusEffectInstance(StatusEffects.HASTE, currentEffect.getDuration(), 0, true, false), null);
                 player.sendMessage(new LiteralText("Why are your hands shaking").formatted(Formatting.GREEN), true);
                 break;
             case 2:
                 if (MiscUtil.random().nextInt(2) == 0) {
-                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, currentEffect.getDuration(), 0, true,false), null);
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, currentEffect.getDuration(), 0, true,false), null);
                     player.sendMessage(new LiteralText("You feel stronger for some reason").formatted(Formatting.GREEN), true);
                 } else {
-                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, currentEffect.getDuration(), 0, true, false), null);
-                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.SLOW_FALLING, currentEffect.getDuration(), 0, true, false), null);
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, currentEffect.getDuration(), 0, true, false), null);
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOW_FALLING, currentEffect.getDuration(), 0, true, false), null);
                     player.sendMessage(new LiteralText("You feel like you're floating").formatted(Formatting.GREEN), true);
                 }
                 break;
             case 3:
                 if (MiscUtil.random().nextInt(2) == 0) {
-                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, currentEffect.getDuration(), 0, true, false), null);
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, currentEffect.getDuration(), 0, true, false), null);
                     player.sendMessage(new LiteralText("Sonic").formatted(Formatting.GREEN), true);
                 } else {
-                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, currentEffect.getDuration(), 0, true, false), null);
-                    player.applyStatusEffect(new StatusEffectInstance(StatusEffects.HUNGER, currentEffect.getDuration(), 0, true, false), null);
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, currentEffect.getDuration(), 0, true, false), null);
+                    player.addStatusEffect(new StatusEffectInstance(StatusEffects.HUNGER, currentEffect.getDuration(), 0, true, false), null);
                     player.sendMessage(new LiteralText("You could really use some oreos").formatted(Formatting.GREEN), true);
                 }
                 break;

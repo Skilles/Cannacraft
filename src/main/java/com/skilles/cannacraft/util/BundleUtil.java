@@ -21,17 +21,17 @@ public class BundleUtil {
         }
         return "null g";
     }
-    public static double getGrams(ItemStack stack) {
+    public static double weigh(ItemStack stack) {
         return stack.getCount() * 3.5;
     }
     public static float getTexture(ItemStack stack) {
-        return (float) (int)(stack.getCount() - 1)/11;
+        return ((int)(stack.getCount() - 1)/11)/3.0F;
     }
     public static void appendBundleTooltip(List<Text> tooltip, int count) {
         tooltip.add(new LiteralText("Amount: ").formatted(Formatting.GRAY).append(new LiteralText(getAmountString(count*3.5)).formatted(Formatting.GREEN)));
     }
     public static String getName(ItemStack stack) { // rounded down
-        double grams = getGrams(stack);
+        double grams = weigh(stack);
         String name = " of ";
         if(grams == 1.0 ) {
             name = StringUtils.prependIfMissingIgnoreCase(name, "Gram");
@@ -41,8 +41,10 @@ public class BundleUtil {
             name = StringUtils.prependIfMissingIgnoreCase(name, "Quarter");
         } else if(grams < 28.0) {
             name = StringUtils.prependIfMissingIgnoreCase(name, "Half");
-        } else if(grams < 112.0) {
+        }  else if(grams < 56.0) {
             name = StringUtils.prependIfMissingIgnoreCase(name, "Ounce");
+        } else if(grams < 112.0) {
+            name = StringUtils.prependIfMissingIgnoreCase(name, "2 Ounces");
         } else if(grams < 448.0) {
             name = StringUtils.prependIfMissingIgnoreCase(name, "Quarter Pound");
         } else {
@@ -56,11 +58,11 @@ public class BundleUtil {
      * @param status of the bundle
      * @return 0 if DRY, 1 if GROUND, 2 if WET
      */
-    public static int convertStatus(TriState status) {
+    public static float convertStatus(TriState status) {
         if(status.equals(TriState.TRUE)) {
-            return 2;
-        } else if(status.equals(TriState.FALSE)) {
             return 1;
+        } else if(status.equals(TriState.FALSE)) {
+            return 0.5F;
         } else {
             return 0;
         }
@@ -68,10 +70,10 @@ public class BundleUtil {
     /**
      * Converts from int to TriState status
      */
-    public static TriState convertStatus(int status) {
-        if(status == 1) {
+    public static TriState convertStatus(float status) {
+        if(status == 0.5F) {
             return TriState.FALSE; // GROUND
-        } else if(status == 2){
+        } else if(status == 1){
             return TriState.TRUE; // WET
         } else {
             return TriState.DEFAULT; // DRY

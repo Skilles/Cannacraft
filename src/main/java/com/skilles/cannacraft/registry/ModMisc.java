@@ -35,7 +35,7 @@ import net.minecraft.world.gen.feature.ConfiguredFeature;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.RandomPatchFeatureConfig;
 import net.minecraft.world.gen.placer.SimpleBlockPlacer;
-import net.minecraft.world.gen.stateprovider.SimpleBlockStateProvider;
+import net.minecraft.world.gen.stateprovider.WeightedBlockStateProvider;
 import net.minecraft.world.poi.PointOfInterestType;
 
 import static com.skilles.cannacraft.Cannacraft.id;
@@ -72,8 +72,8 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
 
     static {
         WEED_CROP_POOL = new DataPool.Builder<BlockState>().add(WEED_CROP_STATE.with(WeedCrop.AGE, 1), 1).add(WEED_CROP_STATE.with(WeedCrop.AGE, 3), 2).add(WEED_CROP_STATE.with(WeedCrop.AGE, 5), 2).add(WEED_CROP_STATE.with(WeedCrop.AGE, 7), 1);
-        //WEED_CROP_CONFIG = (new RandomPatchFeatureConfig.Builder(new WeightedBlockStateProvider(WEED_CROP_POOL), SimpleBlockPlacer.INSTANCE)).tries(64).needsWater().build();
-        WEED_CROP_CONFIG = (new net.minecraft.world.gen.feature.RandomPatchFeatureConfig.Builder(new SimpleBlockStateProvider(ModBlocks.STRAIN_ANALYZER.getDefaultState()), SimpleBlockPlacer.INSTANCE)).tries(32).build();
+        WEED_CROP_CONFIG = (new RandomPatchFeatureConfig.Builder(new WeightedBlockStateProvider(WEED_CROP_POOL), SimpleBlockPlacer.INSTANCE)).tries(64).needsWater().build();
+        //WEED_CROP_CONFIG = (new net.minecraft.world.gen.feature.RandomPatchFeatureConfig.Builder(new SimpleBlockStateProvider(ModBlocks.STRAIN_ANALYZER.getDefaultState()), SimpleBlockPlacer.INSTANCE)).tries(32).build();
         WEED_CROP_FEATURE = Feature.RANDOM_PATCH.configure(WEED_CROP_CONFIG).decorate(Decorator.HEIGHTMAP_SPREAD_DOUBLE.configure(new HeightmapDecoratorConfig(Heightmap.Type.MOTION_BLOCKING)).spreadHorizontally().repeat(5));
     }
 
@@ -89,7 +89,7 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
     private static void registerModelPredicates() {
         FabricModelPredicateProviderRegistry.register(ModItems.WEED_JOINT, new Identifier("lit"), (itemStack, clientWorld, livingEntity, seed) -> itemStack.hasTag() ? itemStack.getTag().getBoolean("Lit") ? 1.0F : 0.0F : 0.0F);
         FabricModelPredicateProviderRegistry.register(ModItems.WEED_BUNDLE, new Identifier("count"), (itemStack, clientWorld, livingEntity, seed) -> BundleUtil.getTexture(itemStack));
-        FabricModelPredicateProviderRegistry.register(ModItems.WEED_BUNDLE, new Identifier("status"), (itemStack, clientWorld, livingEntity, seed) -> itemStack.hasTag() ? itemStack.getSubTag("cannacraft:strain").getInt("Status") : 2); // WET is default
+        FabricModelPredicateProviderRegistry.register(ModItems.WEED_BUNDLE, new Identifier("status"), (itemStack, clientWorld, livingEntity, seed) -> itemStack.hasTag() ? itemStack.getSubTag("cannacraft:strain").getFloat("Status") : 1.0F); // WET is default
     }
     public static final VillagerProfession STONER = VillagerProfessionBuilder.create().id(new Identifier("stoner")).workstation(PointOfInterestType.FARMER).harvestableItems(ModItems.WEED_SEED).secondaryJobSites(Blocks.FARMLAND).workSound(SoundEvents.ENTITY_VILLAGER_WORK_FARMER).build();
     private static void registerVillagers() {
