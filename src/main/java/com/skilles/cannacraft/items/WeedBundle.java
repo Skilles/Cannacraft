@@ -1,19 +1,24 @@
 package com.skilles.cannacraft.items;
 
+import com.skilles.cannacraft.components.StrainInterface;
 import com.skilles.cannacraft.registry.ModMisc;
 import com.skilles.cannacraft.strain.StrainMap;
 import com.skilles.cannacraft.util.BundleUtil;
 import com.skilles.cannacraft.util.StrainUtil;
-import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
+import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
+
+import static com.skilles.cannacraft.Cannacraft.log;
 
 public class WeedBundle extends Item {
     public WeedBundle(Settings settings) {
@@ -27,7 +32,7 @@ public class WeedBundle extends Item {
             if (!strainTag.contains("ID") || StrainUtil.getStrain(strainTag).type().equals(StrainMap.Type.UNKNOWN))
                 strainTag.putInt("ID", 0);
             if (strainTag.getBoolean("Identified")) {
-                name += StrainUtil.getStrain(strainTag.getInt("ID")).name();
+                name += StrainUtil.getStrain(strainTag.getInt("ID"), strainTag.getBoolean("Resource")).name();
             } else {
                 name += "Unidentified Cannabis";
             }
@@ -42,7 +47,26 @@ public class WeedBundle extends Item {
         }
         return super.getName(stack);
     }
-
+    @Override
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
+        if (world.isClient) {
+            ItemStack clientStack = playerEntity.getStackInHand(hand);
+            StrainInterface clientStackInterface = ModMisc.STRAIN.get(clientStack);
+            if (!playerEntity.isSneaking()) {
+                System.out.println("Strain of held seed: "
+                        + clientStackInterface.getStrain()
+                        + " THC: " + clientStackInterface.getThc()
+                        + " Identified: " + clientStackInterface.identified()
+                        + " Genes: " + clientStackInterface.getGenetics()
+                        + " Status: " + clientStackInterface.getStatus()
+                        + " Texture: " + BundleUtil.getTexture(clientStack)
+                );
+            } else {
+                log(clientStack.getTag());
+            }
+        }
+        return TypedActionResult.success(playerEntity.getStackInHand(hand));
+    }
     @Override
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);

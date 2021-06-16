@@ -5,6 +5,7 @@ import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.Gene;
 import com.skilles.cannacraft.strain.GeneTypes;
+import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.strain.StrainMap;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.Block;
@@ -32,7 +33,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -59,10 +59,10 @@ public final class MiscUtil {
         NbtList genes = new NbtList();
         if(tag.contains("Attributes")) genes = tag.getList("Attributes", NbtType.COMPOUND);
         if(tag.getBoolean("Identified")) {
-            tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText(StrainUtil.getStrain(id).name()).formatted(Formatting.GREEN)));
-            tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StringUtils.lowerCase(StrainUtil.getStrain(id).type().name()))).formatted(Formatting.DARK_GREEN)));
+            tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText(StrainUtil.getStrain(tag).name()).formatted(Formatting.GREEN)));
+            tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StringUtils.lowerCase(StrainUtil.getStrain(tag).type().name()))).formatted(Formatting.DARK_GREEN)));
             tooltip.add(new LiteralText("THC: ").formatted(Formatting.GRAY).append(new LiteralText(thc + "%").formatted(Formatting.DARK_GREEN)));
-            Rarity rarity = StrainUtil.getStrain(id).getRarity();
+            Rarity rarity = StrainUtil.getStrain(tag).getRarity();
             tooltip.add(new LiteralText("Rarity: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StringUtils.lowerCase(rarity.toString()))).formatted(rarity.formatting)));
             if(!sex.isEmpty()) tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText(sex).formatted(Formatting.DARK_GREEN)));
             if(!genes.isEmpty()) {
@@ -80,23 +80,27 @@ public final class MiscUtil {
      * TODO: use BE and check if fully grown before dropping bred seed
      */
     public static void dropStack(World world, BlockPos pos, Item type, boolean brokenWithShears) {
-        ItemStack toDrop = new ItemStack(type);
-        if(world.getBlockEntity(pos) != null) {
-            NbtCompound tag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
-            if (tag != null) {
-                tag.putInt("THC", tag.getInt("Seed THC"));
-                if (type.equals(ModItems.WEED_SEED) && !tag.getBoolean("Male")) {
-                    toDrop.putSubTag("cannacraft:strain", trimTag(tag, type));
-                    Block.dropStack(world, pos, toDrop);
-                } else if (brokenWithShears && type.equals(ModItems.WEED_BUNDLE)) {
-                    toDrop.putSubTag("cannacraft:strain", trimTag(tag));
-                    Block.dropStack(world, pos, toDrop);
+        if(world != null) {
+            ItemStack toDrop = new ItemStack(type);
+            if (world.getBlockEntity(pos) != null) {
+                NbtCompound tag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
+                if (tag != null) {
+                    tag.putInt("THC", tag.getInt("Seed THC"));
+                    if (type.equals(ModItems.WEED_SEED) && !tag.getBoolean("Male")) {
+                        toDrop.putSubTag("cannacraft:strain", trimTag(tag, type));
+                        Block.dropStack(world, pos, toDrop);
+                    } else if (brokenWithShears && type.equals(ModItems.WEED_BUNDLE)) {
+                        toDrop.putSubTag("cannacraft:strain", trimTag(tag));
+                        Block.dropStack(world, pos, toDrop);
+                    }
+                } else {
+                    log("Error: NULLTAG");
                 }
             } else {
-                log("Error: NULLTAG");
+                log("Error: NULLBENTITY");
             }
         } else {
-            log("Error: NULLBENTITY");
+            log("Error: NULLWORLD");
         }
     }
     public static void dropStack(World world, BlockPos pos, Item type) {
@@ -113,10 +117,54 @@ public final class MiscUtil {
     /**
      * @param tag to randomize genes and ID for
      */
-    public static void randomizeTag(NbtCompound tag) {
-        Random random = random();
-        tag.put("Attributes", toNbtList(randGenes()));
-        tag.putInt("ID", random.nextInt(StrainUtil.defaultStrains.size() - 1) + 1); // random id
+    public static boolean randomizeTag(NbtCompound tag) {
+        List<Strain> strainList = StrainUtil.getStrainPool();
+        // Compute the total weight of all items together.
+        double totalWeight = 0.0;
+        for (Strain strain : strainList) {
+            totalWeight += getWeight(strain);
+        }
+        // Now choose a random item.
+        int idx = 0;
+        for (double r = Math.random() * totalWeight; idx < strainList.size() - 1; ++idx) {
+            r -= getWeight(strainList.get(idx));
+            if (r <= 0.0) break;
+        }
+        Strain strain = strainList.get(idx);
+        log("Random: " + strain);
+        tag.putInt("ID", strain.id());
+        tag.put("Attributes", toNbtList(randGenes(strain)));
+        tag.putBoolean("Resource", strain.isResource());
+        return strainList.get(idx).isResource();
+        //tag.putInt("ID", random.nextInt(StrainUtil.defaultStrains.size() - 1) + 1); // random id
+    }
+    private static int getWeight(Strain strain) {
+        // TODO: add to config
+        int weight;
+        switch (strain.getRarity().ordinal()) {
+            case 0 -> weight = 50;
+            case 1 -> weight = 30;
+            case 2 -> weight = 15;
+            case 3 -> weight = 5;
+            default -> throw new IllegalStateException("Unexpected value: " + strain.getRarity().ordinal());
+        };
+        if(strain.isResource()) weight /= 2;
+        return weight;
+    }
+    public static ArrayList<Gene> randGenes(Strain strain) {
+        float chance = random.nextFloat() + 1F; // 1.0 - 2.0
+        ArrayList<Gene> geneList = new ArrayList<>();
+        if(random.nextInt(3 + strain.getRarity().ordinal()) == 0) { // 33% - 17% chance
+            if (chance <= 0.2F) { // 20% chance
+                geneList.add(new Gene(GeneTypes.SPEED, random.nextInt(GeneTypes.SPEED.getMax()) + 1));
+                geneList.add(new Gene(GeneTypes.YIELD, random.nextInt(GeneTypes.YIELD.getMax()) + 1));
+            } else if (chance > 0.2F && chance <= 0.5F) { // 30% chance
+                geneList.add(new Gene(GeneTypes.YIELD, random.nextInt(GeneTypes.YIELD.getMax() - 1) + 1));
+            } else if (chance > 0.5F) { // 50% chance
+                geneList.add(new Gene(GeneTypes.SPEED, random.nextInt(GeneTypes.SPEED.getMax() - 1) + 1));
+            }
+        }
+        return geneList;
     }
     public static ArrayList<Gene> randGenes() {
         float chance = random.nextFloat();
@@ -271,14 +319,14 @@ public final class MiscUtil {
     public static Text getItemName(ItemStack stack) {
         if(stack.hasTag()) {
             NbtCompound tag = stack.getSubTag("cannacraft:strain");
-            if (StrainUtil.getStrain(tag.getInt("ID")).type().equals(StrainMap.Type.UNKNOWN)) tag.putInt("ID", 0);
-            String name = tag.getBoolean("Identified") ? StrainUtil.getStrain(tag.getInt("ID")).name() : "Unidentified";
+            if (StrainUtil.getStrain(tag).type().equals(StrainMap.Type.UNKNOWN)) tag.putInt("ID", 0);
+            String name = tag.getBoolean("Identified") ? StrainUtil.getStrain(tag).name() : "Unidentified";
             if(stack.isOf(ModItems.WEED_SEED)) {
-
+                name += stack.getCount() > 1 ? " Seed": " Seeds";
             } else if(stack.isOf(ModItems.WEED_BROWNIE)) {
                 name += stack.getCount() > 1 ? " Brownie": " Brownies";
             } else if(stack.isOf(ModItems.WEED_DISTILLATE)) {
-
+                name += " Distillate";
             } else if(stack.isOf(ModItems.WEED_BUNDLE)) {
 
             }

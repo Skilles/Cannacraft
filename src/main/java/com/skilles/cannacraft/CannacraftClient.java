@@ -1,7 +1,7 @@
 package com.skilles.cannacraft;
 
-import com.skilles.cannacraft.registry.ModBlocks;
 import com.skilles.cannacraft.config.ModConfig;
+import com.skilles.cannacraft.registry.ModBlocks;
 import com.skilles.cannacraft.registry.ModScreens;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;

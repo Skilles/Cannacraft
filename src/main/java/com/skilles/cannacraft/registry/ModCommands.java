@@ -6,7 +6,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.skilles.cannacraft.strain.StrainMap;
 import com.skilles.cannacraft.util.CrossUtil;
-import com.skilles.cannacraft.util.MiscUtil;
 import com.skilles.cannacraft.util.StrainUtil;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.item.ItemStack;
@@ -18,6 +17,7 @@ import net.minecraft.util.Util;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
+import static com.skilles.cannacraft.Cannacraft.log;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -150,7 +150,8 @@ public class ModCommands {
                             .then(argument("index", IntegerArgumentType.integer(0, StrainUtil.getStrainCount()))
                             .executes(ctx -> {
                                 final ServerPlayerEntity self = ctx.getSource().getPlayer();
-                                self.sendSystemMessage(Text.of("Strain removed: "+ StrainUtil.getStrain(getInteger(ctx, "index"))), Util.NIL_UUID);
+                                // TODO: add logic for resource strains
+                                self.sendSystemMessage(Text.of("Strain removed: "+ StrainUtil.getStrain(getInteger(ctx, "index"), false)), Util.NIL_UUID);
                                 StrainUtil.removeStrain(getInteger(ctx, "index"));
                                 return 1;
                             })))
@@ -172,16 +173,22 @@ public class ModCommands {
                                 final ServerPlayerEntity self = ctx.getSource().getPlayer();
                                 ItemStack stack = new ItemStack(ModItems.WEED_SEED);
                                 NbtCompound tag = stack.getOrCreateSubTag("cannacraft:strain");
-                                MiscUtil.randomizeTag(tag);
-                                //ModMisc.STRAIN.get(stack).setStrain(Math.abs(GeneticsManager.random().nextInt(StrainMap.getStrainCount() - 1)) + 1);
-                                ModMisc.STRAIN.get(stack).setThc(StrainUtil.normalDist(18, 5, 13));
+                                StrainUtil.randomStrain(tag);
                                 self.giveItemStack(stack);
                                 self.sendSystemMessage(Text.of("Random seed given"), Util.NIL_UUID);
                                 return 1;
                             })
-                        .then(argument("sex", StringArgumentType.string())
+                            .then(argument("amount", IntegerArgumentType.integer())
                             .executes(ctx -> {
-                                setSex(ctx, getString(ctx, "sex"));
+                                final ServerPlayerEntity self = ctx.getSource().getPlayer();
+                                for(int i = 0; i < getInteger(ctx, "amount"); i++) {
+                                    log("test");
+                                    ItemStack stack = new ItemStack(ModItems.WEED_SEED);
+                                    NbtCompound tag = stack.getOrCreateSubTag("cannacraft:strain");
+                                    StrainUtil.randomStrain(tag);
+                                    self.giveItemStack(stack);
+                                }
+                                self.sendSystemMessage(Text.of(getInteger(ctx, "amount") + " random seeds given"), Util.NIL_UUID);
                                 return 1;
                             })))
                         .then(literal("clear")

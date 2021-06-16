@@ -29,6 +29,7 @@ public interface StrainInterface extends ComponentV3 {
     StrainMap.Type getType();
     int getThc();
     boolean isMale();
+    boolean isResource();
 
     TriState getStatus();
     void setStatus(TriState status);

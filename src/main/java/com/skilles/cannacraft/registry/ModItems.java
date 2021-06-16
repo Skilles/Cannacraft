@@ -4,13 +4,11 @@ import com.skilles.cannacraft.Cannacraft;
 import com.skilles.cannacraft.items.*;
 import com.skilles.cannacraft.items.seedBag.SeedBag;
 import com.skilles.cannacraft.items.weedManual.WeedManual;
-import com.skilles.cannacraft.misc.HighEffect;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.FoodComponent;
-import net.minecraft.item.FoodComponents;
 import net.minecraft.item.Item;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.registry.Registry;
@@ -31,7 +29,7 @@ public class ModItems {
     public static final WeedGrinder WEED_GRINDER = new WeedGrinder(new Item.Settings().group(Cannacraft.ITEM_GROUP).maxCount(1));
 
     // Crafting items
-    public static final Item BROWNIE_MIX = new WeedGrinder(new Item.Settings().group(Cannacraft.ITEM_GROUP));
+    public static final Item BROWNIE_MIX = new Item(new Item.Settings().group(Cannacraft.ITEM_GROUP));
 
     // Crafting items
 
@@ -60,6 +58,6 @@ public class ModItems {
         Registry.register(Registry.ITEM, id("weed_rack"), WEED_RACK);
         Registry.register(Registry.ITEM, id("weed_bong"), WEED_BONG);
         Registry.register(Registry.ITEM, id("grow_light"), GROW_LIGHT);
-        Registry.register(Registry.ITEM, id("grow_light"), BROWNIE_MIX);
+        Registry.register(Registry.ITEM, id("brownie_mix"), BROWNIE_MIX);
     }
 }

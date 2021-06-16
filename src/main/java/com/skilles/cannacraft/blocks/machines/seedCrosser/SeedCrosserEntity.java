@@ -133,7 +133,7 @@ public class SeedCrosserEntity extends MachineBlockEntity {
                 );
                 // Sends message to nearby players
                 for (ServerPlayerEntity player : PlayerLookup.tracking((ServerWorld) world, pos)) {
-                    player.sendSystemMessage(Text.of(StrainUtil.getStrain(StrainUtil.getStrainCount() - 1).name() + " has been created!"), Util.NIL_UUID);
+                    player.sendSystemMessage(Text.of(StrainUtil.getLatestStrain().name() + " has been created!"), Util.NIL_UUID);
                 }
             }
         }
@@ -152,9 +152,9 @@ public class SeedCrosserEntity extends MachineBlockEntity {
                         return true;
                     } else {
                         NbtCompound outputTag = output.getSubTag("cannacraft:strain");
-                        String newName = CrossUtil.crossNames(StrainUtil.getStrain(tag.getInt("ID")).name(), StrainUtil.getStrain(tag2.getInt("ID")).name());
+                        String newName = CrossUtil.crossNames(StrainUtil.getStrain(tag).name(), StrainUtil.getStrain(tag2).name());
                         int newThc = CrossUtil.crossThc(tag.getInt("THC"), tag2.getInt("THC"));
-                        return StrainUtil.isPresent(newName) && outputTag.getInt("ID") == StrainUtil.indexOf(newName) && newThc == outputTag.getInt("THC");
+                        return StrainUtil.isPresent(newName) && StrainUtil.indexOf(StrainUtil.getStrain(outputTag)) == StrainUtil.indexOf(newName) && newThc == outputTag.getInt("THC");
                     }
                 }
             }
@@ -170,13 +170,13 @@ public class SeedCrosserEntity extends MachineBlockEntity {
         NbtCompound tag = stack.getSubTag("cannacraft:strain");
         NbtCompound tag2 = stack2.getSubTag("cannacraft:strain");
 
-        String newName = CrossUtil.crossNames(StrainUtil.getStrain(tag.getInt("ID")).name(), StrainUtil.getStrain(tag2.getInt("ID")).name());
-        StrainMap.Type newType = CrossUtil.crossTypes(StrainUtil.getStrain(tag.getInt("ID")).type(), StrainUtil.getStrain(tag2.getInt("ID")).type());
+        String newName = CrossUtil.crossNames(StrainUtil.getStrain(tag).name(), StrainUtil.getStrain(tag2).name());
+        StrainMap.Type newType = CrossUtil.crossTypes(StrainUtil.getStrain(tag).type(), StrainUtil.getStrain(tag2).type());
         int newThc = CrossUtil.crossThc(tag.getInt("THC"), tag2.getInt("THC"));
 
         if(!StrainUtil.getNames().containsKey(newName)) {
             StrainUtil.addStrain(newName, newType);
-            log("New strain: "+ StrainUtil.getStrain(StrainUtil.getStrainCount() - 1)); // print latest strain
+            log("New strain: "+ StrainUtil.getStrain(newName)); // print latest strain
             flag = 1; // flag if strain was added
         }
         NbtCompound strainTag = new NbtCompound();

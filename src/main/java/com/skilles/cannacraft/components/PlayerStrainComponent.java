@@ -8,9 +8,8 @@ import dev.onyxstudios.cca.api.v3.entity.PlayerComponent;
 import net.minecraft.nbt.NbtCompound;
 
 public class PlayerStrainComponent implements EntityInterface, ComponentV3, AutoSyncedComponent, PlayerComponent<PlayerStrainComponent> {
-    Strain strain;
-
-
+    Strain strain; // strain the player is high on
+    // TODO: add research/progression
 
     @Override
     public void readFromNbt(NbtCompound tag) {
@@ -24,7 +23,7 @@ public class PlayerStrainComponent implements EntityInterface, ComponentV3, Auto
 
     @Override
     public void setStrain(int index) {
-        strain = StrainUtil.getStrain(index);
+        strain = StrainUtil.getStrain(index, false);
     }
 
     @Override

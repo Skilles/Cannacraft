@@ -1,8 +1,6 @@
 package com.skilles.cannacraft.mixins;
 
 import com.skilles.cannacraft.registry.ModItems;
-import com.skilles.cannacraft.strain.Strain;
-import com.skilles.cannacraft.util.MiscUtil;
 import com.skilles.cannacraft.util.StrainUtil;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.ItemStack;
@@ -18,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Catches dropped items and assigns random thc and ID if needed.
  * In the future, can do some custom behavior with dropped items...
  */
-
+// TODO: add different drops for different players...
 @Mixin(ItemEntity.class)
 public abstract class ItemEntityMixin {
 
@@ -29,9 +27,8 @@ public abstract class ItemEntityMixin {
         if(stack.getItem().equals(ModItems.WEED_SEED) || stack.getItem().equals(ModItems.WEED_BUNDLE)) {
             NbtCompound tag = stack.getSubTag("cannacraft:strain");
             if(tag != null && tag.contains("ID")) {
-                if(tag.getInt("ID") == 0) MiscUtil.randomizeTag(tag);
-                Strain strain = StrainUtil.getStrain(tag.getInt("ID"));
-                if(!tag.contains("THC") || (tag.contains("THC") && tag.getInt("THC") < StrainUtil.MIN_THC)) tag.putInt("THC", StrainUtil.randThc(strain));
+                if(tag.getInt("ID") == 0)
+                    StrainUtil.randomStrain(tag);
             }
         }
     }

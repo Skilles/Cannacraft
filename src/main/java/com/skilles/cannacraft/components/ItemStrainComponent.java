@@ -24,8 +24,6 @@ import static com.skilles.cannacraft.components.ItemStrainComponent.StrainType.F
 import static com.skilles.cannacraft.components.ItemStrainComponent.StrainType.SEED;
 import static com.skilles.cannacraft.util.StrainUtil.normalDist;
 
-import com.skilles.cannacraft.components.ItemStrainComponent.StrainType;
-
 
 public class ItemStrainComponent extends ItemComponent implements StrainInterface, CopyableComponent<ItemStrainComponent> {
 
@@ -93,17 +91,17 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
         this.getOrCreateRootTag().putInt("ID", index);
         this.putInt("THC", getThc());
         if(seed()) this.putBoolean("Male", isMale());
-        if(fruit()) this.putInt("Status", BundleUtil.convertStatus(getStatus()));
+        if(fruit()) this.putFloat("Status", BundleUtil.convertStatus(getStatus()));
     }
     @Override
     public String getStrain() {
         if(!this.hasTag("ID")) setStrain(getIndex());
-        return StrainUtil.getStrain(this.getInt("ID")).name();
+        return StrainUtil.getStrain(this.getInt("ID"), this.isResource()).name();
     }
     @Override
     public StrainMap.Type getType() {
         if(!this.hasTag("Type")) setStrain(getIndex());
-        return StrainUtil.getStrain(this.getInt("ID")).type();
+        return StrainUtil.getStrain(this.getInt("ID"), this.isResource()).type();
     }
     @Override
     public int getThc() {
@@ -135,6 +133,15 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
         }
     }
     @Override
+    public boolean isResource() {
+        if(seed()) {
+            if (!this.hasTag("Resource")) this.putBoolean("Resource", false);
+            return this.getBoolean("Resource");
+        } else {
+            return false;
+        }
+    }
+    @Override
     public void setMale(boolean isMale) {
         if(seed()) {
             this.getOrCreateRootTag().putBoolean("Male", isMale);
@@ -157,14 +164,14 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
         if(!this.hasTag("Status")) {
             if(fruit())
             setStatus(TriState.TRUE); // default is WET
-            else putInt("Status", 0); // should not run unless called explicitly on non-fruit
+            else putFloat("Status", 0); // should not run unless called explicitly on non-fruit
         }
-        return BundleUtil.convertStatus(getInt("Status"));
+        return BundleUtil.convertStatus(getFloat("Status"));
     }
     @Override
     public void setStatus(TriState status) {
         if(fruit()) {
-            putInt("Status", BundleUtil.convertStatus(status));
+            putFloat("Status", BundleUtil.convertStatus(status));
         } 
     }
 }

@@ -21,7 +21,7 @@ public class WeedFruit extends Item {
         if (stack.hasTag()) {
             NbtCompound tag = stack.getSubTag("cannacraft:strain");
             if(!tag.contains("ID") || StrainUtil.getStrain(tag).type().equals(StrainMap.Type.UNKNOWN)) tag.putInt("ID", 0);
-            return tag.getBoolean("Identified") ? Text.of(StrainUtil.getStrain(tag.getInt("ID")).name()) : Text.of("Unidentified Cannabis");
+            return tag.getBoolean("Identified") ? Text.of(StrainUtil.getStrain(tag).name()) : Text.of("Unidentified Cannabis");
         }
         return super.getName(stack);
     }

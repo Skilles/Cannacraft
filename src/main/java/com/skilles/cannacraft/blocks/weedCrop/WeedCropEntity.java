@@ -6,7 +6,6 @@ import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.strain.Gene;
 import com.skilles.cannacraft.strain.GeneTypes;
 import com.skilles.cannacraft.strain.Strain;
-import com.skilles.cannacraft.strain.StrainMap;
 import com.skilles.cannacraft.util.CrossUtil;
 import com.skilles.cannacraft.util.MiscUtil;
 import me.shedaniel.autoconfig.ConfigData;
@@ -27,7 +26,7 @@ import java.util.List;
 import java.util.Random;
 
 import static com.skilles.cannacraft.Cannacraft.log;
-import static com.skilles.cannacraft.util.StrainUtil.*;
+import static com.skilles.cannacraft.util.StrainUtil.getStrain;
 
 // TODO: drop seedId, seedThc if male
 // TODO: cross plants by collecting pollen from male
@@ -180,7 +179,7 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
             this.seedThc = CrossUtil.crossThc(maleThc, this.thc);
             log("New THC: " + this.seedThc);
             // Set strain
-            Strain crossedStrain = CrossUtil.crossStrains(getStrain(id), getStrain(maleId));
+            Strain crossedStrain = CrossUtil.crossStrains(getStrain(id, false), getStrain(maleId, false));
             this.seedId = crossedStrain.id();
             if(this.identified) this.identified = maleIdentified;
 

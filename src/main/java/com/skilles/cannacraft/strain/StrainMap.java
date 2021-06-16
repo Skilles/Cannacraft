@@ -6,7 +6,6 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.skilles.cannacraft.util.StrainUtil;
-import net.minecraft.util.registry.Registry;
 import org.apache.logging.log4j.Level;
 
 import java.io.FileWriter;
@@ -22,14 +21,14 @@ import static com.skilles.cannacraft.Cannacraft.log;
 /**
  * This class is responsible for a lot of strain related data management
  */
-public final class StrainMap {
+public class StrainMap {
 
     private static final GsonBuilder builder = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting();
     private static final Gson gson = builder.create();
 
-    public static int ogStrainCount = 4;
+    //public static int ogStrainCount = 4;
     public static BiMap<Integer, Strain> strainArray = HashBiMap.create();
-    public static BiMap<Integer, Strain> resourceStrainArray = HashBiMap.create(StrainUtil.defaultResourceStrains.size());
+    public static BiMap<Integer, Strain> resourceStrainArray = HashBiMap.create();
     public static Map<String, Strain> strainList = new HashMap<>(); // for name lookup
     public enum Type {
         INDICA,
@@ -40,6 +39,8 @@ public final class StrainMap {
 
     public static void registerStrains() {
         load();
+        //StrainUtil.resetStrains();
+        //StrainUtil.initDefaultStrains();
         StrainUtil.validateStrains();
         log("Strains initialized: "+ strainArray);
         log("Strains initialized: "+ strainList);
@@ -65,6 +66,7 @@ public final class StrainMap {
                 strainArray.put(entry.getKey(), entry.getValue());
                 strainList.put(entry.getValue().name(), entry.getValue());
             }
+            resourceStrainArray.putAll(StrainUtil.defaultResourceStrains);
         } catch(Exception e) {
             log(Level.ERROR, "Error loading strains");
             StrainUtil.resetStrains();
