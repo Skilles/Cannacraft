@@ -1,7 +1,8 @@
 package com.skilles.cannacraft.mixins;
 
-import com.skilles.cannacraft.Cannacraft;
 import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.ModMisc;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.ShapelessRecipe;
@@ -13,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static com.skilles.cannacraft.Cannacraft.*;
+import static com.skilles.cannacraft.Cannacraft.id;
 
 /**
  * Copies strain NBT in crafting recipes
@@ -36,6 +37,18 @@ public abstract class ShapelessRecipeMixin {
             ItemStack output = this.getOutput().copy();
             if(input.hasTag()) {
                 output.putSubTag("cannacraft:strain", input.getSubTag("cannacraft:strain"));
+                cir.setReturnValue(output);
+            }
+        } else if(this.id.equals(id("weed_bundle_ground"))) {
+            int slotId = 0;
+            for(int i = 0; i < craftingInventory.size(); i++) {
+                if(craftingInventory.getStack(i).isOf(ModItems.WEED_BUNDLE)) slotId = i;
+            }
+            ItemStack input = craftingInventory.getStack(slotId).copy();
+            ItemStack output = this.getOutput().copy();
+            if(input.hasTag() && input.getSubTag("cannacraft:strain").getFloat("Status") == 0.5F) {
+                output.putSubTag("cannacraft:strain", input.getSubTag("cannacraft:strain"));
+                ModMisc.STRAIN.get(output).setStatus(TriState.DEFAULT);
                 cir.setReturnValue(output);
             }
         }

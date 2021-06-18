@@ -6,9 +6,9 @@
   "mixins": [
     "CompostableMixin",
     "ItemEntityMixin",
+    "MiscRecipeMixin",
     "PlayerInventoryMixin",
     "ShapelessRecipeMixin",
-    "SmeltingRecipeMixin",
     "StatusEffectAccessor",
     "TaskProviderMixin"
   ],

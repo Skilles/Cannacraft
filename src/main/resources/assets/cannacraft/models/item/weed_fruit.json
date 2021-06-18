@@ -1,7 +1,7 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "cannacraft:items/weed_seed"
+    "layer0": "cannacraft:item/weed_fruit/wet/weed_fruit0"
   },
   "overrides": [
     {
@@ -30,7 +30,7 @@
     },
     {
       "predicate": {
-        "status": 1,
+        "status": 0.5,
         "count": 0.0
       },
       "model": "cannacraft:item/weed_fruit/dry/weed_fruit0"
@@ -58,7 +58,7 @@
     },
     {
       "predicate": {
-        "status": 0.5,
+        "status": 1,
         "count": 0.0
       },
       "model": "cannacraft:item/weed_fruit/wet/weed_fruit0"

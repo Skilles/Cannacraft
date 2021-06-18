@@ -196,6 +196,7 @@ public final class MiscUtil {
             newTag.putInt("THC", newTag.getInt("Seed THC"));
             newTag.remove("Seed THC");
             if(newTag.contains("Male") && !newTag.getBoolean("Male")) newTag.remove("Male");
+            if(type != null && type.equals(ModItems.WEED_BUNDLE)) newTag.putFloat("Status", 1.0F);
             if(type !=null && type.equals(ModItems.WEED_SEED)) newTag.putInt("ID", newTag.getInt("Seed ID"));
             newTag.remove("Seed ID");
         }
