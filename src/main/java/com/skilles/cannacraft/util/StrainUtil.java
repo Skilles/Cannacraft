@@ -2,8 +2,8 @@ package com.skilles.cannacraft.util;
 
 import com.skilles.cannacraft.config.ModConfig;
 import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.strain.ResourcePair;
 import com.skilles.cannacraft.strain.Strain;
-import com.skilles.cannacraft.strain.StrainMap.*;
 import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.Item;
@@ -58,8 +58,16 @@ public class StrainUtil {
         if(!strainList.containsKey(name)) return strainArray.get(0);
         return strainList.get(name);
     }
+    public static Strain getStrain(StrainItems item) {
+        String name = item.getName();
+        for(Strain strain : resourceStrainArray.values()) {
+            if (containsWords(strain.name(), StringUtils.split(name)) || strain.name().contains(name)) return strain;
+        }
+        return strainArray.get(0);
+    }
     public static int indexOf(Strain strain) {
         if(strain.isResource()) {
+            // Resource strains are manually assigned an ID
             return strain.id();
         } else {
             try {
@@ -73,7 +81,6 @@ public class StrainUtil {
                 log(strainArray);
             }
         }
-        return 0;
     }
     @Deprecated
     public static int indexOf(String name) {
@@ -130,7 +137,7 @@ public class StrainUtil {
         addStrain(new Strain(name, type));
     }
     public static void addStrain(Strain strain) {
-        if(!isPresent(strain)) {
+        if(!isPresent(strain, false)) {
             strainArray.put(strainArray.size(), strain);
             if(strain.type() != Type.UNKNOWN) strainList.put(strain.name(), strain);
             save();
@@ -161,6 +168,7 @@ public class StrainUtil {
             }
         }
         if(needsInit) initNames();
+        save();
     }
     private static void initNames() {
         log( "Strain name mismatch, reinitializing names");
@@ -243,8 +251,8 @@ public class StrainUtil {
             defaultStrain(defaultStrains.size() + 8, new Strain("Nether Lights", Type.INDICA, Rarity.EPIC, true))
     );
     private static AbstractMap.SimpleEntry<Integer, Strain> defaultStrain(int index, Strain strain) { return new AbstractMap.SimpleEntry<>(index, strain.withId(index)); }
-    public static boolean isPresent(Strain strain) { return strainArray.containsValue(strain); }
 
+    public static boolean isPresent(Strain strain, boolean resource) { return resource ? resourceStrainArray.containsValue(strain) :  strainArray.containsValue(strain); }
     public static boolean isPresent(String name) {
         return strainList.containsKey(name);
     }
@@ -315,6 +323,15 @@ public class StrainUtil {
         if(!tag.contains("THC") || (tag.contains("THC") && tag.getInt("THC") < StrainUtil.MIN_THC))
             tag.putInt("THC", StrainUtil.randThc(StrainUtil.getStrain(tag)));
     }
+    public static ResourcePair[] resourcePairs = new ResourcePair[]{
+            new ResourcePair(StrainItems.COAL, StrainItems.COPPER, StrainItems.IRON),
+            new ResourcePair(StrainItems.IRON, StrainItems.COPPER, StrainItems.GOLD),
+            new ResourcePair(StrainItems.IRON, StrainItems.GOLD, StrainItems.IRON),
+            new ResourcePair(StrainItems.GOLD, StrainItems.DIAMOND, StrainItems.BLAZE),
+            new ResourcePair(StrainItems.COAL, StrainItems.REDSTONE, StrainItems.COPPER),
+            new ResourcePair(StrainItems.EMERALD, StrainItems.LAPIS, StrainItems.DIAMOND),
+            new ResourcePair(StrainItems.DIAMOND, StrainItems.LAPIS, StrainItems.ENDER_PEARL),
+            new ResourcePair(StrainItems.ENDER_PEARL, StrainItems.DIAMOND, StrainItems.NETHERITE)};
 
     public enum StrainItems {
         DISTILLATE(ModItems.WEED_DISTILLATE),

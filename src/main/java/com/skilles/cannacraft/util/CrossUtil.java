@@ -1,10 +1,7 @@
 package com.skilles.cannacraft.util;
 
 import com.google.common.collect.Lists;
-import com.skilles.cannacraft.strain.Gene;
-import com.skilles.cannacraft.strain.GeneTypes;
-import com.skilles.cannacraft.strain.Strain;
-import com.skilles.cannacraft.strain.StrainMap;
+import com.skilles.cannacraft.strain.*;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtList;
@@ -141,13 +138,34 @@ public class CrossUtil {
      * @return crossed strain
      */
     public static Strain crossStrains(Strain female, Strain male) {
-        Strain crossedStrain = new Strain(crossNames(female.name(), male.name()), crossTypes(female.type(), male.type()));
-        if(!StrainUtil.isPresent(crossedStrain)) {
-            addStrain(crossedStrain);
-            log(crossedStrain);
-            return crossedStrain;
+        Strain crossedStrain;
+        if(female.isResource() == male.isResource()) {
+            crossedStrain = crossResources(female, male);
+        } else {
+            crossedStrain = new Strain(crossNames(female.name(), male.name()), crossTypes(female.type(), male.type()));
+            if(!StrainUtil.isPresent(crossedStrain, false)) {
+                addStrain(crossedStrain);
+                log(crossedStrain);
+                return crossedStrain;
+            }
         }
         return strainList.get(crossedStrain.name());
+    }
+    /**
+     * Crosses two resource strains using predefined recipes
+     * @param female strain of female
+     * @param male strain of male
+     * @return crossed strain
+     */
+    public static Strain crossResources(Strain female, Strain male) {
+        StrainUtil.StrainItems fItem = female.strainItem;
+        StrainUtil.StrainItems mItem = male.strainItem;
+        for(ResourcePair pair : StrainUtil.resourcePairs) {
+            if((pair.strain1() == fItem || pair.strain2() == fItem) && (pair.strain1() == mItem || pair.strain2() == mItem))
+                return pair.getOutputStrain();
+        }
+        if (MiscUtil.random().nextFloat() > 0.7F) return male;
+        return female;
     }
     /**
      * This method eventually sorts the output list to only contain names that are not part of the suffix name
