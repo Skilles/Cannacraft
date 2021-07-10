@@ -1,21 +1,22 @@
 package com.skilles.cannacraft.util;
 
 import com.google.common.collect.Lists;
+import com.skilles.cannacraft.strain.Gene;
 import com.skilles.cannacraft.strain.GeneTypes;
 import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.strain.StrainMap;
+import net.fabricmc.fabric.api.util.NbtType;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.util.Pair;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 import static com.skilles.cannacraft.Cannacraft.log;
-import static com.skilles.cannacraft.strain.StrainMap.strainArray;
 import static com.skilles.cannacraft.strain.StrainMap.strainList;
 import static com.skilles.cannacraft.util.StrainUtil.addStrain;
-import static com.skilles.cannacraft.util.StrainUtil.indexOf;
 
 public class CrossUtil {
     private static final Map<String, Integer> suffixesMap = new HashMap<String, Integer>() {{
@@ -201,9 +202,42 @@ public class CrossUtil {
                 return StrainMap.Type.UNKNOWN;
         }
     }
-
+    @Nullable
+    public static NbtList crossGenes(ItemStack stack1, ItemStack stack2) {
+        if(stack1.hasTag() && stack1.getOrCreateSubTag("cannacraft:strain").getList("Attributes", NbtType.COMPOUND) != null && stack2.hasTag() && stack2.getOrCreateSubTag("cannacraft:strain").getList("Attributes", NbtType.COMPOUND) != null) {
+            ArrayList<Gene> list1 = MiscUtil.fromNbtList(stack1.getSubTag("cannacraft:strain").getList("Attributes", NbtType.COMPOUND));
+            ArrayList<Gene> list2 = MiscUtil.fromNbtList(stack2.getSubTag("cannacraft:strain").getList("Attributes", NbtType.COMPOUND));
+            ArrayList<Gene> geneList = new ArrayList<>();
+            for(int i = 0; i < list1.size() && i < list2.size(); i++) {
+                geneList.add(crossGenes(list1.get(i), list2.get(i)));
+            }
+            return MiscUtil.toNbtList(geneList);
+        }
+        return null;
+    }
+    protected static Gene crossGenes(Gene gene1, Gene gene2) {
+        if(gene1.type().equals(gene2.type())) {
+            int level1 = gene1.level();
+            int level2 = gene2.level();
+            /*switch (Math.abs(level2 - level1)) {
+                case 0:
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + Math.abs(level2 - level1));
+            }*/
+            return new Gene(gene1.type(), (level1 + level2) / 2);
+        } else {
+            return gene1;
+        }
+    }
     // terrible code
-    public static Pair<GeneTypes, Integer> crossGenes(int level1, int level2, GeneTypes type) {
+    private static Pair<GeneTypes, Integer> crossGenes(int level1, int level2, GeneTypes type) {
         int levelDiff = Math.abs(level1 - level2);
         int newLevel = 0;
         Random random = new Random();

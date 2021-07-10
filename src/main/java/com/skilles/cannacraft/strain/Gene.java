@@ -11,6 +11,7 @@ public class Gene {
     private boolean recessive;
     private int id;
     private int level;
+    private GeneTypes type;
 
     public Gene(GeneTypes gene, int level) {
         this.name = gene.getName();
@@ -19,6 +20,7 @@ public class Gene {
         } else {
             this.level = gene.getMax();
         }
+        this.type = gene;
         this.id = gene.getId();
     }
     public Gene(NbtCompound compound) {
@@ -34,6 +36,8 @@ public class Gene {
             log("ERROR: no gene/level in constructor compound");
         }
     }
+    public GeneTypes type() { return type; }
+
     public int id() { return id; }
 
     public int level() { return level; }
@@ -41,6 +45,8 @@ public class Gene {
     public String name() {
         return name;
     }
+
+    public boolean isRecessive() { return recessive; }
 
     protected void setLevel(int level) {
         this.level = level;

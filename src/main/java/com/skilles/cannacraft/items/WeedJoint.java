@@ -1,6 +1,7 @@
 package com.skilles.cannacraft.items;
 
 import com.skilles.cannacraft.CannacraftClient;
+import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.util.HighUtil;
 import com.skilles.cannacraft.util.MiscUtil;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
@@ -45,7 +46,7 @@ public class WeedJoint extends BowItem {
         ItemStack itemStack = user.getStackInHand(hand);
         ItemStack offhandStack = user.getOffHandStack();
         NbtCompound tag = itemStack.getOrCreateTag();
-        if(offhandStack.isOf(Items.FLINT_AND_STEEL) || user.getMainHandStack().isOf(Items.FLINT_AND_STEEL)) {
+        if(offhandStack.isOf(Items.FLINT_AND_STEEL) || user.getMainHandStack().isOf(Items.FLINT_AND_STEEL) || offhandStack.isOf(ModItems.WEED_LIGHTER) || user.getMainHandStack().isOf(ModItems.WEED_LIGHTER)) {
             tag.putBoolean("Lit", true);
             user.getInventory().insertStack(user.getOffHandStack());
             user.getOffHandStack().decrement(1);
