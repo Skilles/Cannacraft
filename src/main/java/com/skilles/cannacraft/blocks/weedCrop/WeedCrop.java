@@ -33,7 +33,6 @@ import java.util.Random;
 
 import static com.skilles.cannacraft.CannacraftClient.config;
 import static com.skilles.cannacraft.util.MiscUtil.*;
-import static com.skilles.cannacraft.util.MiscUtil.trimTag;
 
 // TODO: use networking/scheduler, migrate tick to BE
 public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertilizable {
@@ -202,14 +201,16 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     private void dropItems(World world, BlockPos pos, BlockState state, boolean brokenWithShears) {
         int i;
         MiscUtil.dropStack(world, pos, ModItems.WEED_SEED, brokenWithShears);
-        if (isBloomed(state)) {
+        /*if (isBloomed(state)) {
+            if(!((WeedCropEntity) world.getBlockEntity(pos)).isMale)
             MiscUtil.dropStack(world, pos, ModItems.WEED_BUNDLE, brokenWithShears);
-        }
-        for(i = 1; world.getBlockState(pos.up(i)).isOf(ModBlocks.WEED_CROP); i++){
+        }*/
+        for(i = 0; world.getBlockState(pos.up(i)).isOf(ModBlocks.WEED_CROP); i++){
             BlockState aboveState = world.getBlockState(pos.up(i));
             //WeedCropEntity aboveEntity = (WeedCropEntity) world.getBlockEntity(pos.up(i));
             if(isBloomed(aboveState)) {
                 MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_SEED);
+                if(!((WeedCropEntity) world.getBlockEntity(pos.up(i))).isMale)
                 MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_BUNDLE, brokenWithShears);
                 //world.breakBlock(pos.up(i), false, player);
             }
@@ -427,7 +428,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
             if (blockEntity instanceof WeedCropEntity && tag != null && tag.contains("ID")) {
                 NbtList attributes = new NbtList();
                 if(tag.contains("Attributes")) attributes = tag.getList("Attributes", NbtType.COMPOUND);
-                ((WeedCropEntity) blockEntity).setData(tag.getInt("ID"), tag.getInt("THC"), tag.getBoolean("Identified"), tag.getBoolean("Male"), attributes);
+                ((WeedCropEntity) blockEntity).setData(tag, attributes);
                 world.markDirty(pos);
             }
         }

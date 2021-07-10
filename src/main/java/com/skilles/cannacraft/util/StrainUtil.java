@@ -79,6 +79,7 @@ public class StrainUtil {
                 strain.init();
                 System.out.println();
                 log(strainArray);
+                return indexOf(strain);
             }
         }
     }

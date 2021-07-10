@@ -20,7 +20,7 @@ public class Strain {
     private int id;
     private float thcMultiplier;
     private Rarity rarity;
-    private StrainUtil.StrainItems strainItem;
+    public StrainUtil.StrainItems strainItem;
     private final boolean resource;
 
     public Strain(String name, Type type, boolean resource) {
@@ -89,6 +89,7 @@ public class Strain {
         this.strainItem = StrainUtil.getStrainItem(this);
         this.rarity = Rarity.COMMON;
         this.thcMultiplier = StrainUtil.getThcMultiplier(this);
+        StrainUtil.addStrain(this);
     }
 
     @Override
@@ -96,6 +97,9 @@ public class Strain {
         if (this == o) return true;
         if (o == null /*|| getClass() != o.getClass()*/) return false;
         Strain strain = (Strain) o;
+        if(this.isResource()) {
+            return this.strainItem.equals(strain.strainItem);
+        }
         return name.equals(strain.name);
     }
 
