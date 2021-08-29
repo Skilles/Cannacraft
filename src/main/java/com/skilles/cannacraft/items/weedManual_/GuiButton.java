@@ -1,4 +1,4 @@
-package com.skilles.cannacraft.items.weedManual;
+package com.skilles.cannacraft.items.weedManual_;
 
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;

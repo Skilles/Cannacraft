@@ -1,4 +1,4 @@
-package com.skilles.cannacraft.items.weedManual;
+package com.skilles.cannacraft.items.weedManual_;
 
 import com.skilles.cannacraft.Cannacraft;
 import net.minecraft.client.gui.screen.ConfirmChatLinkScreen;
@@ -30,17 +30,17 @@ public class ManualGui extends Screen {
     public void init() {
         int y = (height / 2) - guiHeight / 2;
         y += 40;
-        addSelectableChild(new GuiButton((width / 2 - 30), y + 10, 60, 20, new TranslatableText("cannacraft.manual.wikibtn"), var1 -> client.openScreen(new ConfirmChatLinkScreen(t -> {
+        addSelectableChild(new GuiButton((width / 2 - 30), y + 10, 60, 20, new TranslatableText("cannacraft.manual.wikibtn"), var1 -> client.setScreen(new ConfirmChatLinkScreen(t -> {
             if (t) {
                 Util.getOperatingSystem().open("http://wiki.techreborn.ovh");
             }
-            this.client.openScreen(this);
+            this.client.setScreen(this);
         }, "http://wiki.techreborn.ovh", false))));
-        addSelectableChild(new GuiButton((width / 2 - 30), y + 60, 60, 20, new TranslatableText("cannacraft.manual.discordbtn"), var1 -> client.openScreen(new ConfirmChatLinkScreen(t -> {
+        addSelectableChild(new GuiButton((width / 2 - 30), y + 60, 60, 20, new TranslatableText("cannacraft.manual.discordbtn"), var1 -> client.setScreen(new ConfirmChatLinkScreen(t -> {
             if (t) {
                 Util.getOperatingSystem().open("https://discord.gg/teamreborn");
             }
-            this.client.openScreen(this);
+            this.client.setScreen(this);
         }, "https://discord.gg/teamreborn", false))));
     }
 

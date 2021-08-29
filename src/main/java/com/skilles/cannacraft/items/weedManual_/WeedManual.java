@@ -1,4 +1,4 @@
-package com.skilles.cannacraft.items.weedManual;
+package com.skilles.cannacraft.items.weedManual_;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -26,6 +26,6 @@ public class WeedManual extends Item {
 
     @Environment(EnvType.CLIENT)
     private void openGui(PlayerEntity playerEntity) {
-        MinecraftClient.getInstance().openScreen(new ManualGui(playerEntity));
+        MinecraftClient.getInstance().setScreen(new ManualGui(playerEntity));
     }
 }
