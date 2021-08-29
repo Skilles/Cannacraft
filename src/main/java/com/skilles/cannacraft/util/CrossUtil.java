@@ -139,14 +139,17 @@ public class CrossUtil {
      */
     public static Strain crossStrains(Strain female, Strain male) {
         Strain crossedStrain;
-        if(female.isResource() == male.isResource()) {
+        if(female.isResource() && male.isResource()) {
             crossedStrain = crossResources(female, male);
         } else {
-            crossedStrain = new Strain(crossNames(female.name(), male.name()), crossTypes(female.type(), male.type()));
+            crossedStrain = new Strain(crossNames(female.name(), male.name()), crossTypes(female.type(), male.type()), false);
+            // Unnecessary TODO: maybe remove
             if(!StrainUtil.isPresent(crossedStrain, false)) {
                 addStrain(crossedStrain);
-                log(crossedStrain);
+                log("New Strain: " + crossedStrain);
                 return crossedStrain;
+            } else {
+                log("Duplicate strain");
             }
         }
         return strainList.get(crossedStrain.name());
@@ -222,9 +225,9 @@ public class CrossUtil {
     }
     @Nullable
     public static NbtList crossGenes(ItemStack stack1, ItemStack stack2) {
-        if(stack1.hasTag() && stack1.getOrCreateSubTag("cannacraft:strain").getList("Attributes", NbtType.COMPOUND) != null && stack2.hasTag() && stack2.getOrCreateSubTag("cannacraft:strain").getList("Attributes", NbtType.COMPOUND) != null) {
-            ArrayList<Gene> list1 = MiscUtil.fromNbtList(stack1.getSubTag("cannacraft:strain").getList("Attributes", NbtType.COMPOUND));
-            ArrayList<Gene> list2 = MiscUtil.fromNbtList(stack2.getSubTag("cannacraft:strain").getList("Attributes", NbtType.COMPOUND));
+        if(stack1.hasNbt() && stack1.getOrCreateSubNbt("cannacraft:strain").getList("Attributes", NbtType.COMPOUND) != null && stack2.hasNbt() && stack2.getOrCreateSubNbt("cannacraft:strain").getList("Attributes", NbtType.COMPOUND) != null) {
+            ArrayList<Gene> list1 = MiscUtil.fromNbtList(stack1.getSubNbt("cannacraft:strain").getList("Attributes", NbtType.COMPOUND));
+            ArrayList<Gene> list2 = MiscUtil.fromNbtList(stack2.getSubNbt("cannacraft:strain").getList("Attributes", NbtType.COMPOUND));
             ArrayList<Gene> geneList = new ArrayList<>();
             for(int i = 0; i < list1.size() && i < list2.size(); i++) {
                 geneList.add(crossGenes(list1.get(i), list2.get(i)));

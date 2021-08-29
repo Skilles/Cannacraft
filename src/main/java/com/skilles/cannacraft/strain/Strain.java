@@ -23,26 +23,26 @@ public class Strain {
     public StrainUtil.StrainItems strainItem;
     private final boolean resource;
 
-    public Strain(String name, Type type, boolean resource) {
+    public Strain(String name, Type type, boolean resource, boolean register) {
         this.name = name;
         this.type = type;
         this.strainItem = StrainUtil.getStrainItem(this);
         this.rarity = Rarity.COMMON;
         this.thcMultiplier = 1.0F;
         this.resource = resource;
-        this.id = StrainUtil.indexOf(this);
+        this.id = StrainUtil.indexOf(this, register);
         CLASS_COUNT++;
     }
-    public Strain(String name, Type type, Rarity rarity, boolean resource) {
-        this(name, type, resource);
+    public Strain(String name, Type type, Rarity rarity, boolean resource, boolean register) {
+        this(name, type, resource, register);
         this.rarity = rarity;
         this.thcMultiplier = StrainUtil.getThcMultiplier(this);
     }
-    public Strain(String name, Type type) {
-        this(name, type, false);
+    public Strain(String name, Type type, boolean register) {
+        this(name, type, false, register);
     }
-    public Strain(String name, Type type , Rarity rarity) {
-        this(name, type, false);
+    public Strain(String name, Type type , Rarity rarity, boolean register) {
+        this(name, type, false, register);
         this.rarity = rarity;
         this.thcMultiplier = StrainUtil.getThcMultiplier(this);
     }
@@ -81,7 +81,7 @@ public class Strain {
         NbtCompound tag = new NbtCompound();
         tag.putInt("ID", id);
         ItemStack stack = ModItems.WEED_SEED.getDefaultStack();
-        stack.putSubTag("cannacraft:strain", tag);
+        stack.setSubNbt("cannacraft:strain", tag);
         return stack;
     }
 
@@ -97,10 +97,7 @@ public class Strain {
         if (this == o) return true;
         if (o == null /*|| getClass() != o.getClass()*/) return false;
         Strain strain = (Strain) o;
-        if(this.isResource()) {
-            return this.strainItem.equals(strain.strainItem);
-        }
-        return name.equals(strain.name);
+        return this.isResource() ? this.strainItem.equals(strain.strainItem) : name.equals(strain.name);
     }
 
     @Override

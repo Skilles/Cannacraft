@@ -45,7 +45,7 @@ public class WeedJoint extends BowItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         ItemStack offhandStack = user.getOffHandStack();
-        NbtCompound tag = itemStack.getOrCreateTag();
+        NbtCompound tag = itemStack.getOrCreateNbt();
         if(offhandStack.isOf(Items.FLINT_AND_STEEL) || user.getMainHandStack().isOf(Items.FLINT_AND_STEEL) || offhandStack.isOf(ModItems.WEED_LIGHTER) || user.getMainHandStack().isOf(ModItems.WEED_LIGHTER)) {
             tag.putBoolean("Lit", true);
             user.getInventory().insertStack(user.getOffHandStack());
@@ -61,7 +61,7 @@ public class WeedJoint extends BowItem {
         }
     }
     private boolean isLit(ItemStack stack) {
-        return stack.hasTag() && stack.getTag().getBoolean("Lit");
+        return stack.hasNbt() && stack.getNbt().getBoolean("Lit");
     }
     // TODO: add left hand & fix bodyYaw mismatch
     private Vec3d itemVector(PlayerEntity player, int flag) {
@@ -159,7 +159,7 @@ public class WeedJoint extends BowItem {
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        NbtCompound tag = stack.getOrCreateTag();
+        NbtCompound tag = stack.getOrCreateNbt();
         if(user instanceof PlayerEntity && isLit(stack)) {
             if (remainingUseTicks == 1) {
                 if (tag.contains("cannacraft:strain")) {
@@ -187,8 +187,8 @@ public class WeedJoint extends BowItem {
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
-        if(stack.getTag().contains("cannacraft:strain")) {
-            NbtCompound tag = stack.getSubTag("cannacraft:strain");
+        if(stack.getNbt().contains("cannacraft:strain")) {
+            NbtCompound tag = stack.getSubNbt("cannacraft:strain");
             if (tag.contains("ID") && !(tag.getInt("ID") == 0)) {
                 MiscUtil.appendTooltips(tooltip, tag);
             }

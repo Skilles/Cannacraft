@@ -18,8 +18,8 @@ public class WeedFruit extends Item {
     }
     @Override
     public Text getName(ItemStack stack) {
-        if (stack.hasTag()) {
-            NbtCompound tag = stack.getSubTag("cannacraft:strain");
+        if (stack.hasNbt()) {
+            NbtCompound tag = stack.getSubNbt("cannacraft:strain");
             if(!tag.contains("ID") || StrainUtil.getStrain(tag).type().equals(StrainMap.Type.UNKNOWN)) tag.putInt("ID", 0);
             return tag.getBoolean("Identified") ? Text.of(StrainUtil.getStrain(tag).name()) : Text.of("Unidentified Cannabis");
         }
@@ -29,7 +29,7 @@ public class WeedFruit extends Item {
     @Override
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
-        NbtCompound tag = stack.getOrCreateSubTag("cannacraft:strain");
+        NbtCompound tag = stack.getOrCreateSubNbt("cannacraft:strain");
         if (tag != null && tag.contains("ID") && !(tag.getInt("ID") == 0)) { // checks if ID is set to actual strain
             MiscUtil.appendTooltips(tooltip, tag);
         }

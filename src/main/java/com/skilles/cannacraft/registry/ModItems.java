@@ -3,7 +3,7 @@ package com.skilles.cannacraft.registry;
 import com.skilles.cannacraft.Cannacraft;
 import com.skilles.cannacraft.items.*;
 import com.skilles.cannacraft.items.seedBag.SeedBag;
-import com.skilles.cannacraft.items.weedManual.WeedManual;
+import com.skilles.cannacraft.items.weedManual_.WeedManual;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;

@@ -22,16 +22,16 @@ public abstract class MiscRecipeMixin extends AbstractCookingRecipe {
             int slotId = 0;
             ItemStack input = inventory.getStack(slotId).copy();
             ItemStack output = this.getOutput().copy();
-            if(input.hasTag()) {
-                output.putSubTag("cannacraft:strain", input.getSubTag("cannacraft:strain"));
+            if(input.hasNbt()) {
+                output.setSubNbt("cannacraft:strain", input.getSubNbt("cannacraft:strain"));
                 return output;
             }
         } else if(this.id.equals(id("weed_bundle_dry"))) {
             int slotId = 0;
             ItemStack input = inventory.getStack(slotId).copy();
             ItemStack output = this.getOutput().copy();
-            if(input.hasTag() && input.getSubTag("cannacraft:strain").getFloat("Status") == 1.0F) {
-                output.putSubTag("cannacraft:strain", input.getSubTag("cannacraft:strain"));
+            if(input.hasNbt() && input.getSubNbt("cannacraft:strain").getFloat("Status") == 1.0F) {
+                output.setSubNbt("cannacraft:strain", input.getSubNbt("cannacraft:strain"));
                 ModMisc.STRAIN.get(output).setStatus(TriState.FALSE);
                 return output;
             }

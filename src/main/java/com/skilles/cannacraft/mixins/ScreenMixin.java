@@ -32,8 +32,8 @@ public class ScreenMixin {
 
     @Inject(method = "getTooltipFromItem", at = @At(value = "RETURN", target = "Lnet/minecraft/client/gui/screen/Screen;getTooltipFromItem(Lnet/minecraft/item/ItemStack;)Ljava/util/List;"), cancellable = true)
     private void keyTooltip(ItemStack stack, CallbackInfoReturnable<List<Text>> cir) {
-        if(stack.isOf(ModItems.WEED_SEED) && hasShiftDown() && stack.hasTag()) {
-            NbtCompound tag = stack.getSubTag("cannacraft:strain");
+        if(stack.isOf(ModItems.WEED_SEED) && hasShiftDown() && stack.hasNbt()) {
+            NbtCompound tag = stack.getSubNbt("cannacraft:strain");
             if(tag.getBoolean("Identified") && tag.contains("Attributes") && !tag.getList("Attributes", NbtType.COMPOUND).isEmpty()) {
                 List<Text> tooltip = cir.getReturnValue();
                 NbtList genes = tag.getList("Attributes", NbtType.COMPOUND);
@@ -45,8 +45,8 @@ public class ScreenMixin {
                 }
                 cir.setReturnValue(tooltip);
             }
-        } else if (stack.isOf(ModItems.WEED_BUNDLE) && stack.hasTag()) {
-            NbtCompound tag = stack.getSubTag("cannacraft:strain");
+        } else if (stack.isOf(ModItems.WEED_BUNDLE) && stack.hasNbt()) {
+            NbtCompound tag = stack.getSubNbt("cannacraft:strain");
             List<Text> tooltip = cir.getReturnValue();
             tooltip.add(2, new LiteralText("Press ").append( new LiteralText("SHIFT ").formatted(Formatting.GOLD).append( new LiteralText("to view info").formatted(Formatting.WHITE))));
             assert tag != null;

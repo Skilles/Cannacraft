@@ -89,9 +89,9 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
             ItemStack stack = inventory.get(1);
             ItemStack output = inventory.get(0);
             if(stack.equals(ItemStack.EMPTY)) return false;
-                if (stack.isOf(ModItems.WEED_SEED) && stack.getCount() >= 1 && stack.hasTag() && !stack.getSubTag("cannacraft:strain").getBoolean("Identified")) {
-                    NbtCompound outputTag = output.copy().getSubTag("cannacraft:strain");
-                    NbtCompound subTag = stack.copy().getSubTag("cannacraft:strain");
+                if (stack.isOf(ModItems.WEED_SEED) && stack.getCount() >= 1 && stack.hasNbt() && !stack.getSubNbt("cannacraft:strain").getBoolean("Identified")) {
+                    NbtCompound outputTag = output.copy().getSubNbt("cannacraft:strain");
+                    NbtCompound subTag = stack.copy().getSubNbt("cannacraft:strain");
                     if(outputTag == null) return true;
                     //  if unidentified and NBT aligns
                     return subTag.getInt("ID") == outputTag.getInt("ID") && subTag.getInt("THC") == outputTag.getInt("THC");
@@ -100,7 +100,7 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
     }
     public static int craft(DefaultedList<ItemStack> inventory) {
         ItemStack stack = inventory.get(1);
-        NbtCompound tag = stack.getTag().copy();
+        NbtCompound tag = stack.getNbt().copy();
         ItemStack outputSlot = inventory.get(0);
         ItemStack output = ModItems.WEED_SEED.getDefaultStack();
 
@@ -110,7 +110,7 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
             strainTag.putBoolean("Identified", true);
             NbtCompound outputTag = new NbtCompound();
             outputTag.put("cannacraft:strain", strainTag);
-            output.setTag(outputTag);
+            output.setNbt(outputTag);
             inventory.set(0, output);
         }
         else if (outputSlot.isOf(output.getItem())) {

@@ -89,7 +89,7 @@ public class WeedExtractorEntity extends MachineBlockEntity {
             ItemStack stack = inventory.get(1);
             ItemStack output = inventory.get(0);
             if(stack.equals(ItemStack.EMPTY)) return false;
-                if (stack.isOf(ModItems.WEED_BUNDLE) && stack.getCount() >= 1 && stack.hasTag() && stack.getSubTag("cannacraft:strain").getFloat("Status") == 1.0F) {
+                if (stack.isOf(ModItems.WEED_BUNDLE) && stack.getCount() >= 1 && stack.hasNbt() && stack.getSubNbt("cannacraft:strain").getFloat("Status") == 1.0F) {
                     if(output.equals(ItemStack.EMPTY)) return true;
                     return StrainUtil.getOutputStack(stack).isItemEqual(output);
             }

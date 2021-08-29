@@ -76,9 +76,9 @@ public class HighUtil {
         int duration;
         int amplifier;
         int switchNum = 0;
-        assert user.getActiveItem().hasTag();
-        int index = user.getActiveItem().getSubTag("cannacraft:strain").getInt("ID");
-        int thc = user.getActiveItem().getSubTag("cannacraft:strain").getInt("THC");
+        assert user.getActiveItem().hasNbt();
+        int index = user.getActiveItem().getSubNbt("cannacraft:strain").getInt("ID");
+        int thc = user.getActiveItem().getSubNbt("cannacraft:strain").getInt("THC");
         ModMisc.PLAYER.get(user).setStrain(index);
         if(thc <= 18) switchNum = 1;
         if(19 <= thc && thc <= 25) switchNum = 2;

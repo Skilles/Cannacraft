@@ -155,7 +155,7 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
 
     @Override
     public void copyFrom(ItemStrainComponent other) {
-        stack.setTag(other.stack.getTag());
+        stack.setNbt(other.stack.getNbt());
         //setStrain(other.getIndex());
     }
 

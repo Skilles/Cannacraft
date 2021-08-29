@@ -26,8 +26,8 @@ public class WeedBundle extends Item {
     }
     @Override
     public Text getName(ItemStack stack) {
-        if (stack.hasTag()) {
-            NbtCompound strainTag = stack.getOrCreateSubTag("cannacraft:strain");
+        if (stack.hasNbt()) {
+            NbtCompound strainTag = stack.getOrCreateSubNbt("cannacraft:strain");
             String name = BundleUtil.getName(stack);
             if (!strainTag.contains("ID") || StrainUtil.getStrain(strainTag).type().equals(StrainMap.Type.UNKNOWN))
                 strainTag.putInt("ID", 0);
@@ -62,7 +62,7 @@ public class WeedBundle extends Item {
                         + " Texture: " + BundleUtil.getTexture(clientStack)
                 );
             } else {
-                log(clientStack.getTag());
+                log(clientStack.getNbt());
             }
         }
         return TypedActionResult.success(playerEntity.getStackInHand(hand));

@@ -12,6 +12,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static com.skilles.cannacraft.Cannacraft.log;
+
 /**
  * Catches dropped items and assigns random thc and ID if needed.
  * In the future, can do some custom behavior with dropped items...
@@ -25,10 +27,12 @@ public abstract class ItemEntityMixin {
     @Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/world/World;DDDLnet/minecraft/item/ItemStack;)V")
     public void ItemEntity(World world, double x, double y, double z, ItemStack stack, CallbackInfo ci) {
         if(stack.getItem().equals(ModItems.WEED_SEED) || stack.getItem().equals(ModItems.WEED_BUNDLE)) {
-            NbtCompound tag = stack.getSubTag("cannacraft:strain");
+            NbtCompound tag = stack.getSubNbt("cannacraft:strain");
             if(tag != null && tag.contains("ID")) {
-                if(tag.getInt("ID") == 0)
+                if(tag.getInt("ID") == 0) {
+                    log("Changing tag: " + tag);
                     StrainUtil.randomStrain(tag);
+                }
             }
         }
     }

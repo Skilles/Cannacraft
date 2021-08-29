@@ -35,8 +35,8 @@ public abstract class ShapelessRecipeMixin {
             }
             ItemStack input = craftingInventory.getStack(slotId).copy();
             ItemStack output = this.getOutput().copy();
-            if(input.hasTag()) {
-                output.putSubTag("cannacraft:strain", input.getSubTag("cannacraft:strain"));
+            if(input.hasNbt()) {
+                output.setSubNbt("cannacraft:strain", input.getSubNbt("cannacraft:strain"));
                 cir.setReturnValue(output);
             }
         } else if(this.id.equals(id("weed_bundle_ground"))) {
@@ -46,8 +46,8 @@ public abstract class ShapelessRecipeMixin {
             }
             ItemStack input = craftingInventory.getStack(slotId).copy();
             ItemStack output = this.getOutput().copy();
-            if(input.hasTag() && input.getSubTag("cannacraft:strain").getFloat("Status") == 0.5F) {
-                output.putSubTag("cannacraft:strain", input.getSubTag("cannacraft:strain"));
+            if(input.hasNbt() && input.getSubNbt("cannacraft:strain").getFloat("Status") == 0.5F) {
+                output.setSubNbt("cannacraft:strain", input.getSubNbt("cannacraft:strain"));
                 ModMisc.STRAIN.get(output).setStatus(TriState.DEFAULT);
                 cir.setReturnValue(output);
             }

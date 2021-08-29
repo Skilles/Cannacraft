@@ -36,7 +36,7 @@ public class ModCommands {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack itemStack = self.getMainHandStack();
         if (itemStack.getItem().equals(ModItems.WEED_SEED)) {
-            //NbtCompound tag = itemStack.getOrCreateSubTag("cannacraft:strain");
+            //NbtCompound tag = itemStack.getOrCreateSubNbt("cannacraft:strain");
             if (gender.equalsIgnoreCase("male")) {
                 ModMisc.STRAIN.get(itemStack).setMale(true);
             } else if (gender.equalsIgnoreCase("female")) {
@@ -88,8 +88,8 @@ public class ModCommands {
     public static int clearGenes(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack stack = self.getMainHandStack();
-        if(stack.hasTag()) {
-            NbtCompound tag = stack.getSubTag("cannacraft:strain");
+        if(stack.hasNbt()) {
+            NbtCompound tag = stack.getSubNbt("cannacraft:strain");
             tag.remove("Attributes");
         }
         self.sendSystemMessage(Text.of("Genes removed"), Util.NIL_UUID);
@@ -172,7 +172,7 @@ public class ModCommands {
                             .executes(ctx -> {
                                 final ServerPlayerEntity self = ctx.getSource().getPlayer();
                                 ItemStack stack = new ItemStack(ModItems.WEED_SEED);
-                                NbtCompound tag = stack.getOrCreateSubTag("cannacraft:strain");
+                                NbtCompound tag = stack.getOrCreateSubNbt("cannacraft:strain");
                                 StrainUtil.randomStrain(tag);
                                 self.giveItemStack(stack);
                                 self.sendSystemMessage(Text.of("Random seed given"), Util.NIL_UUID);
@@ -184,7 +184,7 @@ public class ModCommands {
                                 for(int i = 0; i < getInteger(ctx, "amount"); i++) {
                                     log("test");
                                     ItemStack stack = new ItemStack(ModItems.WEED_SEED);
-                                    NbtCompound tag = stack.getOrCreateSubTag("cannacraft:strain");
+                                    NbtCompound tag = stack.getOrCreateSubNbt("cannacraft:strain");
                                     StrainUtil.randomStrain(tag);
                                     self.giveItemStack(stack);
                                 }

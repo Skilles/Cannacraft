@@ -18,8 +18,8 @@ public class WeedBrownie extends Item {
 
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        if(stack.hasTag()) {
-            NbtCompound tag = stack.getSubTag("cannacraft:strain");
+        if(stack.hasNbt()) {
+            NbtCompound tag = stack.getSubNbt("cannacraft:strain");
             if (tag.contains("ID") && !(tag.getInt("ID") == 0)) {
                 MiscUtil.appendTooltips(tooltip, tag);
             }

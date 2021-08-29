@@ -84,8 +84,8 @@ public class BundleUtil {
      * Used to convert to float for model predicate
      */
     public static float getStatus(ItemStack stack) {
-        if(stack.hasTag()) {
-            return (float) stack.getSubTag("cannacraft:strain").getInt("Status");
+        if(stack.hasNbt()) {
+            return (float) stack.getSubNbt("cannacraft:strain").getInt("Status");
         }
         return 2.0F; // wet
     }

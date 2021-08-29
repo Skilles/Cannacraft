@@ -143,18 +143,18 @@ public class SeedCrosserEntity extends MachineBlockEntity {
             ItemStack stack2 = inventory.get(2);
             ItemStack output = inventory.get(0);
             if(stack.equals(ItemStack.EMPTY) || stack2.equals(ItemStack.EMPTY)) return false;
-            if (stack.hasTag() && stack2.hasTag()) {
-                NbtCompound tag = stack.getSubTag("cannacraft:strain");
-                NbtCompound tag2 = stack2.getSubTag("cannacraft:strain");
+            if (stack.hasNbt() && stack2.hasNbt()) {
+                NbtCompound tag = stack.getSubNbt("cannacraft:strain");
+                NbtCompound tag2 = stack2.getSubNbt("cannacraft:strain");
                 if (tag.getBoolean("Identified") && tag2.getBoolean("Identified")) {
                     if(tag.equals(tag2)) return false;
                     if (output.isEmpty()) {
                         return true;
                     } else {
-                        NbtCompound outputTag = output.getSubTag("cannacraft:strain");
+                        NbtCompound outputTag = output.getSubNbt("cannacraft:strain");
                         String newName = CrossUtil.crossNames(StrainUtil.getStrain(tag).name(), StrainUtil.getStrain(tag2).name());
                         int newThc = CrossUtil.crossThc(tag.getInt("THC"), tag2.getInt("THC"));
-                        return StrainUtil.isPresent(newName) && StrainUtil.indexOf(StrainUtil.getStrain(outputTag)) == StrainUtil.indexOf(newName) && newThc == outputTag.getInt("THC");
+                        return StrainUtil.isPresent(newName) && StrainUtil.getStrain(outputTag).id() == StrainUtil.indexOf(newName) && newThc == outputTag.getInt("THC");
                     }
                 }
             }
@@ -167,8 +167,8 @@ public class SeedCrosserEntity extends MachineBlockEntity {
         ItemStack stack2 = inventory.get(2);
         ItemStack outputSlot = inventory.get(0);
         ItemStack output = ModItems.WEED_SEED.getDefaultStack();
-        NbtCompound tag = stack.getSubTag("cannacraft:strain");
-        NbtCompound tag2 = stack2.getSubTag("cannacraft:strain");
+        NbtCompound tag = stack.getSubNbt("cannacraft:strain");
+        NbtCompound tag2 = stack2.getSubNbt("cannacraft:strain");
 
         String newName = CrossUtil.crossNames(StrainUtil.getStrain(tag).name(), StrainUtil.getStrain(tag2).name());
         StrainMap.Type newType = CrossUtil.crossTypes(StrainUtil.getStrain(tag).type(), StrainUtil.getStrain(tag2).type());
@@ -185,11 +185,11 @@ public class SeedCrosserEntity extends MachineBlockEntity {
         strainTag.putInt("THC", newThc);
         NbtCompound outputTag = new NbtCompound();
         outputTag.put("cannacraft:strain", strainTag);
-        output.setTag(outputTag);
+        output.setNbt(outputTag);
 
         if(outputSlot.isEmpty()) {
             inventory.set(0, output);
-        } else if(outputSlot.getTag().equals(outputTag)) {
+        } else if(outputSlot.getNbt().equals(outputTag)) {
             outputSlot.increment(1);
         }
         stack.decrement(1);

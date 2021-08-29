@@ -24,7 +24,7 @@ import static com.skilles.cannacraft.CannacraftClient.config;
 import static com.skilles.cannacraft.strain.StrainMap.*;
 
 public class StrainUtil {
-    static final Strain UNKNOWN_STRAIN = new Strain("Unknown", Type.UNKNOWN);
+    static final Strain UNKNOWN_STRAIN = new Strain("Unknown", Type.UNKNOWN, true);
     public static final int MIN_THC = 13;
 
     public static int getStrainCount() {
@@ -65,33 +65,44 @@ public class StrainUtil {
         }
         return strainArray.get(0);
     }
-    public static int indexOf(Strain strain) {
+
+    /**
+     * This method returns the index of a strain. If the strain is new, it is added to the strainArray
+     * @param strain to get the index of
+     * @return the ID of the strain
+     */
+    public static int indexOf(Strain strain, boolean addStrain) {
         if(strain.isResource()) {
             // Resource strains are manually assigned an ID
             return strain.id();
         } else {
+            // Can't find strain
             try {
                 return strainArray.inverse().get(strain);
             } catch (Exception e) {
-                log("Invalid strain!");
-                log(strain);
-                log(e.getMessage());
-                strain.init();
-                System.out.println();
-                log(strainArray);
-                return indexOf(strain);
+                if(addStrain) {
+                    log("Adding new strain");
+                    strain.init();
+                    log(strain);
+                } else {
+                    log("Error getting strain index");
+                    log(e.getMessage());
+                    System.out.println();
+                    log(strainArray);
+                }
+                return indexOf(strain, addStrain);
             }
         }
     }
     @Deprecated
     public static int indexOf(String name) {
         if(!strainList.containsKey(name)) return 0;
-        return indexOf(toStrain(name));
+        return indexOf(toStrain(name), false);
     }
     public static ItemStack getOutputStack(ItemStack stack) {
         if(AutoConfig.getConfigHolder(ModConfig.class).getConfig().getCrop().resource) {
-            if (stack.isOf(ModItems.WEED_BUNDLE) && stack.hasTag()) {
-                return getStrain(stack.getTag()).getItem().getDefaultStack();
+            if (stack.isOf(ModItems.WEED_BUNDLE) && stack.hasNbt()) {
+                return getStrain(stack.getNbt()).getItem().getDefaultStack();
             }
         } else {
             return StrainItems.DISTILLATE.item.getDefaultStack();
@@ -131,11 +142,11 @@ public class StrainUtil {
     }
     @TestOnly
     public static void testItems() {
-        log(getItem(new Strain("Purple Lapis", Type.HYBRID)));
+        log(getItem(new Strain("Purple Lapis", Type.HYBRID, true, true)));
     }
     @Deprecated
     public static void addStrain(String name, Type type) {
-        addStrain(new Strain(name, type));
+        addStrain(new Strain(name, type, false));
     }
     public static void addStrain(Strain strain) {
         if(!isPresent(strain, false)) {
@@ -215,7 +226,7 @@ public class StrainUtil {
         /*for(Strain strain : defaultStrains.values()) {
             addStrain(strain);
         }*/
-        initDefaultStrains();
+        //initDefaultStrains();
         save();
     }
 
@@ -225,31 +236,31 @@ public class StrainUtil {
      */
     public static Map<Integer, Strain> defaultStrains = Map.ofEntries(
             defaultStrain(0, UNKNOWN_STRAIN),
-            defaultStrain(1, new Strain("OG Kush", Type.HYBRID)),
-            defaultStrain(2, new Strain("Purple Punch", Type.INDICA, Rarity.UNCOMMON)),
-            defaultStrain(3, new Strain("Chem Trix", Type.SATIVA, Rarity.UNCOMMON)),
-            defaultStrain(4, new Strain("Blue Dream", Type.HYBRID)),
-            defaultStrain(5, new Strain("Bubba Kush", Type.INDICA)),
-            defaultStrain(6, new Strain("Grandaddy Purple", Type.INDICA)),
-            defaultStrain(7, new Strain("Green Crack", Type.SATIVA)),
-            defaultStrain(8, new Strain("Northern Lights", Type.INDICA, Rarity.UNCOMMON)),
-            defaultStrain(9, new Strain("Pineapple Express", Type.HYBRID, Rarity.RARE)),
-            defaultStrain(10, new Strain("Girl Scout Cookies", Type.HYBRID)),
-            defaultStrain(11, new Strain("Blueberry", Type.INDICA, Rarity.UNCOMMON))
+            defaultStrain(1, new Strain("OG Kush", Type.HYBRID, true)),
+            defaultStrain(2, new Strain("Purple Punch", Type.INDICA, Rarity.UNCOMMON, true)),
+            defaultStrain(3, new Strain("Chem Trix", Type.SATIVA, Rarity.UNCOMMON, true)),
+            defaultStrain(4, new Strain("Blue Dream", Type.HYBRID, true)),
+            defaultStrain(5, new Strain("Bubba Kush", Type.INDICA, true)),
+            defaultStrain(6, new Strain("Grandaddy Purple", Type.INDICA, true)),
+            defaultStrain(7, new Strain("Green Crack", Type.SATIVA, true)),
+            defaultStrain(8, new Strain("Northern Lights", Type.INDICA, Rarity.UNCOMMON, true)),
+            defaultStrain(9, new Strain("Pineapple Express", Type.HYBRID, Rarity.RARE, true)),
+            defaultStrain(10, new Strain("Girl Scout Cookies", Type.HYBRID, true)),
+            defaultStrain(11, new Strain("Blueberry", Type.INDICA, Rarity.UNCOMMON, true))
     );
     /**
      * Immutable map of resource strains
      */
     public static Map<Integer, Strain> defaultResourceStrains = Map.ofEntries(
-            defaultStrain(defaultStrains.size(), new Strain("Iron OG", Type.HYBRID, Rarity.UNCOMMON, true)),
-            defaultStrain(defaultStrains.size() + 1, new Strain("Diamond Kush", Type.INDICA, Rarity.RARE, true)),
-            defaultStrain(defaultStrains.size() + 2, new Strain("Lapis Dream", Type.SATIVA, Rarity.COMMON, true)),
-            defaultStrain(defaultStrains.size() + 3, new Strain("Alaskan Emerald", Type.HYBRID, Rarity.RARE, true)),
-            defaultStrain(defaultStrains.size() + 4, new Strain("Cherrystone", Type.INDICA, Rarity.UNCOMMON, true)),
-            defaultStrain(defaultStrains.size() + 5, new Strain("Copper Haze", Type.INDICA, Rarity.COMMON, true)),
-            defaultStrain(defaultStrains.size() + 6, new Strain("Coal Crack", Type.SATIVA, Rarity.COMMON, true)),
-            defaultStrain(defaultStrains.size() + 7, new Strain("Goldberry", Type.INDICA, Rarity.UNCOMMON, true)),
-            defaultStrain(defaultStrains.size() + 8, new Strain("Nether Lights", Type.INDICA, Rarity.EPIC, true))
+            defaultStrain(defaultStrains.size(), new Strain("Iron OG", Type.HYBRID, Rarity.UNCOMMON, true, true)),
+            defaultStrain(defaultStrains.size() + 1, new Strain("Diamond Kush", Type.INDICA, Rarity.RARE, true, true)),
+            defaultStrain(defaultStrains.size() + 2, new Strain("Lapis Dream", Type.SATIVA, Rarity.COMMON, true, true)),
+            defaultStrain(defaultStrains.size() + 3, new Strain("Alaskan Emerald", Type.HYBRID, Rarity.RARE, true, true)),
+            defaultStrain(defaultStrains.size() + 4, new Strain("Cherrystone", Type.INDICA, Rarity.UNCOMMON, true, true)),
+            defaultStrain(defaultStrains.size() + 5, new Strain("Copper Haze", Type.INDICA, Rarity.COMMON, true, true)),
+            defaultStrain(defaultStrains.size() + 6, new Strain("Coal Crack", Type.SATIVA, Rarity.COMMON, true, true)),
+            defaultStrain(defaultStrains.size() + 7, new Strain("Goldberry", Type.INDICA, Rarity.UNCOMMON, true, true)),
+            defaultStrain(defaultStrains.size() + 8, new Strain("Nether Lights", Type.INDICA, Rarity.EPIC, true, true))
     );
     private static AbstractMap.SimpleEntry<Integer, Strain> defaultStrain(int index, Strain strain) { return new AbstractMap.SimpleEntry<>(index, strain.withId(index)); }
 

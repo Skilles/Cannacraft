@@ -178,7 +178,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         ItemStack newStack = new ItemStack(ModItems.WEED_SEED);
         NbtCompound tag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
         if (tag != null) {
-            newStack.putSubTag("cannacraft:strain", trimTag(tag));
+            newStack.setSubNbt("cannacraft:strain", trimTag(tag));
         }
         return newStack;
     }
@@ -212,6 +212,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
                 MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_SEED);
                 if(!((WeedCropEntity) world.getBlockEntity(pos.up(i))).isMale)
                 MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_BUNDLE, brokenWithShears);
+
                 //world.breakBlock(pos.up(i), false, player);
             }
         }
@@ -421,8 +422,8 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     }
 
     public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
-        if (itemStack.hasTag()) {
-            NbtCompound tag =  itemStack.getSubTag("cannacraft:strain");
+        if (itemStack.hasNbt()) {
+            NbtCompound tag =  itemStack.getSubNbt("cannacraft:strain");
             BlockEntity blockEntity = world.getBlockEntity(pos);
             //tag.putInt("ID", ModMisc.STRAIN.get(itemStack).getIndex()); // index 0 = null bug workaround
             if (blockEntity instanceof WeedCropEntity && tag != null && tag.contains("ID")) {

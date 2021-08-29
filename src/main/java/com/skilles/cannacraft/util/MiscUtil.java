@@ -87,10 +87,10 @@ public final class MiscUtil {
                 if (tag != null) {
                     tag.putInt("THC", tag.getInt("Seed THC"));
                     if (type.equals(ModItems.WEED_SEED) && !tag.getBoolean("Male")) {
-                        toDrop.putSubTag("cannacraft:strain", trimTag(tag, type));
+                        toDrop.setSubNbt("cannacraft:strain", trimTag(tag, type));
                         Block.dropStack(world, pos, toDrop);
                     } else if (brokenWithShears && type.equals(ModItems.WEED_BUNDLE)) {
-                        toDrop.putSubTag("cannacraft:strain", trimTag(tag, type));
+                        toDrop.setSubNbt("cannacraft:strain", trimTag(tag, type));
                         Block.dropStack(world, pos, toDrop);
                     }
                 } else {
@@ -297,8 +297,8 @@ public final class MiscUtil {
     }
 
     public static DefaultedList<ItemStack> getItemsFromNbt(ItemStack stack) {
-        if(stack.isOf(ModItems.SEED_BAG) && stack.hasTag()) {
-            NbtCompound tag = stack.getTag();
+        if(stack.isOf(ModItems.SEED_BAG) && stack.hasNbt()) {
+            NbtCompound tag = stack.getNbt();
             assert tag != null;
             NbtList nbtList = tag.getList("Items", NbtElement.LIST_TYPE);
             List<ItemStack> itemList = new ArrayList<>();
@@ -309,7 +309,7 @@ public final class MiscUtil {
                 bagTag.putInt("ID", compound.getInt("ID"));
                 bagTag.putInt("THC", compound.getInt("THC"));
                 bagTag.put("Attrbiutes", compound.getList("Attributes", NbtElement.LIST_TYPE));
-                seedStack.putSubTag("cannacraft:strain", bagTag);
+                seedStack.setSubNbt("cannacraft:strain", bagTag);
                 itemList.add(seedStack);
             }
             return ImplementedInventory.of(DefaultedList.copyOf(ItemStack.EMPTY, itemList.toArray(new ItemStack[27]))).getItems();
@@ -318,8 +318,8 @@ public final class MiscUtil {
     }
 
     public static Text getItemName(ItemStack stack) {
-        if(stack.hasTag()) {
-            NbtCompound tag = stack.getSubTag("cannacraft:strain");
+        if(stack.hasNbt()) {
+            NbtCompound tag = stack.getSubNbt("cannacraft:strain");
             if (StrainUtil.getStrain(tag).type().equals(StrainMap.Type.UNKNOWN)) tag.putInt("ID", 0);
             String name = tag.getBoolean("Identified") ? StrainUtil.getStrain(tag).name() : "Unidentified";
             if(stack.isOf(ModItems.WEED_SEED)) {

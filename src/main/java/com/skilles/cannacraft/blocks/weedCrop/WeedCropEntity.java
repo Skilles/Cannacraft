@@ -71,7 +71,10 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
         this.identified = tag.getBoolean("Identified");
         this.isMale = tag.getBoolean("Male");
         this.resource = tag.getBoolean("Resource");
+        this.seedId = index;
+        this.seedThc = thc;
         this.attributes = attributes;
+        log("Data for BE crop set" + tag);
     }
     float multiplier() {
         float multiplier = 1;
@@ -185,6 +188,9 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
             // Set strain
             NbtCompound myTag = this.writeNbt(new NbtCompound());
             Strain crossedStrain = CrossUtil.crossStrains(getStrain(myTag), getStrain(maleTag));
+            log("Strain 1 " + getStrain(myTag));
+            log("Strain 2 " + getStrain(maleTag));
+            log("Name of crossed strain: " + crossedStrain.name());
             this.seedId = crossedStrain.id();
             if(this.identified) this.identified = maleIdentified;
             log("New tag: " + this.writeNbt(new NbtCompound()));
