@@ -65,7 +65,7 @@ public class WeedBundle extends Item {
                 log(clientStack.getNbt());
             }
         }
-        return TypedActionResult.success(playerEntity.getStackInHand(hand));
+        return TypedActionResult.pass(playerEntity.getStackInHand(hand));
     }
     @Override
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
