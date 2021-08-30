@@ -55,6 +55,7 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
     private NbtList attributes;
     private static final int maxBreedTime = 50;
     private int cachedLimit;
+    public boolean boosted;
 
     public void setData(int index, int thc, boolean identified, boolean isMale, NbtList attributes) {
         this.index = index;
@@ -80,6 +81,7 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
         float multiplier = 1;
         if(hasGene(GeneTypes.SPEED)) multiplier *= (1.0F + ((float) getGene(GeneTypes.SPEED).level()) / 2.0F); // 1: 50%, 2: 100%, 3: 150%
         multiplier *= config.getCrop().speed;
+        if(boosted) multiplier *= 2;
         return multiplier;
     }
 
