@@ -10,7 +10,10 @@ import com.skilles.cannacraft.blocks.seedChest.SeedChest;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.Material;
+import net.minecraft.block.PlantBlock;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.registry.Registry;
 
@@ -31,7 +34,7 @@ public class ModBlocks {
             .copyOf(Blocks.COAL_BLOCK));
     public static final Block WEED_BONG = new WeedBong(FabricBlockSettings.copyOf(Blocks.GLASS));
     public static final Block WEED_RACK = new WeedRack(FabricBlockSettings.copyOf(Blocks.OAK_PLANKS));
-    public static final Block GROW_LIGHT = new GrowLight(FabricBlockSettings.of(Material.GLASS));
+    public static final Block GROW_LIGHT = new GrowLight(FabricBlockSettings.copyOf(Blocks.REDSTONE_LAMP));
 
     public static void registerBlocks() {
         Registry.register(Registry.BLOCK, id( "seed_chest"), SEED_CHEST);
@@ -42,6 +45,6 @@ public class ModBlocks {
         Registry.register(Registry.BLOCK, id( "seed_crosser"), SEED_CROSSER);
         Registry.register(Registry.BLOCK, id( "weed_bong"), WEED_BONG);
         Registry.register(Registry.BLOCK, id( "weed_rack"), WEED_RACK);
-        Registry.register(Registry.BLOCK, id( "grow_light"), GROW_LIGHT);
+        Registry.register(Registry.BLOCK, id( "grow_lamp"), GROW_LIGHT);
     }
 }

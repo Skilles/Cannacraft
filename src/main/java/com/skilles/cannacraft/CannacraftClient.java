@@ -27,6 +27,7 @@ public class CannacraftClient implements ClientModInitializer, ModMenuApi  {
     @Override
     public void onInitializeClient() {
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.WEED_CROP, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.GROW_LIGHT, RenderLayer.getCutout());
         ModScreens.registerScreens();
         AutoConfig.register(ModConfig.class, GsonConfigSerializer::new);
         config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();

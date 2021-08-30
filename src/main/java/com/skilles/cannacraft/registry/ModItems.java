@@ -3,7 +3,6 @@ package com.skilles.cannacraft.registry;
 import com.skilles.cannacraft.Cannacraft;
 import com.skilles.cannacraft.items.*;
 import com.skilles.cannacraft.items.seedBag.SeedBag;
-import com.skilles.cannacraft.items.weedManual_.WeedManual;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -57,7 +56,7 @@ public class ModItems {
         Registry.register(Registry.ITEM, id("weed_grinder"), WEED_GRINDER);
         Registry.register(Registry.ITEM, id("weed_rack"), WEED_RACK);
         Registry.register(Registry.ITEM, id("weed_bong"), WEED_BONG);
-        Registry.register(Registry.ITEM, id("grow_light"), GROW_LIGHT);
+        Registry.register(Registry.ITEM, id("grow_lamp"), GROW_LIGHT);
         Registry.register(Registry.ITEM, id("brownie_mix"), BROWNIE_MIX);
     }
 }
