@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "cannacraft:block/weed_bong" },
+    "facing=east": { "model": "cannacraft:block/weed_bong", "y": 90 },
+    "facing=south": { "model": "cannacraft:block/weed_bong", "y": 180 },
+    "facing=west": { "model": "cannacraft:block/weed_bong", "y": 270 }
+  }
+}

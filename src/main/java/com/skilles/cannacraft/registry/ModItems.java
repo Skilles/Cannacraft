@@ -49,14 +49,14 @@ public class ModItems {
         Registry.register(Registry.ITEM, id( "strain_analyzer"), STRAIN_ANALYZER);
         Registry.register(Registry.ITEM, id( "seed_crosser"), SEED_CROSSER);
         Registry.register(Registry.ITEM, id("weed_extractor"), WEED_EXTRACTOR);
-        Registry.register(Registry.ITEM, id("weed_manual"), WEED_MANUAL);
-        Registry.register(Registry.ITEM, id("weed_distillate"), WEED_DISTILLATE);
-        Registry.register(Registry.ITEM, id("weed_brownie"), WEED_BROWNIE);
-        Registry.register(Registry.ITEM, id("weed_lighter"), WEED_LIGHTER);
-        Registry.register(Registry.ITEM, id("weed_grinder"), WEED_GRINDER);
-        Registry.register(Registry.ITEM, id("weed_rack"), WEED_RACK);
+        Registry.register(Registry.ITEM, id("manual"), WEED_MANUAL);
+        Registry.register(Registry.ITEM, id("weed_distillate"), WEED_DISTILLATE); // TODO
+        Registry.register(Registry.ITEM, id("weed_brownie"), WEED_BROWNIE); // TODO
+        Registry.register(Registry.ITEM, id("lighter"), WEED_LIGHTER);
+        Registry.register(Registry.ITEM, id("weed_grinder"), WEED_GRINDER); // TODO
+        Registry.register(Registry.ITEM, id("weed_rack"), WEED_RACK); // TODO
         Registry.register(Registry.ITEM, id("weed_bong"), WEED_BONG);
         Registry.register(Registry.ITEM, id("grow_lamp"), GROW_LIGHT);
-        Registry.register(Registry.ITEM, id("brownie_mix"), BROWNIE_MIX);
+        Registry.register(Registry.ITEM, id("brownie_mix"), BROWNIE_MIX); // TODO
     }
 }
