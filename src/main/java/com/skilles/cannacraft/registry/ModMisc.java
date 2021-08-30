@@ -1,6 +1,7 @@
 package com.skilles.cannacraft.registry;
 
 import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
+import com.skilles.cannacraft.blocks.weedRack.WeedRackEntityRenderer;
 import com.skilles.cannacraft.components.EntityInterface;
 import com.skilles.cannacraft.components.ItemStrainComponent;
 import com.skilles.cannacraft.components.PlayerStrainComponent;
@@ -16,6 +17,7 @@ import dev.onyxstudios.cca.api.v3.item.ItemComponentFactoryRegistry;
 import dev.onyxstudios.cca.api.v3.item.ItemComponentInitializer;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.client.model.FabricModelPredicateProviderRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.villager.VillagerProfessionBuilder;
 import net.minecraft.block.BlockState;
@@ -91,6 +93,9 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
         FabricModelPredicateProviderRegistry.register(ModItems.WEED_BUNDLE, new Identifier("count"), (itemStack, clientWorld, livingEntity, seed) -> BundleUtil.getTexture(itemStack));
         FabricModelPredicateProviderRegistry.register(ModItems.WEED_BUNDLE, new Identifier("status"), (itemStack, clientWorld, livingEntity, seed) -> itemStack.hasNbt() ? itemStack.getSubNbt("cannacraft:strain").getFloat("Status") : 1.0F); // WET is default
     }
+    private static void registerRenderers() {
+        BlockEntityRendererRegistry.register(ModEntities.WEED_RACK_ENTITY, WeedRackEntityRenderer::new);
+    }
     public static final VillagerProfession STONER = VillagerProfessionBuilder.create().id(new Identifier("stoner")).workstation(PointOfInterestType.FARMER).harvestableItems(ModItems.WEED_SEED).secondaryJobSites(Blocks.FARMLAND).workSound(SoundEvents.ENTITY_VILLAGER_WORK_FARMER).build();
     private static void registerVillagers() {
         Registry.register(Registry.VILLAGER_PROFESSION, id("stoner"), STONER);
@@ -101,5 +106,6 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
         registerEffects();
         registerModelPredicates();
         registerVillagers();
+        registerRenderers();
     }
 }

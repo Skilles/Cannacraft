@@ -2,12 +2,12 @@ package com.skilles.cannacraft.registry;
 
 import com.skilles.cannacraft.blocks.GrowLight;
 import com.skilles.cannacraft.blocks.WeedBong;
-import com.skilles.cannacraft.blocks.WeedRack;
 import com.skilles.cannacraft.blocks.machines.seedCrosser.SeedCrosser;
 import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzer;
 import com.skilles.cannacraft.blocks.machines.weedExtractor.WeedExtractor;
 import com.skilles.cannacraft.blocks.seedChest.SeedChest;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
+import com.skilles.cannacraft.blocks.weedRack.WeedRack;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.minecraft.block.Block;

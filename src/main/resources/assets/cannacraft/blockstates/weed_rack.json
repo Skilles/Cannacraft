@@ -1,0 +1,23 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "cannacraft:block/weed_rack",
+      "x": 90,
+      "y": 180
+    },
+    "facing=east": {
+      "model": "cannacraft:block/weed_rack",
+      "x": 90,
+      "y": 270
+    },
+    "facing=south": {
+      "model": "cannacraft:block/weed_rack",
+      "x": 90
+    },
+    "facing=west": {
+      "model": "cannacraft:block/weed_rack",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

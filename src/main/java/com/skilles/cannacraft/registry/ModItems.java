@@ -54,7 +54,7 @@ public class ModItems {
         Registry.register(Registry.ITEM, id("weed_brownie"), WEED_BROWNIE); // TODO
         Registry.register(Registry.ITEM, id("lighter"), WEED_LIGHTER);
         Registry.register(Registry.ITEM, id("weed_grinder"), WEED_GRINDER); // TODO
-        Registry.register(Registry.ITEM, id("weed_rack"), WEED_RACK); // TODO
+        Registry.register(Registry.ITEM, id("weed_rack"), WEED_RACK);
         Registry.register(Registry.ITEM, id("weed_bong"), WEED_BONG);
         Registry.register(Registry.ITEM, id("grow_lamp"), GROW_LIGHT);
         Registry.register(Registry.ITEM, id("brownie_mix"), BROWNIE_MIX); // TODO
