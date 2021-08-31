@@ -121,6 +121,10 @@ public class WeedRegistry {
         return stackStrain.getItem().getDefaultStack();
     }
 
+    public static StrainInfo getStrainInfo(ItemStack itemStack) {
+        return new StrainInfo(getStrain(itemStack), getThc(itemStack), isIdentified(itemStack), getGenes(itemStack));
+    }
+
     // Convert strain to item
     public static ItemStack strainToItem(@Nullable Strain strain, @Nullable StatusTypes status, @Nullable Integer thc, @Nullable NbtList genes, WeedTypes type, boolean identified) {
         if(strain == null) strain = randomStrain();
