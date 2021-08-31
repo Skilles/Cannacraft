@@ -28,7 +28,7 @@ public class ModItems {
     public static final WeedGrinder WEED_GRINDER = new WeedGrinder(new Item.Settings().group(Cannacraft.ITEM_GROUP).maxCount(1));
 
     // Crafting items
-    public static final Item BROWNIE_MIX = new Item(new Item.Settings().group(Cannacraft.ITEM_GROUP));
+    public static final BrownieMix BROWNIE_MIX = new BrownieMix(new Item.Settings().group(Cannacraft.ITEM_GROUP));
 
     // Crafting items
 

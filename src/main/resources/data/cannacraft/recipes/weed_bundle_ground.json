@@ -1,14 +1,16 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "ingredient": [
-  {
-    "item": "cannacraft:weed_fruit"
-  },
-  {
-    "item": "cannacraft:weed_grinder"
-  }
+  "ingredients": [
+    {
+      "item": "cannacraft:weed_fruit"
+    },
+    {
+      "item": "cannacraft:weed_grinder"
+    }
   ],
-  "result": "cannacraft:weed_fruit",
-  "experience": 2,
-  "cookingtime": 200
+  "result": {
+    "item": "cannacraft:weed_fruit",
+    "count": 1
+  },
+  "group": "cannacraft"
 }
