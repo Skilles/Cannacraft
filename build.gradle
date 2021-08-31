@@ -54,7 +54,7 @@ dependencies {
 	modApi 'teamreborn:energy:0.1.1'
 	include 'teamreborn:energy:0.1.1'
 
-	annotationProcessor "net.fabricmc:fabric-mixin-compile-extensions:0.4.3"
+	annotationProcessor "net.fabricmc:fabric-mixin-compile-extensions:0.4.5"
 	// compile against the API
 	//modCompileOnly "mcp.mobius.waila:wthit-api:fabric-${project.wthit_api_version}"
 	modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}") {
@@ -65,7 +65,7 @@ dependencies {
 
 	// run against the full jar
 	//modRuntime "mcp.mobius.waila.wthit-fabric:wthit-fabric-${project.wthit_version}"
-	modImplementation "com.ptsmods:devlogin:1.0.0"
+	modImplementation "com.ptsmods:devlogin:1.2"
 
 	// Patchouli
 	modImplementation "vazkii.patchouli:Patchouli:${project.patchouli_version}"
