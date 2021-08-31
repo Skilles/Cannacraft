@@ -7,7 +7,6 @@ import com.skilles.cannacraft.util.BundleUtil;
 import com.skilles.cannacraft.util.StrainUtil;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
@@ -20,7 +19,7 @@ import java.util.List;
 
 import static com.skilles.cannacraft.Cannacraft.log;
 
-public class WeedBundle extends Item {
+public class WeedBundle extends StrainItem {
     public WeedBundle(Settings settings) {
         super(settings);
     }
@@ -70,7 +69,6 @@ public class WeedBundle extends Item {
     @Override
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
-        int count = stack.getCount();
-        BundleUtil.appendBundleTooltip(tooltip, count);
+        BundleUtil.appendBundleTooltip(tooltip, stack.getCount());
     }
 }

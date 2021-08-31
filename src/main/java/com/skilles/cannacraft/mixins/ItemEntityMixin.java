@@ -1,10 +1,9 @@
 package com.skilles.cannacraft.mixins;
 
 import com.skilles.cannacraft.registry.ModItems;
-import com.skilles.cannacraft.util.StrainUtil;
+import com.skilles.cannacraft.util.WeedRegistry;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -27,12 +26,9 @@ public abstract class ItemEntityMixin {
     @Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/world/World;DDDLnet/minecraft/item/ItemStack;)V")
     public void ItemEntity(World world, double x, double y, double z, ItemStack stack, CallbackInfo ci) {
         if(stack.getItem().equals(ModItems.WEED_SEED) || stack.getItem().equals(ModItems.WEED_BUNDLE)) {
-            NbtCompound tag = stack.getSubNbt("cannacraft:strain");
-            if(tag != null && tag.contains("ID")) {
-                if(tag.getInt("ID") == 0) {
-                    log("Changing tag: " + tag);
-                    StrainUtil.randomStrain(tag);
-                }
+            if(stack.hasNbt() && WeedRegistry.getStrain(stack).id() == 0) {
+                log("Changing tag: " + stack.getNbt());
+                stack.setNbt(WeedRegistry.randomItem(WeedRegistry.WeedTypes.fromStack(stack), false, false).getNbt());
             }
         }
     }

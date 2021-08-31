@@ -52,7 +52,7 @@ public class ScreenMixin {
             assert tag != null;
             if(tag.contains("ID") && hasShiftDown()) {
                 tooltip.clear();
-                MiscUtil.appendTooltips(tooltip, tag);
+                MiscUtil.appendTooltips(tooltip, tag, true);
                 if (tag.contains("Attributes") && !tag.getList("Attributes", NbtType.COMPOUND).isEmpty()) {
                     NbtList genes = tag.getList("Attributes", NbtType.COMPOUND);
                     tooltip.set(tooltip.size() - 1, new LiteralText("Genes: ").formatted(Formatting.GRAY));

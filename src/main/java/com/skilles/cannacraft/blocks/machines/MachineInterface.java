@@ -21,6 +21,10 @@ public interface MachineInterface extends EnergyStorage, SidedInventory, NamedSc
     void playSound(int flag);
     boolean isWorking();
 
+    boolean canCraft(DefaultedList<ItemStack> inventory);
+    int craft(DefaultedList<ItemStack> inventory);
+
+
     @Override
     int[] getAvailableSlots(Direction side);
 

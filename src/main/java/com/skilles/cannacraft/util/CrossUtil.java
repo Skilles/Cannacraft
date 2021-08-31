@@ -7,27 +7,25 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.util.Pair;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static com.skilles.cannacraft.Cannacraft.log;
 import static com.skilles.cannacraft.strain.StrainMap.strainList;
-import static com.skilles.cannacraft.util.StrainUtil.addStrain;
 
 public class CrossUtil {
-    private static final Map<String, Integer> suffixesMap = new HashMap<String, Integer>() {{
-        put("OG", 5);
-        put("Kush", 2);
-        put("Cookies", 1);
-        put("Dream", 1);
-        put("Poison", 0);
-        put("Crack", 0);
-        put("Dawg", 0);
-        put("Punch", 1);
-        put("Trix", 0);
-        put("Cake", 0);
-    }
+    private static final Map<String, Integer> suffixesMap = new HashMap<>() {
+        {
+            put("OG", 5);
+            put("Kush", 2);
+            put("Cookies", 1);
+            put("Dream", 1);
+            put("Poison", 0);
+            put("Crack", 0);
+            put("Dawg", 0);
+            put("Punch", 1);
+            put("Trix", 0);
+            put("Cake", 0);
+        }
     };
 
     public static int crossThc(int thc1, int thc2) {
@@ -135,24 +133,20 @@ public class CrossUtil {
      * Crosses two strains (name and type) and adds them to the list if not present
      * @param female strain of female
      * @param male strain of male
+     * @param register whether to add to the strain registry
      * @return crossed strain
      */
-    public static Strain crossStrains(Strain female, Strain male) {
+    public static Strain crossStrains(Strain female, Strain male, boolean register) {
         Strain crossedStrain;
         if(female.isResource() && male.isResource()) {
             crossedStrain = crossResources(female, male);
         } else {
-            crossedStrain = new Strain(crossNames(female.name(), male.name()), crossTypes(female.type(), male.type()), false);
-            // Unnecessary TODO: maybe remove
-            if(!StrainUtil.isPresent(crossedStrain, false)) {
-                addStrain(crossedStrain);
-                log("New Strain: " + crossedStrain);
-                return crossedStrain;
-            } else {
-                log("Duplicate strain");
-            }
+            return new Strain(crossNames(female.name(), male.name()), crossTypes(female.type(), male.type()), register);
         }
         return strainList.get(crossedStrain.name());
+    }
+    public static Strain crossStrains(Strain female, Strain male) {
+        return crossStrains(female, male, false);
     }
     /**
      * Crosses two resource strains using predefined recipes
@@ -164,7 +158,7 @@ public class CrossUtil {
         StrainUtil.StrainItems fItem = female.strainItem;
         StrainUtil.StrainItems mItem = male.strainItem;
         for(ResourcePair pair : StrainUtil.resourcePairs) {
-            if((pair.strain1() == fItem || pair.strain2() == fItem) && (pair.strain1() == mItem || pair.strain2() == mItem))
+            if((pair.strain1() == fItem || pair.strain1() == mItem) && (pair.strain2() == fItem || pair.strain2() == mItem))
                 return pair.getOutputStrain();
         }
         if (MiscUtil.random().nextFloat() > 0.7F) return male;
@@ -223,39 +217,43 @@ public class CrossUtil {
                 return StrainMap.Type.UNKNOWN;
         }
     }
-    @Nullable
     public static NbtList crossGenes(ItemStack stack1, ItemStack stack2) {
-        if(stack1.hasNbt() && stack1.getOrCreateSubNbt("cannacraft:strain").getList("Attributes", NbtType.COMPOUND) != null && stack2.hasNbt() && stack2.getOrCreateSubNbt("cannacraft:strain").getList("Attributes", NbtType.COMPOUND) != null) {
-            ArrayList<Gene> list1 = MiscUtil.fromNbtList(stack1.getSubNbt("cannacraft:strain").getList("Attributes", NbtType.COMPOUND));
-            ArrayList<Gene> list2 = MiscUtil.fromNbtList(stack2.getSubNbt("cannacraft:strain").getList("Attributes", NbtType.COMPOUND));
-            ArrayList<Gene> geneList = new ArrayList<>();
-            for(int i = 0; i < list1.size() && i < list2.size(); i++) {
-                geneList.add(crossGenes(list1.get(i), list2.get(i)));
-            }
-            return MiscUtil.toNbtList(geneList);
-        }
-        return null;
+        ArrayList<Gene> list1 = MiscUtil.fromNbtList(stack1.getSubNbt("cannacraft:strain").getList("Attributes", NbtType.COMPOUND));
+        ArrayList<Gene> list2 = MiscUtil.fromNbtList(stack2.getSubNbt("cannacraft:strain").getList("Attributes", NbtType.COMPOUND));
+        ArrayList<Gene> output = new ArrayList<>();
+        list1.forEach(gene1 -> {
+            Optional<Gene> gene2 = list2.stream().filter(j -> gene1.type() == j.type()).findFirst();
+            // Removes gene from list2 if it finds a match, otherwise adds it to the output
+            gene2.ifPresentOrElse( x -> {
+                    output.add(crossGenes(x, gene2.get()));
+                    list2.remove(gene2.get());
+            }, () -> output.add(gene1));
+        });
+        output.addAll(list2);
+        return MiscUtil.toNbtList(output);
+    }
+    public static ItemStack crossItems(ItemStack stack1, ItemStack stack2, boolean register) {
+        Strain newStrain = CrossUtil.crossStrains(WeedRegistry.getStrain(stack1), WeedRegistry.getStrain(stack2), register);
+        int newThc = CrossUtil.crossThc(WeedRegistry.getThc(stack1), WeedRegistry.getThc(stack2));
+        NbtList newGenes = CrossUtil.crossGenes(stack1, stack2);
+        return WeedRegistry.strainToItem(newStrain, null, newThc, newGenes, WeedRegistry.WeedTypes.fromStack(stack1), true);
     }
     protected static Gene crossGenes(Gene gene1, Gene gene2) {
-        if(gene1.type().equals(gene2.type())) {
-            int level1 = gene1.level();
-            int level2 = gene2.level();
-            /*switch (Math.abs(level2 - level1)) {
-                case 0:
-                    break;
-                case 1:
-                    break;
-                case 2:
-                    break;
-                case 3:
-                    break;
-                default:
-                    throw new IllegalStateException("Unexpected value: " + Math.abs(level2 - level1));
-            }*/
-            return new Gene(gene1.type(), (level1 + level2) / 2);
-        } else {
-            return gene1;
-        }
+        int level1 = gene1.level();
+        int level2 = gene2.level();
+        /*switch (Math.abs(level2 - level1)) {
+            case 0:
+                break;
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + Math.abs(level2 - level1));
+        }*/
+        return new Gene(gene1.type(), (level1 + level2) / 2);
     }
     // terrible code
     private static Pair<GeneTypes, Integer> crossGenes(int level1, int level2, GeneTypes type) {

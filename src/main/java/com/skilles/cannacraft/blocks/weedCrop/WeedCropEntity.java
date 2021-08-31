@@ -22,6 +22,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -111,16 +112,7 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
     }
     public boolean canBreed() {
         if(breedingProgress() != -1 && !this.isMale) {
-            int COUNT = 0;
-            for (Direction direction : Direction.Type.HORIZONTAL) {
-                BlockEntity blockEntity2 = world.getBlockEntity(pos.offset(direction));
-                if (blockEntity2 instanceof WeedCropEntity cropToBreed) {
-                    //NbtCompound tag = blockEntity2.writeNbt(new NbtCompound());
-                    if (cropToBreed.isMale && this.resource == cropToBreed.resource) {
-                        COUNT++;
-                    }
-                }
-            }
+            int COUNT = (int) Direction.Type.HORIZONTAL.stream().filter(direction -> world.getBlockEntity(pos.offset(direction)) instanceof WeedCropEntity cropToBreed && cropToBreed.isMale && this.resource == cropToBreed.resource).count();
             return COUNT > 0;
         } else {
             return false;
@@ -155,46 +147,27 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
     void breedCrops(World world, BlockPos pos, Random random) {
         if(canBreed()) {
             // Cross thc/names/type
-            int id = this.index;
-            int thc = this.thc;
-            int maleId = 0;
-            int maleThc = 0;
-            boolean maleIdentified = false;
-            NbtCompound maleTag = null;
-            List<WeedCropEntity> entityList = new ArrayList<>();
+
+            List<WeedCropEntity> nearCrops = new ArrayList<>();
+
             for (Direction direction : Direction.Type.HORIZONTAL) {
                 BlockEntity blockEntity2 = world.getBlockEntity(pos.offset(direction));
-                if (blockEntity2 instanceof WeedCropEntity weedBlockEntity2) {
-                    if (weedBlockEntity2.isMale) {
-                        entityList.add(weedBlockEntity2);
-                        if(entityList.size() == 1 || !config.getCrop().randomBreed) { // if only 1 male or randomBreed is off
-                            if(weedBlockEntity2.thc > maleThc) { // if thc hasn't been set or is greater than previous male's
-                                maleThc = weedBlockEntity2.thc; // highest male thc
-                                // maleId = weedBlockEntity2.index; // highest thc male id
-                                maleIdentified = weedBlockEntity2.identified;
-                                maleTag = weedBlockEntity2.writeNbt(new NbtCompound());
-                            }
-                        }
-                    }
+                if (blockEntity2 instanceof WeedCropEntity weedBlockEntity2 && weedBlockEntity2.isMale) {
+                    nearCrops.add(weedBlockEntity2);
                 }
             }
-            if(config.getCrop().randomBreed) {
-                WeedCropEntity randCrop = entityList.get(random.nextInt(entityList.size()));
-                maleThc = randCrop.thc;
-                // maleId = randCrop.index; // random thc male id
-                maleIdentified = randCrop.identified;
-                maleTag = randCrop.writeNbt(new NbtCompound());
-            }
+            WeedCropEntity alphaMale = config.getCrop().randomBreed ? nearCrops.get(random.nextInt(nearCrops.size())) : nearCrops.stream().max(Comparator.comparingInt(entity -> entity.thc)).get();
             // Set thc
-            this.seedThc = CrossUtil.crossThc(maleThc, this.thc);
+            this.seedThc = CrossUtil.crossThc(alphaMale.thc, this.thc);
             // Set strain
             NbtCompound myTag = this.writeNbt(new NbtCompound());
+            NbtCompound maleTag = alphaMale.writeNbt(new NbtCompound());
             Strain crossedStrain = CrossUtil.crossStrains(getStrain(myTag), getStrain(maleTag));
             log("Strain 1 " + getStrain(myTag));
             log("Strain 2 " + getStrain(maleTag));
             log("Name of crossed strain: " + crossedStrain.name());
             this.seedId = crossedStrain.id();
-            if(this.identified) this.identified = maleIdentified;
+
             log("New tag: " + this.writeNbt(new NbtCompound()));
 
             world.setBlockState(pos, WeedCrop.withBreeding(world.getBlockState(pos), false), 2);
@@ -249,7 +222,6 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
 
     @Override
     public void sync() {
-        if(!world.isClient)
-            BlockEntityClientSerializable.super.sync();
+        if(!world.isClient) BlockEntityClientSerializable.super.sync();
     }
 }

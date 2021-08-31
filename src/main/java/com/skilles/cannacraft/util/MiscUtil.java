@@ -36,6 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -51,7 +52,7 @@ public final class MiscUtil {
         return random;
     }
 
-    public static void appendTooltips(List<Text> tooltip, NbtCompound tag) {
+    public static void appendTooltips(List<Text> tooltip, NbtCompound tag, boolean shiftGenes) {
         String sex = "";
         if(tag.contains("Male")) sex = tag.getBoolean("Male") ? "Male" : "Female";
         int id = tag.getInt("ID");
@@ -65,7 +66,7 @@ public final class MiscUtil {
             Rarity rarity = StrainUtil.getStrain(tag).getRarity();
             tooltip.add(new LiteralText("Rarity: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StringUtils.lowerCase(rarity.toString()))).formatted(rarity.formatting)));
             if(!sex.isEmpty()) tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText(sex).formatted(Formatting.DARK_GREEN)));
-            if(!genes.isEmpty()) {
+            if(!genes.isEmpty() && shiftGenes) {
                 tooltip.add(new LiteralText("Press ").append( new LiteralText("SHIFT ").formatted(Formatting.GOLD).append( new LiteralText("to view Genes").formatted(Formatting.WHITE))));
             }
         } else {
@@ -118,27 +119,16 @@ public final class MiscUtil {
      * @param tag to randomize genes and ID for
      */
     public static boolean randomizeTag(NbtCompound tag) {
-        List<Strain> strainList = StrainUtil.getStrainPool();
-        // Compute the total weight of all items together.
-        double totalWeight = 0.0;
-        for (Strain strain : strainList) {
-            totalWeight += getWeight(strain);
-        }
-        // Now choose a random item.
-        int idx = 0;
-        for (double r = Math.random() * totalWeight; idx < strainList.size() - 1; ++idx) {
-            r -= getWeight(strainList.get(idx));
-            if (r <= 0.0) break;
-        }
-        Strain strain = strainList.get(idx);
+
+        Strain strain = WeedRegistry.randomStrain();
         log("Random: " + strain);
         tag.putInt("ID", strain.id());
         tag.put("Attributes", toNbtList(randGenes(strain)));
         tag.putBoolean("Resource", strain.isResource());
-        return strainList.get(idx).isResource();
+        return strain.isResource();
         //tag.putInt("ID", random.nextInt(StrainUtil.defaultStrains.size() - 1) + 1); // random id
     }
-    private static int getWeight(Strain strain) {
+    static int getWeight(Strain strain) {
         // TODO: add to config
         int weight;
         switch (strain.getRarity().ordinal()) {
@@ -258,12 +248,9 @@ public final class MiscUtil {
         List<Direction> validDirections = new ArrayList<>();
         for (Direction direction : Direction.Type.HORIZONTAL) {
             BlockState neighborState = world.getBlockState(pos.offset(direction));
-            for (Block block : blocks) {
-                if (neighborState.isOf(block) && (!toGrow || world.getBlockState(pos.offset(direction).up()).isOf(Blocks.AIR))) validDirections.add(direction);
-            }
+            Arrays.stream(blocks).filter(block -> neighborState.isOf(block) && (!toGrow || world.getBlockState(pos.offset(direction).up()).isOf(Blocks.AIR))).map(block -> direction).forEachOrdered(validDirections::add);
         }
-        if(!validDirections.isEmpty()) return Util.getRandom(validDirections, random());
-        return null;
+        return validDirections.isEmpty() ? null : Util.getRandom(validDirections, random());
     }
 
     /**
@@ -323,9 +310,9 @@ public final class MiscUtil {
             if (StrainUtil.getStrain(tag).type().equals(StrainMap.Type.UNKNOWN)) tag.putInt("ID", 0);
             String name = tag.getBoolean("Identified") ? StrainUtil.getStrain(tag).name() : "Unidentified";
             if(stack.isOf(ModItems.WEED_SEED)) {
-                name += stack.getCount() > 1 ? " Seed": " Seeds";
+                name += stack.getCount() > 1 ? " Seeds": " Seed";
             } else if(stack.isOf(ModItems.WEED_BROWNIE)) {
-                name += stack.getCount() > 1 ? " Brownie": " Brownies";
+                name += stack.getCount() > 1 ? " Brownies": " Brownie";
             } else if(stack.isOf(ModItems.WEED_DISTILLATE)) {
                 name += " Distillate";
             } else if(stack.isOf(ModItems.WEED_BUNDLE)) {

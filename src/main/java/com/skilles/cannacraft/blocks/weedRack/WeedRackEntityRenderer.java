@@ -22,31 +22,27 @@ public class WeedRackEntityRenderer implements BlockEntityRenderer<WeedRackEntit
         ItemStack itemStack = entity.getStack(0);
         Direction dir = entity.getCachedState().get(WeedRack.FACING);
         int k = (int)entity.getPos().asLong();
-        int progress = entity.processTime;
-        int j = light - 200;
+
         if (!itemStack.isEmpty()) {
             matrices.push();
-            switch(dir) {
-                case NORTH:
-                    matrices.translate(0.5F, 0.4375F, 0.96875F);
-                    break;
-                case SOUTH:
+            switch (dir) {
+                case NORTH -> matrices.translate(0.5F, 0.4375F, 0.96875F);
+                case SOUTH -> {
                     matrices.translate(0.5F, 0.4375F, 0.03125F);
                     matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180F));
-                    break;
-                case EAST:
+                }
+                case EAST -> {
                     matrices.translate(0.03125F, 0.4375F, 0.5F);
                     matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(270F));
-                    break;
-                case WEST:
+                }
+                case WEST -> {
                     matrices.translate(0.96875F, 0.4375F, 0.5F);
                     matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(90F));
-                    break;
-                default:
-
+                }
+                default -> {
+                }
             }
-
-            itemRenderer.renderItem(itemStack, ModelTransformation.Mode.FIXED, j + progress * 2, overlay, matrices, vertexConsumers, k);
+            itemRenderer.renderItem(itemStack, ModelTransformation.Mode.FIXED, light, overlay, matrices, vertexConsumers, k);
             matrices.pop();
         }
     }

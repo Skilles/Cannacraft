@@ -56,7 +56,7 @@ public class BundleUtil {
     /**
      * Converts from TriState to int for NBT tags
      * @param status of the bundle
-     * @return 0 if DRY, 1 if GROUND, 2 if WET
+     * @return 0 if DRY, 0.5 if GROUND, 1 if WET
      */
     public static float convertStatus(TriState status) {
         if(status.equals(TriState.TRUE)) {

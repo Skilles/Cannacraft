@@ -1,19 +1,15 @@
 package com.skilles.cannacraft.util;
 
-import com.skilles.cannacraft.config.ModConfig;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.ResourcePair;
 import com.skilles.cannacraft.strain.Strain;
-import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Rarity;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
-import org.jetbrains.annotations.TestOnly;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -69,9 +65,10 @@ public class StrainUtil {
     /**
      * This method returns the index of a strain. If the strain is new, it is added to the strainArray
      * @param strain to get the index of
+     * @param register whether to register the strain
      * @return the ID of the strain
      */
-    public static int indexOf(Strain strain, boolean addStrain) {
+    public static int indexOf(Strain strain, boolean register) {
         if(strain.isResource()) {
             // Resource strains are manually assigned an ID
             return strain.id();
@@ -80,7 +77,7 @@ public class StrainUtil {
             try {
                 return strainArray.inverse().get(strain);
             } catch (Exception e) {
-                if(addStrain) {
+                if(register) {
                     log("Adding new strain");
                     strain.init();
                     log(strain);
@@ -90,7 +87,7 @@ public class StrainUtil {
                     System.out.println();
                     log(strainArray);
                 }
-                return indexOf(strain, addStrain);
+                return indexOf(strain, register);
             }
         }
     }
@@ -99,51 +96,16 @@ public class StrainUtil {
         if(!strainList.containsKey(name)) return 0;
         return indexOf(toStrain(name), false);
     }
-    public static ItemStack getOutputStack(ItemStack stack) {
-        if(AutoConfig.getConfigHolder(ModConfig.class).getConfig().getCrop().resource) {
-            if (stack.isOf(ModItems.WEED_BUNDLE) && stack.hasNbt()) {
-                return getStrain(stack.getNbt()).getItem().getDefaultStack();
-            }
-        } else {
-            return StrainItems.DISTILLATE.item.getDefaultStack();
-        }
-        return Items.AIR.getDefaultStack();
-    }
     private static boolean containsWords(String input, String[] words) {
         return Arrays.stream(words).anyMatch(input::contains);
     }
     public static StrainItems getStrainItem(Strain strain) {
         String name = strain.name();
-        for(StrainItems item: StrainItems.values()) {
-            if (containsWords(name, StringUtils.split(item.getName())) || name.contains(item.getName())) return item;
-        }
-        return StrainItems.DISTILLATE;
+        return Arrays.stream(StrainItems.values())
+                .filter(item -> containsWords(name, StringUtils.split(item.getName())) || name.contains(item.getName()))
+                .findFirst().orElse(StrainItems.DISTILLATE);
     }
-    @Deprecated
-    public static Item getItem(Strain strain) {
-        // TODO: add other mod metals
-        //Class<Items> itemsClass = Items.class;
-        //Field[] itemFields = itemsClass.getFields();
-        /*for (Field field: itemFields) {
-            try {
-                Item item = (Item) field.get(itemsClass);
-                if(Arrays.stream(StrainItems.values()).anyMatch(obj -> obj.getKey().equals(item.getTranslationKey()))) {
-                    String itemName = I18n.translate(item.getTranslationKey());
-                    String[] itemNames = StringUtils.split(itemName);
-                    if(name.contains(itemNames[0])) {
-                        return item;
-                    }
-                }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }*/
-        return strain.getItem();
-    }
-    @TestOnly
-    public static void testItems() {
-        log(getItem(new Strain("Purple Lapis", Type.HYBRID, true, true)));
-    }
+
     @Deprecated
     public static void addStrain(String name, Type type) {
         addStrain(new Strain(name, type, false));
@@ -297,9 +259,6 @@ public class StrainUtil {
         IntStream.iterate(strainArray.size() - 1, i -> i == -1, i -> i - 1).forEach(output::remove);
         return output;
     }
-    public static int randThc(Strain strain) {
-        return (int) (normalDist(15, 5, MIN_THC) * strain.thcMultiplier());
-    }
 
     public static Strain toStrain(String name) {
         return strainList.getOrDefault(name, UNKNOWN_STRAIN);
@@ -330,11 +289,6 @@ public class StrainUtil {
         }
     }
 
-    public static void randomStrain(NbtCompound tag) {
-        MiscUtil.randomizeTag(tag);
-        if(!tag.contains("THC") || (tag.contains("THC") && tag.getInt("THC") < StrainUtil.MIN_THC))
-            tag.putInt("THC", StrainUtil.randThc(StrainUtil.getStrain(tag)));
-    }
     public static ResourcePair[] resourcePairs = new ResourcePair[]{
             new ResourcePair(StrainItems.COAL, StrainItems.COPPER, StrainItems.IRON),
             new ResourcePair(StrainItems.IRON, StrainItems.COPPER, StrainItems.GOLD),
@@ -368,8 +322,6 @@ public class StrainUtil {
         String getName() {
             return I18n.translate(item.getTranslationKey());
         }
-        String getKey() {
-            return item.getTranslationKey();
-        }
+
     }
 }

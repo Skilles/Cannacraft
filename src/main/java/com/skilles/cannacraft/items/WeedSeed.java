@@ -95,9 +95,11 @@ public class WeedSeed extends AliasedBlockItem {
     @Override
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
-        NbtCompound tag = stack.getSubNbt("cannacraft:strain");
-        if (tag != null && tag.contains("ID") && !(tag.getInt("ID") == 0)) { // checks if ID is set to actual strain
-            MiscUtil.appendTooltips(tooltip, tag);
+        if(stack.hasNbt()) {
+            NbtCompound tag = stack.getSubNbt("cannacraft:strain");
+            if (tag.contains("ID") && !(tag.getInt("ID") == 0)) {
+                MiscUtil.appendTooltips(tooltip, tag, true);
+            }
         }
 
 

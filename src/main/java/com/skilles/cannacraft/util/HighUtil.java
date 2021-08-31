@@ -1,16 +1,13 @@
 package com.skilles.cannacraft.util;
 
 import com.skilles.cannacraft.registry.ModMisc;
+import com.skilles.cannacraft.strain.StrainInfo;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
 
 public class HighUtil {
     /**
@@ -72,14 +69,12 @@ public class HighUtil {
     /**
      * @param user entity to
      */
-    public static void applyHigh(LivingEntity user) {
+    public static void applyHigh(StrainInfo strainInfo, LivingEntity user) {
         int duration;
         int amplifier;
         int switchNum = 0;
-        assert user.getActiveItem().hasNbt();
-        int index = user.getActiveItem().getSubNbt("cannacraft:strain").getInt("ID");
-        int thc = user.getActiveItem().getSubNbt("cannacraft:strain").getInt("THC");
-        ModMisc.PLAYER.get(user).setStrain(index);
+        int thc = strainInfo.thc();
+        ModMisc.PLAYER.get(user).setStrain(strainInfo.strain().id());
         if(thc <= 18) switchNum = 1;
         if(19 <= thc && thc <= 25) switchNum = 2;
         if(26 <= thc) switchNum = 3;
@@ -99,7 +94,7 @@ public class HighUtil {
             };
         }
         amplifier = durationToAmplifier(duration);
-        if(amplifier >  2 && !user.world.isDay()) {
+        /*if(amplifier >  2 && !user.world.isDay()) {
             BlockPos pos = user.getBlockPos();
             //BlockState blockState = Blocks.GREEN_BED.getDefaultState();
             //user.world.setBlockState(pos, blockState.with(BedBlock.OCCUPIED, true), 4);
@@ -107,7 +102,7 @@ public class HighUtil {
             //((PlayerEntityAccessor)user).setSleepTimer(100);
             ((ServerWorld) user.world).setTimeOfDay(6000);
             user.sendSystemMessage(Text.of("You pass out and awake the next day"), Util.NIL_UUID);
-        }
+        }*/
         user.addStatusEffect(new StatusEffectInstance(ModMisc.HIGH, duration, amplifier, true, false));
         sendHighMessage((PlayerEntity) user);
     }
