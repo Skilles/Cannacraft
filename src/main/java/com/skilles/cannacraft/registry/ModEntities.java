@@ -1,5 +1,6 @@
 package com.skilles.cannacraft.registry;
 
+import com.skilles.cannacraft.blocks.machines.generator.GeneratorEntity;
 import com.skilles.cannacraft.blocks.machines.seedCrosser.SeedCrosserEntity;
 import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzerEntity;
 import com.skilles.cannacraft.blocks.machines.weedExtractor.WeedExtractorEntity;
@@ -22,6 +23,7 @@ public class ModEntities {
     public static BlockEntityType<SeedCrosserEntity> SEED_CROSSER_ENTITY;
     public static BlockEntityType<WeedExtractorEntity> WEED_EXTRACTOR_ENTITY;
     public static BlockEntityType<WeedBongEntity> WEED_BONG_ENTITY;
+    public static BlockEntityType<GeneratorEntity> GENERATOR_ENTITY;
 
     public static void registerEntities() {
         SEED_CHEST_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, id("seed_chest"), FabricBlockEntityTypeBuilder.create(SeedChestEntity::new, ModBlocks.SEED_CHEST).build());
@@ -31,5 +33,6 @@ public class ModEntities {
         WEED_EXTRACTOR_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "cannacraft:weed_extractor", FabricBlockEntityTypeBuilder.create(WeedExtractorEntity::new, ModBlocks.WEED_EXTRACTOR).build());
         WEED_RACK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "cannacraft:weed_rack", FabricBlockEntityTypeBuilder.create(WeedRackEntity::new, ModBlocks.WEED_RACK).build());
         WEED_BONG_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "cannacraft:weed_bong", FabricBlockEntityTypeBuilder.create(WeedBongEntity::new, ModBlocks.WEED_BONG).build());
+        GENERATOR_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "cannacraft:generator", FabricBlockEntityTypeBuilder.create(GeneratorEntity::new, ModBlocks.GENERATOR).build());
     }
 }

@@ -1,6 +1,7 @@
 package com.skilles.cannacraft.registry;
 
 import com.skilles.cannacraft.blocks.GrowLight;
+import com.skilles.cannacraft.blocks.machines.generator.Generator;
 import com.skilles.cannacraft.blocks.machines.seedCrosser.SeedCrosser;
 import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzer;
 import com.skilles.cannacraft.blocks.machines.weedExtractor.WeedExtractor;
@@ -35,6 +36,7 @@ public class ModBlocks {
     public static final Block WEED_BONG = new WeedBong(FabricBlockSettings.copyOf(Blocks.GLASS));
     public static final Block WEED_RACK = new WeedRack(FabricBlockSettings.copyOf(Blocks.OAK_PLANKS));
     public static final Block GROW_LIGHT = new GrowLight(FabricBlockSettings.copyOf(Blocks.REDSTONE_LAMP));
+    public static final Block GENERATOR = new Generator(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK));
 
     public static void registerBlocks() {
         Registry.register(Registry.BLOCK, id( "seed_chest"), SEED_CHEST);
@@ -46,5 +48,6 @@ public class ModBlocks {
         Registry.register(Registry.BLOCK, id( "weed_bong"), WEED_BONG);
         Registry.register(Registry.BLOCK, id( "weed_rack"), WEED_RACK);
         Registry.register(Registry.BLOCK, id( "grow_lamp"), GROW_LIGHT);
+        Registry.register(Registry.BLOCK, id( "generator"), GENERATOR);
     }
 }

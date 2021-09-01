@@ -40,6 +40,7 @@ public class ModItems {
     public static final BlockItem WEED_RACK = new BlockItem(ModBlocks.WEED_RACK, new Item.Settings().group(Cannacraft.ITEM_GROUP));
     public static final BlockItem WEED_BONG = new BlockItem(ModBlocks.WEED_BONG, new Item.Settings().group(Cannacraft.ITEM_GROUP));
     public static final BlockItem GROW_LIGHT = new BlockItem(ModBlocks.GROW_LIGHT, new Item.Settings().group(Cannacraft.ITEM_GROUP));
+    public static final BlockItem GENERATOR = new BlockItem(ModBlocks.GENERATOR, new Item.Settings().group(Cannacraft.ITEM_GROUP));
     public static void registerItems () {
         Registry.register(Registry.ITEM, id( "weed_seed"), WEED_SEED);
         Registry.register(Registry.ITEM, id( "seed_bag"), SEED_BAG);
@@ -57,6 +58,7 @@ public class ModItems {
         Registry.register(Registry.ITEM, id("weed_rack"), WEED_RACK);
         Registry.register(Registry.ITEM, id("weed_bong"), WEED_BONG);
         Registry.register(Registry.ITEM, id("grow_lamp"), GROW_LIGHT);
-        Registry.register(Registry.ITEM, id("brownie_mix"), BROWNIE_MIX); // TODO
+        Registry.register(Registry.ITEM, id("brownie_mix"), BROWNIE_MIX);
+        Registry.register(Registry.ITEM, id("generator"), GENERATOR);
     }
 }

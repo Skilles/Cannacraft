@@ -1,6 +1,8 @@
 package com.skilles.cannacraft.registry;
 
 
+import com.skilles.cannacraft.blocks.machines.generator.GeneratorScreen;
+import com.skilles.cannacraft.blocks.machines.generator.GeneratorScreenHandler;
 import com.skilles.cannacraft.blocks.machines.seedCrosser.SeedCrosserScreen;
 import com.skilles.cannacraft.blocks.machines.seedCrosser.SeedCrosserScreenHandler;
 import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzerScreen;
@@ -21,17 +23,20 @@ public class ModScreens {
     public static ScreenHandlerType<StrainAnalyzerScreenHandler> STRAIN_ANALYZER_SCREEN_HANDLER;
     public static ScreenHandlerType<SeedCrosserScreenHandler> SEED_CROSSER_SCREEN_HANDLER;
     public static ScreenHandlerType<WeedExtractorScreenHandler> WEED_EXTRACTOR_SCREEN_HANDLER;
+    public static ScreenHandlerType<GeneratorScreenHandler> GENERATOR_SCREEN_HANDLER;
 
     public static void registerScreenHandlers() {
         SEED_CHEST_SCREEN_HANDLER = registerSimple(id("seed_chest"), SeedChestScreenHandler::new);
         STRAIN_ANALYZER_SCREEN_HANDLER = registerSimple(id("strain_analyzer"), StrainAnalyzerScreenHandler::new);
         SEED_CROSSER_SCREEN_HANDLER = registerSimple(id("seed_crosser"), SeedCrosserScreenHandler::new);
         WEED_EXTRACTOR_SCREEN_HANDLER = registerSimple(id("weed_extractor"), WeedExtractorScreenHandler::new);
+        GENERATOR_SCREEN_HANDLER = registerSimple(id("generator"), GeneratorScreenHandler::new);
     }
     public static void registerScreens() {
        register(SEED_CHEST_SCREEN_HANDLER, SeedChestScreen::new);
        register(STRAIN_ANALYZER_SCREEN_HANDLER, StrainAnalyzerScreen::new);
        register(SEED_CROSSER_SCREEN_HANDLER, SeedCrosserScreen::new);
        register(WEED_EXTRACTOR_SCREEN_HANDLER, WeedExtractorScreen::new);
+       register(GENERATOR_SCREEN_HANDLER, GeneratorScreen::new);
     }
 }
