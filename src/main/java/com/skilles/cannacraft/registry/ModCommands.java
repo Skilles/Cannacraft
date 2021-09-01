@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.strain.StrainMap;
 import com.skilles.cannacraft.util.CrossUtil;
 import com.skilles.cannacraft.util.StrainUtil;
@@ -199,6 +200,15 @@ public class ModCommands {
                                 self.sendSystemMessage(Text.of("Strains reset"), Util.NIL_UUID);
                                 return 1;
                             }))
+                        .then(literal("discover")
+                                .then(argument("strain", StringArgumentType.greedyString())
+                                        .executes(ctx -> {
+                                            final ServerPlayerEntity self = ctx.getSource().getPlayer();
+                                            Strain argStrain = StrainUtil.toStrain(getString(ctx, "strain"));
+                                            ModMisc.PLAYER.get(self).getCannadex().discoverStrains(argStrain);
+                                            self.sendSystemMessage(Text.of("Unlocked strain " + argStrain.name()), Util.NIL_UUID);
+                                            return 1;
+                                        })))
             ));
         });
     }

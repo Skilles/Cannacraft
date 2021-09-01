@@ -261,7 +261,7 @@ public class StrainUtil {
     }
 
     public static Strain toStrain(String name) {
-        return strainList.getOrDefault(name, UNKNOWN_STRAIN);
+        return strainList.getOrDefault(name, resourceStrainArray.values().stream().filter(x -> x.name().equalsIgnoreCase(name)).findAny().orElse(UNKNOWN_STRAIN));
     }
 
     public static Map<String, Strain> getNames() {

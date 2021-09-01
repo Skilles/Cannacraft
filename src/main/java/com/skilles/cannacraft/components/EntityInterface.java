@@ -1,6 +1,7 @@
 package com.skilles.cannacraft.components;
 
 import com.skilles.cannacraft.registry.ModMisc;
+import com.skilles.cannacraft.strain.Cannadex;
 import com.skilles.cannacraft.strain.Strain;
 import dev.onyxstudios.cca.api.v3.component.ComponentV3;
 
@@ -11,5 +12,6 @@ public interface EntityInterface extends ComponentV3 {
 
     void setStrain(int index);
     Strain getStrain();
+    Cannadex getCannadex();
 
 }
