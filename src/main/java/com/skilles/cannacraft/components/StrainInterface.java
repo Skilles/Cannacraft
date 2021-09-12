@@ -1,11 +1,11 @@
 package com.skilles.cannacraft.components;
 
+import com.skilles.cannacraft.dna.genome.Genome;
+import com.skilles.cannacraft.dna.genome.gene.TraitGene;
 import com.skilles.cannacraft.registry.ModMisc;
-import com.skilles.cannacraft.strain.StrainMap;
+import com.skilles.cannacraft.strain.StrainInfo;
 import dev.onyxstudios.cca.api.v3.component.ComponentV3;
 import net.fabricmc.fabric.api.util.TriState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 
 import java.util.List;
 
@@ -16,26 +16,34 @@ public interface StrainInterface extends ComponentV3 {
     }
 
     void setStrain(int index); // setType not needed
-    void setGenetics(NbtList geneList);
+
+    void setTraits(List<TraitGene> geneList);
+
     void setThc(int thc);
+
     void setMale(boolean isMale);
 
-    void addGene(String name, int level);
+    void addGene(TraitGene gene);
+
     boolean hasGenes();
 
-    String getStrain();
-    List<NbtCompound> getGenetics();
-    int getIndex();
-    StrainMap.Type getType();
+    StrainInfo getStrainInfo();
+
+    List<TraitGene> getTraits();
+
     int getThc();
+
     boolean isMale();
-    boolean isResource();
 
     TriState getStatus();
+
     void setStatus(TriState status);
 
     void identify();
+
     boolean identified();
+
+    Genome getGenome();
 
     void copyFrom(ItemStrainComponent other);
 }
