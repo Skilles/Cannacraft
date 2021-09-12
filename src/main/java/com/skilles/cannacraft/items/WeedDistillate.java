@@ -1,8 +1,5 @@
 package com.skilles.cannacraft.items;
 
-import com.skilles.cannacraft.components.StrainInterface;
-import com.skilles.cannacraft.registry.ModMisc;
-import com.skilles.cannacraft.util.BundleUtil;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
@@ -20,15 +17,8 @@ public class WeedDistillate extends StrainItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
         if (world.isClient) {
             ItemStack clientStack = playerEntity.getStackInHand(hand);
-            StrainInterface clientStackInterface = ModMisc.STRAIN.get(clientStack);
             if (!playerEntity.isSneaking()) {
-                System.out.println("Strain of held seed: "
-                        + clientStackInterface.getStrain()
-                        + " THC: " + clientStackInterface.getThc()
-                        + " Identified: " + clientStackInterface.identified()
-                        + " Genes: " + clientStackInterface.getGenetics()
-                        + " Texture: " + BundleUtil.getTexture(clientStack)
-                );
+                StrainItem.debugAction(world, playerEntity, hand);
             } else {
                 log(clientStack.getNbt());
             }
