@@ -49,6 +49,8 @@ public class Enums {
 
         int value;
 
+        public static int length = 3;
+
         private static final Map<Integer, Code> lookup = new HashMap<>();
 
         public static final Code[] values = values();
@@ -222,9 +224,8 @@ public class Enums {
 
     public enum InfoType {
         STRAIN(0),
-        TYPE(1),
-        THC(2),
-        RESOURCE(3);
+        THC(1),
+        RESOURCE(2);
 
         private static final Map<Integer, InfoType> lookup = new HashMap<>();
 

@@ -1,21 +1,23 @@
 package com.skilles.cannacraft.dna.genome;
 
 import com.skilles.cannacraft.dna.chromosome.TraitChromosome;
+import com.skilles.cannacraft.dna.genome.gene.BaseGene;
+import com.skilles.cannacraft.dna.genome.gene.InfoGene;
 import com.skilles.cannacraft.dna.genome.gene.TraitGene;
+import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.strain.StrainInfo;
-import com.skilles.cannacraft.util.ConvertUtil;
+import com.skilles.cannacraft.util.CrossUtil;
+import com.skilles.cannacraft.util.DnaUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static com.skilles.cannacraft.dna.genome.Enums.Phenotype;
-import static com.skilles.cannacraft.dna.genome.Enums.State;
+import static com.skilles.cannacraft.dna.genome.Enums.*;
 
 public class Meiosis {
 
     private static final Random random = new Random();
-    private static final int SEED_COUNT = 4;
 
     // Cross two chromosomes of the same type
     public static TraitChromosome cross(TraitChromosome mother, TraitChromosome father) {
@@ -68,26 +70,37 @@ public class Meiosis {
         return (strength1 + strength2) / 2;
     }
 
-    /** Takes two genomes and crosses their traits together, generating a number of
+    /** Takes two genomes and crosses their genes together, generating a number of
      *  resulting genomes that can be used as the genomes for the mother's seeds.
      * @param mother a female genome
      * @param father a male genome
+     * @param amount how many resulting genomes to generate
+     * @param register whether to register the resulting strain
      * @return a list of genomes as a result of breeding the mother and father's traits
      */
-    public static List<Genome> crossGenome(Genome mother, Genome father) {
-        StrainInfo motherInfo = ConvertUtil.convertStrain(mother, true);
-        StrainInfo fatherInfo = ConvertUtil.convertStrain(father, true);
+    public static List<Genome> crossGenome(Genome mother, Genome father, int amount, boolean register) {
+        StrainInfo motherInfo = DnaUtil.convertStrain(mother, true);
+        StrainInfo fatherInfo = DnaUtil.convertStrain(father, true);
         List<TraitGene> motherGenes = motherInfo.geneList();
         List<TraitGene> fatherGenes = fatherInfo.geneList();
+
+        assert motherInfo.strain().isResource() == fatherInfo.strain().isResource();
+
         List<Genome> newGenomes = new ArrayList<>();
-        for (int j = 0; j < SEED_COUNT; j++) {
-            TraitGene[] seedGenes = new TraitGene[Phenotype.size];
-            for (int i = 0; i < motherGenes.size(); i++) {
+        Strain crossedStrain = CrossUtil.crossStrains(motherInfo.strain(), fatherInfo.strain(), register);
+        int[] crossedThcs = CrossUtil.multiCrossThc(motherInfo.thc(), fatherInfo.thc(), amount);
+        int maxGenes = motherGenes.size() + 2;
+        for (int j = 0; j < amount; j++) {
+            List<BaseGene> seedGenes = new ArrayList<>();
+            for (int i = 0; i < maxGenes; i++) {
                 TraitGene gene1 = motherGenes.get(i);
                 TraitGene gene2 = fatherGenes.get(i);
-                seedGenes[i] = crossGene(gene1, gene2);
+                seedGenes.add(crossGene(gene1, gene2));
             }
-            newGenomes.add(new Genome(random.nextInt(2) == 1, seedGenes));
+            seedGenes.add(new InfoGene(InfoType.STRAIN, crossedStrain.id()));
+            seedGenes.add(new InfoGene(InfoType.THC, crossedThcs[j]));
+            seedGenes.add(new InfoGene(InfoType.RESOURCE, crossedStrain.isResource() ? 1 : 0));
+            newGenomes.add(new Genome(random.nextInt(2) == 1, seedGenes.toArray(new BaseGene[0])));
         }
         return newGenomes;
     }

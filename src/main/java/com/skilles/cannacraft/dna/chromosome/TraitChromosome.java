@@ -2,13 +2,13 @@ package com.skilles.cannacraft.dna.chromosome;
 
 import com.skilles.cannacraft.dna.genome.gene.BaseGene;
 import com.skilles.cannacraft.dna.genome.gene.TraitGene;
-import com.skilles.cannacraft.util.ConvertUtil;
+import com.skilles.cannacraft.util.DnaUtil;
 
 import java.util.EnumMap;
 import java.util.Map;
 
 import static com.skilles.cannacraft.dna.genome.Enums.*;
-import static com.skilles.cannacraft.util.ConvertUtil.STOP_CODON;
+import static com.skilles.cannacraft.util.DnaUtil.STOP_CODON;
 
 // TODO: transfer and separate methods into base chromosome
 
@@ -67,7 +67,7 @@ public class TraitChromosome extends BaseChromosome {
             this.traitMap.put(phenotype, gene);
             this.geneMap.put(phenotype.index, gene);
         }
-        this.geneMap = ConvertUtil.sortByValue(this.geneMap);
+        this.geneMap = DnaUtil.sortByValue(this.geneMap);
         this.updateSequence();
     }
 

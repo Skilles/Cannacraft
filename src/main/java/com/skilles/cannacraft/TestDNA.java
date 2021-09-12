@@ -4,7 +4,7 @@ import com.skilles.cannacraft.dna.chromosome.TraitChromosome;
 import com.skilles.cannacraft.dna.genome.Genome;
 import com.skilles.cannacraft.dna.genome.gene.TraitGene;
 import com.skilles.cannacraft.strain.StrainMap;
-import com.skilles.cannacraft.util.ConvertUtil;
+import com.skilles.cannacraft.util.DnaUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +59,7 @@ public class TestDNA {
         Genome genome = genomeFromGenes();
         Genome genome2 = new Genome(false, new TraitGene(3, Phenotype.FLY, State.DOMINANT), new TraitGene(6, Phenotype.LUCK, State.CARRIER));
         Genome genome3 = new Genome("AACAAATGGGTAACAAATGGGTAATAAAAAAAATAAAAATAATAAAAACAATAAAAAGTGGGTAAAAAAAAAAATAAAAAAAATAAATGGGTAAAATCAACAACAAAAAAAAGAATAAAAAGATAAATTGGGTAAAAAAATTAATAAAAAAATCAAATGGGT");
-        Genome genome4 = ConvertUtil.convertGenome(0, StrainMap.Type.INDICA, 0, false, false, genome.traitMap.values().stream().toList());
+        Genome genome4 = DnaUtil.convertGenome(0, StrainMap.Type.INDICA, 0, false, false, genome.traitMap.values().stream().toList());
         if (!genome.equals(genome2)) {
             System.out.println(genome);
             System.out.println(genome2);

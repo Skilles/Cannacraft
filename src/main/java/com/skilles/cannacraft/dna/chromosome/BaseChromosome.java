@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static com.skilles.cannacraft.dna.genome.Enums.*;
-import static com.skilles.cannacraft.util.ConvertUtil.STOP_CODON;
+import static com.skilles.cannacraft.util.DnaUtil.STOP_CODON;
 
 public class BaseChromosome implements Comparable<BaseChromosome>, Serializable {
 
@@ -55,7 +55,6 @@ public class BaseChromosome implements Comparable<BaseChromosome>, Serializable 
         } else if (type.equals(ChromoType.INFO)) {
             return new BaseGene[] {
                 new InfoGene(InfoType.STRAIN, 0),
-                new InfoGene(InfoType.TYPE, 0),
                 new InfoGene(InfoType.THC, 0),
                 new InfoGene(InfoType.RESOURCE, 0)
             };
@@ -134,7 +133,7 @@ public class BaseChromosome implements Comparable<BaseChromosome>, Serializable 
         return this.geneMap.values().toString();
     }
 
-    protected void updateSequence() {
+    public void updateSequence() {
         this.sequence = geneMap.values().stream().map(gene -> gene.sequence).collect(Collectors.joining());
         this.sequence += STOP_CODON;
     }

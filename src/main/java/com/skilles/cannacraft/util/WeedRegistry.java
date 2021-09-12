@@ -1,6 +1,9 @@
 package com.skilles.cannacraft.util;
 
+import com.skilles.cannacraft.blocks.weedCrop.WeedCropEntity;
 import com.skilles.cannacraft.config.ModConfig;
+import com.skilles.cannacraft.dna.genome.Genome;
+import com.skilles.cannacraft.dna.genome.gene.TraitGene;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.Gene;
 import com.skilles.cannacraft.strain.GeneTypes;
@@ -97,10 +100,17 @@ public class WeedRegistry {
     // Check identified from item
     public static boolean isIdentified(ItemStack itemStack) { return getStrainTag(itemStack).getBoolean("Identified"); }
 
+    public static boolean isIdentified(WeedCropEntity entity) { return getStrainTag(entity).getBoolean("Identified"); }
+
+    public static boolean isMale(ItemStack itemStack) { return getStrainTag(itemStack).getBoolean("Male"); }
+
     // Get subtag from item
-    private static NbtCompound getStrainTag(ItemStack itemStack) {
+    public static NbtCompound getStrainTag(ItemStack itemStack) {
         assert checkItem(itemStack);
         return itemStack.getNbt().getCompound("cannacraft:strain");
+    }
+    public static NbtCompound getStrainTag(WeedCropEntity entity) {
+        return entity.writeNbt(new NbtCompound()).getCompound("cannacraft:strain");
     }
 
     // Get genes from item
@@ -122,21 +132,35 @@ public class WeedRegistry {
     }
 
     public static StrainInfo getStrainInfo(ItemStack itemStack) {
-        return new StrainInfo(getStrain(itemStack), getThc(itemStack), isIdentified(itemStack), getGenes(itemStack));
+        Genome genome = DnaUtil.getGenome(itemStack);
+        return DnaUtil.convertStrain(genome, isIdentified(itemStack));
+    }
+
+    public static StrainInfo getStrainInfo(WeedCropEntity entity) {
+        Genome genome = DnaUtil.getGenome(entity);
+        return DnaUtil.convertStrain(genome, isIdentified(entity));
     }
 
     // Convert strain to item
-    public static ItemStack strainToItem(@Nullable Strain strain, @Nullable StatusTypes status, @Nullable Integer thc, @Nullable NbtList genes, WeedTypes type, boolean identified) {
-        if(strain == null) strain = randomStrain();
+    public static ItemStack strainToItem(StrainInfo info, WeedTypes type, StatusTypes status) {
+        return strainToItem(info.strain(), info.thc(), info.identified(), info.geneList(), type, status);
+    }
+
+    // Convert strain to item
+    public static ItemStack strainToItem(@Nullable Strain strain, @Nullable Integer thc, boolean identified, @Nullable List<TraitGene> genes, WeedTypes type, @Nullable StatusTypes status) {
+        return strainToItem(strain, thc, identified, genes, type, status, false);
+    }
+
+    // Convert strain to item
+    public static ItemStack strainToItem(@Nullable Strain strain, @Nullable Integer thc, boolean identified, @Nullable List<TraitGene> genes, WeedTypes type, @Nullable StatusTypes status, boolean male) {
+        if (strain == null) strain = randomStrain();
+        if (thc == null) thc = randomThc(strain);
+
+        Genome genome = DnaUtil.convertGenome(strain.id(), strain.type(), thc, strain.isResource(), male, genes);
 
         ItemStack itemStack = type.item().getDefaultStack();
-        NbtCompound strainTag = new NbtCompound();
-        strainTag.putInt("ID", strain.id());
-        strainTag.putInt("THC", thc != null ? thc : randomThc(strain));
-        if(status != null) strainTag.putFloat("Status", status.value());
-        strainTag.put("Attributes", genes != null ? genes : MiscUtil.toNbtList(MiscUtil.randGenes(strain)));
-        strainTag.putBoolean("Identified", identified);
-        itemStack.setSubNbt("cannacraft:strain", strainTag);
+        itemStack.setSubNbt("cannacraft:strain", DnaUtil.generateNbt(genome, identified, status));
+
         return itemStack;
     }
 

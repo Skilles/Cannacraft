@@ -4,16 +4,22 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.skilles.cannacraft.dna.genome.Enums;
+import com.skilles.cannacraft.dna.genome.Genome;
+import com.skilles.cannacraft.dna.genome.gene.TraitGene;
 import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.strain.StrainMap;
 import com.skilles.cannacraft.util.CrossUtil;
+import com.skilles.cannacraft.util.DnaUtil;
 import com.skilles.cannacraft.util.StrainUtil;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
@@ -29,7 +35,7 @@ public class ModCommands {
         ItemStack itemStack = self.getMainHandStack();
         if (itemStack.getItem().equals(ModItems.WEED_SEED) || itemStack.getItem().equals(ModItems.WEED_BUNDLE)) {
             ModMisc.STRAIN.get(itemStack).setStrain(strain);
-            self.sendSystemMessage(Text.of("Strain set to: " + ModMisc.STRAIN.get(itemStack).getStrain()), Util.NIL_UUID);
+            self.sendSystemMessage(Text.of("Strain set to: " + ModMisc.STRAIN.get(itemStack).getStrainInfo().strain()), Util.NIL_UUID);
         }
         return 1;
     }
@@ -83,7 +89,7 @@ public class ModCommands {
     public static int addGene(CommandContext<ServerCommandSource> ctx, String gene, int level) throws CommandSyntaxException {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack stack = self.getMainHandStack();
-        ModMisc.STRAIN.get(stack).addGene(gene, level);
+        ModMisc.STRAIN.get(stack).addGene(new TraitGene(level, Enums.Phenotype.valueOf(gene), Enums.State.DOMINANT));
         self.sendSystemMessage(Text.of("Gene added: " + gene), Util.NIL_UUID);
         return 1;
     }
@@ -209,6 +215,13 @@ public class ModCommands {
                                             self.sendSystemMessage(Text.of("Unlocked strain " + argStrain.name()), Util.NIL_UUID);
                                             return 1;
                                         })))
+                        .then(literal("info")
+                                .executes(ctx -> {
+                                    final ServerPlayerEntity self = ctx.getSource().getPlayer();
+                                    Genome genome = DnaUtil.getGenome(self.getMainHandStack());
+                                    self.sendMessage(new LiteralText(genome.prettyPrint()).formatted(Formatting.RED), false);
+                                    return 1;
+                                }))
             ));
         });
     }

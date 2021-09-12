@@ -15,7 +15,7 @@ public class TraitGene extends BaseGene {
     public TraitGene(String sequence) {
         super(sequence);
         assert sequence.length() % GENE_LENGTH == 0;
-        int codeLength = Code.values[0].name().length();
+        int codeLength = Code.length;
         this.phenotype = Phenotype.get(Code.convert(sequence.substring(codeLength * 2, codeLength * 3)));
         this.state = State.get(Code.convert(sequence.substring(codeLength * 3, codeLength * 4)));
         this.genotype = getGenotype();

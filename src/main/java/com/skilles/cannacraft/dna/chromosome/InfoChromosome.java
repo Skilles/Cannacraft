@@ -9,7 +9,7 @@ import java.util.Objects;
 
 import static com.skilles.cannacraft.dna.genome.Enums.ChromoType;
 import static com.skilles.cannacraft.dna.genome.Enums.InfoType;
-import static com.skilles.cannacraft.util.ConvertUtil.STOP_CODON;
+import static com.skilles.cannacraft.util.DnaUtil.STOP_CODON;
 
 // TODO: probably delete, make genetype in as optional parameter,
 

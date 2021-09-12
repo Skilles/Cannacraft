@@ -4,7 +4,7 @@ import com.skilles.cannacraft.dna.genome.gene.SexGene;
 
 import static com.skilles.cannacraft.dna.genome.Enums.ChromoType;
 import static com.skilles.cannacraft.dna.genome.Genome.DEFAULT_SEX;
-import static com.skilles.cannacraft.util.ConvertUtil.STOP_CODON;
+import static com.skilles.cannacraft.util.DnaUtil.STOP_CODON;
 
 public class SexChromosome extends BaseChromosome {
 
@@ -38,6 +38,12 @@ public class SexChromosome extends BaseChromosome {
 
     public static String getSequence(char sex) {
         return sex == 'X' ? "AAA" : "AAT";
+    }
+
+    public void setMale(boolean male) {
+        this.sex = male ? 'Y' : 'X';
+        this.geneMap.put(0, new SexGene(this.sex));
+        this.updateSequence();
     }
 
 }

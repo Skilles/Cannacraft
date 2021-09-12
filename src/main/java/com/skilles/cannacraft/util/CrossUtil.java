@@ -32,6 +32,15 @@ public class CrossUtil {
         return (thc1 + thc2) / 2;
     }
 
+    public static int[] multiCrossThc(int thc1, int thc2, int amount) {
+        int[] output = new int[amount];
+        for (int i = 0; i < amount; i++) {]
+            int average = crossThc(thc1, thc2);
+            output[i] = StrainUtil.normalDist(average, 1, average - 4);
+        }
+        return output;
+    }
+
     /**
      * @return a list with all possible combinations of strains
      */
@@ -236,7 +245,7 @@ public class CrossUtil {
         Strain newStrain = CrossUtil.crossStrains(WeedRegistry.getStrain(stack1), WeedRegistry.getStrain(stack2), register);
         int newThc = CrossUtil.crossThc(WeedRegistry.getThc(stack1), WeedRegistry.getThc(stack2));
         NbtList newGenes = CrossUtil.crossGenes(stack1, stack2);
-        return WeedRegistry.strainToItem(newStrain, null, newThc, newGenes, WeedRegistry.WeedTypes.fromStack(stack1), true);
+        return WeedRegistry.strainToItem(newStrain, newThc, true, newGenes, WeedRegistry.WeedTypes.fromStack(stack1), null);
     }
     protected static Gene crossGenes(Gene gene1, Gene gene2) {
         int level1 = gene1.level();
@@ -261,7 +270,7 @@ public class CrossUtil {
         int newLevel = 0;
         Random random = new Random();
 
-        switch(levelDiff) {
+        switch (levelDiff) {
             case 0:
                 newLevel = level1;
                 break;

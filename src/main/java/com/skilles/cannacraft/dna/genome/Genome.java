@@ -9,10 +9,9 @@ import com.skilles.cannacraft.util.copy.DeepCopy;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.skilles.cannacraft.dna.genome.Enums.ChromoType;
-import static com.skilles.cannacraft.dna.genome.Enums.Phenotype;
-import static com.skilles.cannacraft.util.ConvertUtil.STOP_CODON;
-import static com.skilles.cannacraft.util.ConvertUtil.convertChromosome;
+import static com.skilles.cannacraft.dna.genome.Enums.*;
+import static com.skilles.cannacraft.util.DnaUtil.STOP_CODON;
+import static com.skilles.cannacraft.util.DnaUtil.convertChromosome;
 
 public class Genome {
 
@@ -20,16 +19,17 @@ public class Genome {
 
     public static final char DEFAULT_SEX = 'X';
 
-
     public final Map<ChromoType, BaseChromosome> chromosomeMap =  new EnumMap<>(ChromoType.class);
 
     public Map<Phenotype, TraitGene> traitMap = new EnumMap<>(Phenotype.class);
+
+    public Map<InfoType, InfoGene> infoMap = new EnumMap<>(InfoType.class);
 
     Diploid sexChromosomes;
 
     public final int size;
 
-    private final String fullString;
+    private String fullString;
 
     // Create a genome that expresses the following genes
     public Genome(boolean male, BaseGene... genes) {
@@ -55,6 +55,32 @@ public class Genome {
                 throw new IllegalArgumentException("Duplicate chromosome types! " + type + " | " + Arrays.toString(chromosomes));
             }
         }
+    }
+
+    private void updateSequence() {
+        this.chromosomeMap.values().forEach(BaseChromosome::updateSequence);
+        this.fullString = this.chromosomeMap.values().stream().map(c -> c.sequence).collect(Collectors.joining());
+    }
+
+    private void updateMaps() {
+        this.traitMap.clear();
+        this.infoMap.clear();
+        for (BaseChromosome chromosome : this.chromosomeMap.values()) {
+            GeneType type = chromosome.geneMap.get(0).geneType;
+            if (type.equals(GeneType.INFO)) {
+                InfoChromosome iChromosome = (InfoChromosome) chromosome;
+                this.infoMap.putAll(iChromosome.infoMap);
+            } else if (type.equals(GeneType.TRAIT)) {
+                TraitChromosome tChromosome = (TraitChromosome) chromosome;
+                // tChromosome.fillMissingGenes();
+                this.traitMap.putAll(tChromosome.traitMap);
+            }
+        }
+    }
+
+    public void update() {
+        this.updateMaps();
+        this.updateSequence();
     }
 
     private static BaseChromosome[] sequenceMap(String string) {
@@ -86,14 +112,17 @@ public class Genome {
         checkChromosomes(chromosomes);
         List<ChromoType> missingTypes = new ArrayList<>(List.of(ChromoType.values));
         for (BaseChromosome chromosome : chromosomes) {
-            ChromoType type = chromosome.type;
-            missingTypes.remove(type);
-            if (!type.equals(ChromoType.SEX1) && !type.equals(ChromoType.SEX2) && !type.equals(ChromoType.INFO)) {
+            GeneType type = chromosome.geneMap.get(0).geneType;
+            missingTypes.remove(chromosome.type);
+            if (type.equals(GeneType.INFO)) {
+                InfoChromosome iChromosome = (InfoChromosome) chromosome;
+                this.infoMap.putAll(iChromosome.infoMap);
+            } else if (type.equals(GeneType.TRAIT)) {
                 TraitChromosome tChromosome = (TraitChromosome) chromosome;
                 tChromosome.fillMissingGenes();
                 this.traitMap.putAll(tChromosome.traitMap);
             }
-            chromosomeMap.put(type, chromosome);
+            chromosomeMap.put(chromosome.type, chromosome);
         }
         for (ChromoType type : missingTypes) {
             if (type.equals(ChromoType.SEX1)) {
@@ -111,37 +140,34 @@ public class Genome {
     }
 
 
-    public void prettyPrint() {
-        chromosomeMap.forEach((type, c) -> System.out.println(type + ": " + c));
+    public String prettyPrint() {
+        return chromosomeMap.entrySet().stream().map(entry -> entry.getKey().toString() + ": " + entry.getValue() + "\n").collect(Collectors.joining());
+        // chromosomeMap.forEach((type, c) -> System.out.println(type + ": " + c));
     }
 
     public void sequencePrint() {
         System.out.println(chromosomeMap.values().stream().map(c -> c.sequence).collect(Collectors.joining(" | ")));
     }
 
-//    public boolean isMale() {
-//        return (sexChromosomes.first().isY() && !sexChromosomes.second().isY()) || (sexChromosomes.second().isY() && !sexChromosomes.first().isY());
-//    }
-
-    // Called only on mother
-    /*public Genome sex(Genome father) {
-        Random random = new Random();
-        List<Chromosome> output = new ArrayList<>();
-        for (int i = 0; i < chromosomes.size(); i++) {
-            Chromosome mChromosome = chromosomes.get(i);
-            Chromosome fChromosome = father.chromosomes.get(i);
-            if (mChromosome.equals(fChromosome)) {
-                output.add(mChromosome);
-                continue;
-            }
-            // Chromosome[] combinations = mChromosome.meiosis(fChromosome);
-            Chromosome crossed = Meiosis.cross(mChromosome, fChromosome);
-            output.add(crossed);
+    public void updateGene(TraitGene gene, boolean update) {
+        ((TraitChromosome) this.chromosomeMap.get(gene.phenotype.chromoType)).updateGene(gene);
+        if (update) {
+            this.update();
         }
-        Genome offspring = new Genome(output.toArray(new Chromosome[0]));
-        offspring.sexChromosomes = new Diploid((SexChromosome) this.sexChromosomes.random(), (SexChromosome) father.sexChromosomes.random());
-        return offspring;
-    }*/
+    }
+
+    public void updateGene(InfoGene gene, boolean update) {
+        ((InfoChromosome) this.chromosomeMap.get(ChromoType.INFO)).updateGene(gene);
+        if (update) {
+            this.update();
+        }
+    }
+
+    public void setMale(boolean male) {
+        this.sexChromosomes.second().setMale(male);
+        this.chromosomeMap.replace(ChromoType.SEX2, this.sexChromosomes.second());
+        this.updateSequence();
+    }
 
     public static BaseChromosome[] build(boolean male, BaseGene... genes) {
         // Chromosome[] output = new Chromosome[NUM_CHROMOSOMES];
