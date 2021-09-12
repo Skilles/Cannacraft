@@ -1,10 +1,8 @@
 package com.skilles.cannacraft.items;
 
-import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzer;
-import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzerEntity;
+import com.skilles.cannacraft.blocks.machines.MachineBlock;
+import com.skilles.cannacraft.blocks.machines.MachineBlockEntity;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
-import com.skilles.cannacraft.components.StrainInterface;
-import com.skilles.cannacraft.registry.ModMisc;
 import com.skilles.cannacraft.strain.StrainMap;
 import com.skilles.cannacraft.util.MiscUtil;
 import com.skilles.cannacraft.util.StrainUtil;
@@ -45,20 +43,7 @@ public class WeedSeed extends AliasedBlockItem {
     }
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
-        if (world.isClient) {
-            ItemStack clientStack = playerEntity.getStackInHand(hand);
-            StrainInterface clientStackInterface = ModMisc.STRAIN.get(clientStack);
-            if (!playerEntity.isSneaking()) {
-                System.out.println("Strain of held seed: "
-                        + clientStackInterface.getStrain()
-                        + " THC: " + clientStackInterface.getThc()
-                        + " Identified: " + clientStackInterface.identified()
-                        + " Genes: " + clientStackInterface.getGenetics()
-                );
-            } else {
-                log(clientStack.getNbt());
-            }
-        }
+        StrainItem.debugAction(world, playerEntity, hand);
         return TypedActionResult.success(playerEntity.getStackInHand(hand));
     }
 
@@ -66,10 +51,10 @@ public class WeedSeed extends AliasedBlockItem {
     public ActionResult useOnBlock(ItemUsageContext context) {
         Block block = context.getWorld().getBlockState(context.getBlockPos()).getBlock();
         if (!context.getWorld().isClient()) {
-            if (block instanceof StrainAnalyzer) {
-                System.out.println("Active: " + context.getWorld().getBlockState(context.getBlockPos()).get(StrainAnalyzer.ACTIVE)
-                        + " Facing: " + context.getWorld().getBlockState(context.getBlockPos()).get(StrainAnalyzer.FACING)
-                + " Power: " + ((StrainAnalyzerEntity) context.getWorld().getBlockEntity(context.getBlockPos())).getEnergy());
+            if (block instanceof MachineBlock) {
+                System.out.println("Active: " + context.getWorld().getBlockState(context.getBlockPos()).get(MachineBlock.ACTIVE)
+                        + " Facing: " + context.getWorld().getBlockState(context.getBlockPos()).get(MachineBlock.FACING)
+                + " Power: " + ((MachineBlockEntity) context.getWorld().getBlockEntity(context.getBlockPos())).getEnergy());
             }
             if (block instanceof WeedCrop) {
                 BlockEntity blockEntity = context.getWorld().getBlockEntity(context.getBlockPos());
