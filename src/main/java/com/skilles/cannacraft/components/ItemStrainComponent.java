@@ -5,11 +5,9 @@ import com.skilles.cannacraft.dna.genome.Genome;
 import com.skilles.cannacraft.dna.genome.gene.InfoGene;
 import com.skilles.cannacraft.dna.genome.gene.TraitGene;
 import com.skilles.cannacraft.strain.StrainInfo;
-import com.skilles.cannacraft.util.BundleUtil;
 import com.skilles.cannacraft.util.DnaUtil;
 import dev.onyxstudios.cca.api.v3.component.CopyableComponent;
 import dev.onyxstudios.cca.api.v3.item.ItemComponent;
-import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
@@ -17,6 +15,7 @@ import java.util.List;
 
 import static com.skilles.cannacraft.dna.genome.Enums.ChromoType;
 import static com.skilles.cannacraft.dna.genome.Enums.InfoType;
+import static com.skilles.cannacraft.util.WeedRegistry.StatusTypes;
 
 
 public class ItemStrainComponent extends ItemComponent implements StrainInterface, CopyableComponent<ItemStrainComponent> {
@@ -31,6 +30,8 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
 
     private List<TraitGene> cachedGenes;
 
+    private List<TraitGene> expressedGenes;
+
     public ItemStrainComponent(ItemStack stack) {
         super(stack);
     }
@@ -38,7 +39,7 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
     @Override
     public void setStrain(int index) {
         this.getGenome().updateGene(new InfoGene(InfoType.STRAIN, index), true);
-        this.onTagInvalidated();
+        update();
     }
 
     @Override
@@ -47,25 +48,25 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
             this.getGenome().updateGene(gene, false);
         }
         this.getGenome().update();
-        this.onTagInvalidated();
+        update();
     }
 
     @Override
     public void setThc(int thc) {
         this.getGenome().updateGene(new InfoGene(InfoType.THC, thc), true);
-        this.onTagInvalidated();
+        update();
     }
 
     @Override
     public void setMale(boolean male) {
         this.getGenome().setMale(male);
-        this.onTagInvalidated();
+        update();
     }
 
     @Override
     public void addGene(TraitGene gene) {
         this.getGenome().updateGene(gene, true);
-        this.onTagInvalidated();
+        update();
     }
 
     @Override
@@ -90,6 +91,14 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
     }
 
     @Override
+    public List<TraitGene> getExpressed() {
+        if (this.expressedGenes == null || this.cachedGenes == null) {
+            this.expressedGenes = new ArrayList<>(this.getTraits().stream().filter(gene -> gene.value > 0 && gene.isExpressed()).toList());
+        }
+        return this.expressedGenes;
+    }
+
+    @Override
     public int getThc() {
         if (!this.genomeInit || this.cachedThc == -1) {
             this.cachedThc = ((InfoChromosome) this.getGenome().chromosomeMap.get(ChromoType.INFO)).infoMap.get(InfoType.THC).value;
@@ -103,16 +112,16 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
     }
 
     @Override
-    public TriState getStatus() {
+    public StatusTypes getStatus() {
         if (!this.hasTag("Status")) {
             this.putFloat("Status", 0.0F);
         }
-        return BundleUtil.convertStatus(this.getFloat("Status"));
+        return StatusTypes.byValue(this.getFloat("Status"));
     }
 
     @Override
-    public void setStatus(TriState status) {
-        this.putFloat("Status", BundleUtil.convertStatus(status));
+    public void setStatus(StatusTypes status) {
+        this.putFloat("Status", status.value());
     }
 
     @Override
@@ -133,15 +142,25 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
     @Override
     public Genome getGenome() {
         if (!this.genomeInit) {
-            this.cachedGenome = DnaUtil.getGenome(this.stack);
-            this.genomeInit = true;
-            this.putString("DNA", cachedGenome.toString());
+            update();
         }
         return this.cachedGenome;
     }
 
+    private void update() {
+        if (this.cachedGenome == null) {
+            this.cachedGenome = DnaUtil.getGenome(this.stack);
+        }
+        this.putString("DNA", cachedGenome.toString());
+        this.genomeInit = true;
+    }
+
     @Override
     public void copyFrom(ItemStrainComponent other) {
+        this.cachedGenome = other.getGenome();
+        this.cachedStrainInfo = other.getStrainInfo();
+        this.expressedGenes = other.getExpressed();
+        this.cachedThc = other.getThc();
     }
 
     @Override

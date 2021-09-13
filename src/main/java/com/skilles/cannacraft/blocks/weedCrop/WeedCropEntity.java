@@ -3,12 +3,11 @@ package com.skilles.cannacraft.blocks.weedCrop;
 import com.skilles.cannacraft.CannacraftClient;
 import com.skilles.cannacraft.config.ModConfig;
 import com.skilles.cannacraft.dna.genome.Genome;
-import com.skilles.cannacraft.dna.genome.gene.InfoGene;
+import com.skilles.cannacraft.dna.genome.Meiosis;
 import com.skilles.cannacraft.dna.genome.gene.TraitGene;
 import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.strain.StrainInfo;
-import com.skilles.cannacraft.util.CrossUtil;
 import com.skilles.cannacraft.util.DnaUtil;
 import com.skilles.cannacraft.util.MiscUtil;
 import me.shedaniel.autoconfig.ConfigData;
@@ -16,6 +15,9 @@ import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
@@ -28,12 +30,11 @@ import java.util.List;
 import java.util.Random;
 
 import static com.skilles.cannacraft.Cannacraft.log;
-import static com.skilles.cannacraft.dna.genome.Enums.InfoType;
 import static com.skilles.cannacraft.dna.genome.Enums.Phenotype;
 
 // TODO: drop seedId, seedThc if male
 // TODO: cross plants by collecting pollen from male
-// TODO: hide THC for males (possibly completely remove thc for males, selecting for THC will be done by breeding crosses)
+
 public class WeedCropEntity extends BlockEntity implements BlockEntityClientSerializable {
 
     public WeedCropEntity(BlockPos pos, BlockState state) {
@@ -56,9 +57,11 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
 
     private int cachedLimit;
 
+    private int seedCount = 10;
+
     private Genome genome;
 
-    private Genome seedGenome;
+    private List<Genome> seedGenomes;
 
     private StrainInfo strainInfo;
 
@@ -70,12 +73,20 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
 
     public void setData(Genome genome, boolean identified) {
         this.identified = identified;
-        this.genome = this.seedGenome = genome;
+        this.genome = genome;
+        this.strainInfo = DnaUtil.convertStrain(genome, identified);
+        this.initialized = true;
+        this.seedGenomes = new ArrayList<>();
+        this.seedGenomes.add(this.genome);
     }
 
     public void setData(NbtCompound tag) {
         this.identified = tag.getBoolean("Identified");
-        this.genome = this.seedGenome = new Genome(tag.getString("DNA"));
+        this.genome = new Genome(tag.getString("DNA"));
+        this.strainInfo = DnaUtil.convertStrain(this.genome, identified);
+        this.initialized = true;
+        this.seedGenomes = new ArrayList<>();
+        this.seedGenomes.add(this.genome);
         log("Data for BE crop set" + tag);
     }
 
@@ -120,7 +131,8 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
         if (breedingProgress() != -1 && !this.isMale()) {
             int COUNT = (int) Direction.Type.HORIZONTAL.stream()
                     .filter(direction -> world.getBlockEntity(pos.offset(direction)) instanceof WeedCropEntity otherEntity
-                            && otherEntity.isMale() && this.getStrain().isResource() == otherEntity.getStrain().isResource())
+                            && otherEntity.isMale()
+                            && this.getStrain().isResource() == otherEntity.getStrain().isResource())
                     .count();
             return COUNT > 0;
         } else {
@@ -157,17 +169,13 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
             }
             assert !nearCrops.isEmpty();
             WeedCropEntity alphaMale = config.getCrop().randomBreed ? nearCrops.get(random.nextInt(nearCrops.size())) : nearCrops.stream().max(Comparator.comparingInt(WeedCropEntity::getThc)).get();
-            // Set seed thc
-            this.seedGenome.updateGene(new InfoGene(InfoType.THC, CrossUtil.crossThc(alphaMale.getThc(), this.getThc())), true);
-            // this.seedThc = CrossUtil.crossThc(alphaMale.thc, this.thc);
+            this.seedGenomes = Meiosis.crossGenome(this.genome, alphaMale.genome, this.seedCount, true);
+            this.seedInitialized = true;
+            StrainInfo info = DnaUtil.convertStrain(this.seedGenomes.get(0), false);
             // Set strain
-            NbtCompound myTag = this.writeNbt(new NbtCompound());
-            NbtCompound maleTag = alphaMale.writeNbt(new NbtCompound());
-            Strain crossedStrain = CrossUtil.crossStrains(this.getStrain(), alphaMale.getStrain());
             log("Strain 1: " + this.getStrain());
             log("Strain 2: " + alphaMale.getStrain());
-            log("Name of crossed strain: " + crossedStrain.name());
-            this.seedGenome.updateGene(new InfoGene(InfoType.STRAIN, crossedStrain.id()), true);
+            log("Name of crossed strain: " + info.strain().name());
             this.markDirty();
             log("New tag: " + this.writeNbt(new NbtCompound()));
 
@@ -204,8 +212,12 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
         return this.strainInfo;
     }
 
-    Genome getGenome() {
+    public Genome getGenome() {
         return genome;
+    }
+
+    public List<Genome> seedGenomes() {
+        return this.seedGenomes;
     }
 
     TraitGene getGene(Phenotype type) {
@@ -220,8 +232,15 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
     public NbtCompound writeNbt(NbtCompound tag) {
         super.writeNbt(tag);
         tag.putBoolean("Identified", identified);
+        if (genome == null) {
+            this.readNbt(tag);
+        }
         tag.putString("DNA", genome.toString());
-        tag.putString("Seed DNA", seedGenome.toString());
+        NbtList seedGenomeNbt = new NbtList();
+        for (Genome genome : this.seedGenomes) {
+            seedGenomeNbt.add(NbtString.of(genome.toString()));
+        }
+        tag.put("Seed DNA", seedGenomeNbt);
         return tag;
     }
 
@@ -235,7 +254,11 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
             this.initialized = true;
         }
         if (!this.seedInitialized) {
-            this.seedGenome = new Genome(nbt.getString("Seed DNA"));
+            this.seedGenomes = new ArrayList<>();
+            for (NbtElement nbtElement : nbt.getList("Seed DNA", NbtElement.STRING_TYPE)) {
+                String dnaString = nbtElement.asString();
+                this.seedGenomes.add(new Genome(dnaString));
+            }
             this.seedInitialized = true;
         }
     }
@@ -263,4 +286,5 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
             BlockEntityClientSerializable.super.sync();
         }
     }
+
 }

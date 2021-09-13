@@ -10,7 +10,7 @@ public class SexChromosome extends BaseChromosome {
 
     public char sex;
 
-    public SexChromosome(char sex, ChromoType type) {
+    public SexChromosome(ChromoType type, char sex) {
         super("", type);
         this.sex = sex;
         this.geneMap.put(0, new SexGene(sex));

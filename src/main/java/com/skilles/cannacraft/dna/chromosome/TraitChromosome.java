@@ -63,7 +63,7 @@ public class TraitChromosome extends BaseChromosome {
     public void fillMissingGenes() {
         for (Phenotype phenotype : Phenotype.values) {
             if (traitMap.containsKey(phenotype) || !phenotype.chromoType.equals(this.type)) continue;
-            TraitGene gene = new TraitGene(0, phenotype, phenotype.recessive ? State.DOMINANT : State.RECESSIVE);
+            TraitGene gene = new TraitGene(phenotype, 0, phenotype.recessive ? State.DOMINANT : State.RECESSIVE);
             this.traitMap.put(phenotype, gene);
             this.geneMap.put(phenotype.index, gene);
         }

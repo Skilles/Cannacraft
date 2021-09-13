@@ -3,7 +3,6 @@ package com.skilles.cannacraft.items;
 import com.skilles.cannacraft.blocks.machines.MachineBlock;
 import com.skilles.cannacraft.blocks.machines.MachineBlockEntity;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
-import com.skilles.cannacraft.strain.StrainMap;
 import com.skilles.cannacraft.util.MiscUtil;
 import com.skilles.cannacraft.util.StrainUtil;
 import net.minecraft.block.Block;
@@ -35,8 +34,6 @@ public class WeedSeed extends AliasedBlockItem {
     @Override
     public Text getName(ItemStack stack) {
         if (stack.hasNbt()) {
-            NbtCompound tag = stack.getSubNbt("cannacraft:strain");
-            if(StrainUtil.getStrain(tag).type().equals(StrainMap.Type.UNKNOWN)) tag.putInt("ID", 0);
             return MiscUtil.getItemName(stack);
         }
         return super.getName(stack);
@@ -77,16 +74,15 @@ public class WeedSeed extends AliasedBlockItem {
         }
         return super.useOnBlock(context);
     }
+
     @Override
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
-        if(stack.hasNbt()) {
+        if (stack.hasNbt()) {
             NbtCompound tag = stack.getSubNbt("cannacraft:strain");
-            if (tag.contains("ID") && !(tag.getInt("ID") == 0)) {
-                MiscUtil.appendTooltips(tooltip, tag, true);
+            if (tag.contains("DNA")) {
+                MiscUtil.appendTooltips(tooltip, stack, true);
             }
         }
-
-
     }
 }

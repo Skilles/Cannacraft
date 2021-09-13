@@ -3,6 +3,7 @@ package com.skilles.cannacraft.util;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCropEntity;
 import com.skilles.cannacraft.dna.chromosome.InfoChromosome;
 import com.skilles.cannacraft.dna.chromosome.TraitChromosome;
+import com.skilles.cannacraft.dna.genome.Enums;
 import com.skilles.cannacraft.dna.genome.Genome;
 import com.skilles.cannacraft.dna.genome.Meiosis;
 import com.skilles.cannacraft.dna.genome.gene.BaseGene;
@@ -10,15 +11,14 @@ import com.skilles.cannacraft.dna.genome.gene.InfoGene;
 import com.skilles.cannacraft.dna.genome.gene.TraitGene;
 import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.strain.StrainInfo;
-import com.skilles.cannacraft.strain.StrainMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import org.apache.commons.math3.distribution.EnumeratedDistribution;
+import org.apache.commons.math3.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.skilles.cannacraft.dna.genome.Enums.*;
 import static com.skilles.cannacraft.util.WeedRegistry.*;
@@ -32,7 +32,7 @@ public class DnaUtil {
         Phenotype type = Phenotype.get(Code.convert(string.substring(0, codeLength)));
         int strength = Code.convert(string.substring(codeLength, codeLength * 2));
         State state = State.get(Code.convert(string.substring(codeLength * 2, codeLength * 3)));
-        return new TraitGene(strength, type, state);
+        return new TraitGene(type, strength, state);
     }
     
     public static TraitChromosome convertChromosome(String string) {
@@ -67,11 +67,16 @@ public class DnaUtil {
         return new Genome(strainTag.getString("DNA"));
     }
 
-    private static Genome convertGenome(StrainInfo strainInfo) {
-        return convertGenome(strainInfo.strain().id(), strainInfo.strain().type(), strainInfo.thc(), strainInfo.strain().isResource(), strainInfo.male(), strainInfo.geneList());
+    public static Genome getGenome(NbtCompound baseTag) {
+        NbtCompound strainTag = baseTag.getCompound("cannacraft:strain");
+        return new Genome(strainTag.getString("DNA"));
     }
 
-    public static Genome convertGenome(int id, StrainMap.Type type, int thc, boolean resource, boolean male, List<TraitGene> traitList) {
+    private static Genome convertGenome(StrainInfo strainInfo) {
+        return convertGenome(strainInfo.strain().id(), strainInfo.thc(), strainInfo.strain().isResource(), strainInfo.male(), strainInfo.geneList());
+    }
+
+    public static Genome convertGenome(int id, int thc, boolean resource, boolean male, List<TraitGene> traitList) {
         List<BaseGene> geneList = new ArrayList<>(traitList);
         geneList.add(new InfoGene(InfoType.STRAIN, id));
         geneList.add(new InfoGene(InfoType.THC, thc));
@@ -93,7 +98,7 @@ public class DnaUtil {
 
     public static ItemStack genomeToItem(Genome genome, WeedTypes type, StatusTypes status, boolean identified) {
         ItemStack itemStack = type.item().getDefaultStack();
-        itemStack.setSubNbt("cannacraft:strain", DnaUtil.generateNbt(genome, identified, status));
+        itemStack.setNbt(DnaUtil.generateNbt(genome, identified, status));
 
         return itemStack;
     }
@@ -113,6 +118,25 @@ public class DnaUtil {
         return output;
     }
 
+    public static Genome randomGenome() {
+        StrainInfo randInfo = randomStrainInfo(true, false);
+        List<TraitGene> randomGenes = new ArrayList<>();
+        Random random = new Random();
+        int MAX_GENES = 4;
+        int j = 2;
+        for (int i = 0; i < MAX_GENES; i++) {
+            if (random.nextInt(j) == 0) {
+                Phenotype randType = new EnumeratedDistribution<>(Arrays.stream(Enums.Phenotype.values())
+                        .map(g -> new Pair<>(g, (double) g.rarity.getWeight())).collect(Collectors.toList()))
+                        .sample();
+                int randStrength = StrainUtil.normalDist(1, 1, 1);
+                randomGenes.add(new TraitGene(randType, randStrength, randType.recessive ? State.RECESSIVE : State.DOMINANT));
+                j++;
+            }
+        }
+        return convertGenome(randInfo.withGenes(randomGenes));
+    }
+
     public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
         List<Map.Entry<K, V>> list = new ArrayList<>(map.entrySet());
         list.sort(Map.Entry.comparingByValue());
@@ -124,5 +148,6 @@ public class DnaUtil {
 
         return result;
     }
+
 
 }

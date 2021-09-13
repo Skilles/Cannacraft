@@ -2,6 +2,7 @@ package com.skilles.cannacraft.dna.chromosome;
 
 import com.skilles.cannacraft.dna.genome.gene.BaseGene;
 import com.skilles.cannacraft.dna.genome.gene.InfoGene;
+import com.skilles.cannacraft.strain.StrainInfo;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -25,6 +26,11 @@ public class InfoChromosome extends BaseChromosome {
         if (!this.sequence.endsWith(STOP_CODON)) {
             System.err.println("NO STOP CODON! " + this + "  " + this.sequence);
         }
+    }
+
+    public InfoChromosome(StrainInfo strainInfo) {
+        super(ChromoType.INFO);
+
     }
 
     public InfoChromosome() {

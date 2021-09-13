@@ -25,7 +25,6 @@ import net.minecraft.util.Util;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.skilles.cannacraft.util.WeedRegistry.WeedTypes;
-import static com.skilles.cannacraft.util.WeedRegistry.randomItem;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -89,7 +88,7 @@ public class ModCommands {
     public static int addGene(CommandContext<ServerCommandSource> ctx, String gene, int level) throws CommandSyntaxException {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack stack = self.getMainHandStack();
-        ModMisc.STRAIN.get(stack).addGene(new TraitGene(level, Enums.Phenotype.valueOf(gene), Enums.State.DOMINANT));
+        ModMisc.STRAIN.get(stack).addGene(new TraitGene(Enums.Phenotype.valueOf(gene), level, Enums.State.DOMINANT));
         self.sendSystemMessage(Text.of("Gene added: " + gene), Util.NIL_UUID);
         return 1;
     }
@@ -119,7 +118,7 @@ public class ModCommands {
                         .executes(ctx -> {
                             addGene(ctx, getString(ctx, "name"), getInteger(ctx, "level"));
                             return 1;
-                    }))))
+                        }))))
                     .then(literal("clear")
                         .executes(ctx -> {
                             clearGenes(ctx);
@@ -179,20 +178,20 @@ public class ModCommands {
                         .then(literal("random")
                             .executes(ctx -> {
                                 final ServerPlayerEntity self = ctx.getSource().getPlayer();
-                                self.giveItemStack(randomItem(WeedTypes.SEED, true, true));
+                                self.giveItemStack(DnaUtil.genomeToItem(DnaUtil.randomGenome(), WeedTypes.SEED, null, true));
                                 self.sendSystemMessage(Text.of("Random seed given"), Util.NIL_UUID);
                                 return 1;
                             }).then(argument("type", StringArgumentType.string())
                                 .executes(ctx -> {
                                     final ServerPlayerEntity self = ctx.getSource().getPlayer();
-                                    self.giveItemStack(randomItem(WeedTypes.fromString(getString(ctx, "type")), true, true));
+                                    self.giveItemStack(DnaUtil.genomeToItem(DnaUtil.randomGenome(), WeedTypes.fromString(getString(ctx, "type")), null, true));
                                     return 1;
                                 })
                                 .then(argument("amount", IntegerArgumentType.integer())
                                     .executes(ctx -> {
                                         final ServerPlayerEntity self = ctx.getSource().getPlayer();
                                         for(int i = 0; i < getInteger(ctx, "amount"); i++) {
-                                            self.giveItemStack(randomItem(WeedTypes.fromString(getString(ctx, "type")), true, true));
+                                            self.giveItemStack(DnaUtil.genomeToItem(DnaUtil.randomGenome(), WeedTypes.fromString(getString(ctx, "type")), null, true));
                                         }
                                         self.sendSystemMessage(Text.of(getInteger(ctx, "amount") + " random seeds given"), Util.NIL_UUID);
                                         return 1;

@@ -1,7 +1,6 @@
 package com.skilles.cannacraft.mixins;
 
 import com.skilles.cannacraft.registry.ModMisc;
-import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.*;
@@ -9,6 +8,7 @@ import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 
 import static com.skilles.cannacraft.Cannacraft.id;
+import static com.skilles.cannacraft.util.WeedRegistry.StatusTypes;
 
 @Mixin({SmeltingRecipe.class, CampfireCookingRecipe.class})
 public abstract class MiscRecipeMixin extends AbstractCookingRecipe {
@@ -30,9 +30,9 @@ public abstract class MiscRecipeMixin extends AbstractCookingRecipe {
             int slotId = 0;
             ItemStack input = inventory.getStack(slotId).copy();
             ItemStack output = this.getOutput().copy();
-            if(input.hasNbt() && input.getSubNbt("cannacraft:strain").getFloat("Status") == 1.0F) {
+            if(input.hasNbt() && ModMisc.STRAIN.get(output).getStatus() == StatusTypes.DRY) {
                 output.setSubNbt("cannacraft:strain", input.getSubNbt("cannacraft:strain"));
-                ModMisc.STRAIN.get(output).setStatus(TriState.FALSE);
+                ModMisc.STRAIN.get(output).setStatus(StatusTypes.DRY);
                 return output;
             }
         }

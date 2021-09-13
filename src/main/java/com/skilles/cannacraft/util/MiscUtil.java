@@ -1,13 +1,16 @@
 package com.skilles.cannacraft.util;
 
 import com.skilles.cannacraft.blocks.ImplementedInventory;
+import com.skilles.cannacraft.blocks.weedCrop.WeedCropEntity;
+import com.skilles.cannacraft.dna.genome.Genome;
+import com.skilles.cannacraft.dna.genome.gene.TraitGene;
 import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.ModMisc;
 import com.skilles.cannacraft.strain.Gene;
 import com.skilles.cannacraft.strain.GeneTypes;
 import com.skilles.cannacraft.strain.Strain;
-import com.skilles.cannacraft.strain.StrainMap;
-import net.fabricmc.fabric.api.util.NbtType;
+import com.skilles.cannacraft.strain.StrainInfo;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -52,27 +55,33 @@ public final class MiscUtil {
         return random;
     }
 
-    public static void appendTooltips(List<Text> tooltip, NbtCompound tag, boolean shiftGenes) {
-        String sex = "";
-        if(tag.contains("Male")) sex = tag.getBoolean("Male") ? "Male" : "Female";
-        int id = tag.getInt("ID");
-        int thc = tag.getInt("THC");
-        NbtList genes = new NbtList();
-        if(tag.contains("Attributes")) genes = tag.getList("Attributes", NbtType.COMPOUND);
-        if(tag.getBoolean("Identified")) {
-            tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText(StrainUtil.getStrain(tag).name()).formatted(Formatting.GREEN)));
-            tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StringUtils.lowerCase(StrainUtil.getStrain(tag).type().name()))).formatted(Formatting.DARK_GREEN)));
+    public static void appendTooltips(List<Text> tooltip, ItemStack stack, boolean shiftGenes) {
+        NbtCompound tag = WeedRegistry.getStrainTag(stack);
+        Genome genome = ModMisc.STRAIN.get(stack).getGenome();
+        boolean identified = tag.getBoolean("Identified");
+        StrainInfo info = DnaUtil.convertStrain(genome, identified);
+        String sex = info.male() ? "Male" : "Female";
+        int id = info.strain().id();
+        int thc = info.thc();
+        List<TraitGene> genes = ModMisc.STRAIN.get(stack).getExpressed();
+        if(identified) {
+            tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText(info.strain().name()).formatted(Formatting.GREEN)));
+            tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StringUtils.lowerCase(info.strain().type().name()))).formatted(Formatting.DARK_GREEN)));
             tooltip.add(new LiteralText("THC: ").formatted(Formatting.GRAY).append(new LiteralText(thc + "%").formatted(Formatting.DARK_GREEN)));
-            Rarity rarity = StrainUtil.getStrain(tag).getRarity();
+            Rarity rarity = info.strain().getRarity();
             tooltip.add(new LiteralText("Rarity: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StringUtils.lowerCase(rarity.toString()))).formatted(rarity.formatting)));
-            if(!sex.isEmpty()) tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText(sex).formatted(Formatting.DARK_GREEN)));
-            if(!genes.isEmpty() && shiftGenes) {
+            if (stack.isOf(ModItems.WEED_SEED)) {
+                tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText(sex).formatted(Formatting.DARK_GREEN)));
+            }
+            if (!genes.isEmpty() && shiftGenes) {
                 tooltip.add(new LiteralText("Press ").append( new LiteralText("SHIFT ").formatted(Formatting.GOLD).append( new LiteralText("to view Genes").formatted(Formatting.WHITE))));
             }
         } else {
             tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText("Unidentified").formatted(Formatting.GREEN)));
             tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText("Unknown").formatted(Formatting.DARK_GREEN)));
-            if(!sex.isEmpty()) tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText("Unknown").formatted(Formatting.DARK_GREEN)));
+            if (stack.isOf(ModItems.WEED_SEED)) {
+                tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText("Unknown").formatted(Formatting.DARK_GREEN)));
+            }
         }
     }
 
@@ -83,17 +92,15 @@ public final class MiscUtil {
     public static void dropStack(World world, BlockPos pos, Item type, boolean brokenWithShears) {
         if(world != null) {
             ItemStack toDrop = new ItemStack(type);
-            if (world.getBlockEntity(pos) != null) {
-                NbtCompound tag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
-                if (tag != null) {
-                    tag.putInt("THC", tag.getInt("Seed THC"));
-                    if (type.equals(ModItems.WEED_SEED) && !tag.getBoolean("Male")) {
-                        toDrop.setSubNbt("cannacraft:strain", trimTag(tag, type));
-                        Block.dropStack(world, pos, toDrop);
-                    } else if (brokenWithShears && type.equals(ModItems.WEED_BUNDLE)) {
-                        toDrop.setSubNbt("cannacraft:strain", trimTag(tag, type));
-                        Block.dropStack(world, pos, toDrop);
-                    }
+            if (world.getBlockEntity(pos) instanceof WeedCropEntity weedEntity) {
+                NbtCompound tag = weedEntity.writeNbt(new NbtCompound());
+                Genome genome = weedEntity.getGenome();
+                if (type.equals(ModItems.WEED_SEED) && !genome.isMale()) {
+                    toDrop.setSubNbt("cannacraft:strain", trimTag(tag, type));
+                    Block.dropStack(world, pos, toDrop);
+                } else if (brokenWithShears && type.equals(ModItems.WEED_BUNDLE)) {
+                    toDrop.setSubNbt("cannacraft:strain", trimTag(tag, type));
+                    Block.dropStack(world, pos, toDrop);
                 } else {
                     log("Error: NULLTAG");
                 }
@@ -128,6 +135,7 @@ public final class MiscUtil {
         return strain.isResource();
         //tag.putInt("ID", random.nextInt(StrainUtil.defaultStrains.size() - 1) + 1); // random id
     }
+
     static int getWeight(Strain strain) {
         // TODO: add to config
         int weight;
@@ -141,6 +149,7 @@ public final class MiscUtil {
         if(strain.isResource()) weight /= 2;
         return weight;
     }
+    @Deprecated
     public static ArrayList<Gene> randGenes(Strain strain) {
         float chance = random.nextFloat() + 1F; // 1.0 - 2.0
         ArrayList<Gene> geneList = new ArrayList<>();
@@ -156,6 +165,7 @@ public final class MiscUtil {
         }
         return geneList;
     }
+    @Deprecated
     public static ArrayList<Gene> randGenes() {
         float chance = random.nextFloat();
         ArrayList<Gene> geneList = new ArrayList<>();
@@ -170,31 +180,39 @@ public final class MiscUtil {
         }
         return geneList;
     }
+
     /**
      * Format Block NBT to conform with ItemStack
      * @param tag block NBT tag
      * @param type type of format
      * @return tag with trimmed NBT
      */
-    public static NbtCompound trimTag(NbtCompound tag, @Nullable Item type){
-        NbtCompound newTag = tag.copy();
-        if(newTag != null) {
-            newTag.remove("id");
-            newTag.remove("x");
-            newTag.remove("y");
-            newTag.remove("z");
-            newTag.putInt("THC", newTag.getInt("Seed THC"));
-            newTag.remove("Seed THC");
-            if(newTag.contains("Male") && !newTag.getBoolean("Male")) newTag.remove("Male");
-            if(type != null && type.equals(ModItems.WEED_BUNDLE)) newTag.putFloat("Status", 1F);
-            if(type !=null && type.equals(ModItems.WEED_SEED)) newTag.putInt("ID", newTag.getInt("Seed ID"));
-            newTag.remove("Seed ID");
+    public static NbtCompound trimTag(NbtCompound tag, @Nullable Item type, boolean identified)  {
+        NbtCompound newTag = new NbtCompound();
+        newTag.putString("DNA", tag.getString("DNA"));
+        newTag.putBoolean("Identified", identified);
+
+        if (type != null) {
+            if (type.equals(ModItems.WEED_BUNDLE)) {
+                newTag.putFloat("Status", 1F);
+            } else if (type.equals(ModItems.WEED_SEED)) {
+                NbtList nbtList = tag.getList("Seed DNA", NbtElement.STRING_TYPE);
+                newTag.putString("DNA", nbtList.get(0).asString());
+            }
         }
+
         return newTag;
     }
+
+    public static NbtCompound trimTag(NbtCompound tag, @Nullable Item type) {
+        return trimTag(tag, type, tag.getBoolean("Identified"));
+    }
+
     public static NbtCompound trimTag(NbtCompound tag) {
         return trimTag(tag, null);
     }
+
+    @Deprecated
     public static NbtList toNbtList(ArrayList<Gene> list) {
         NbtList nbtList = new NbtList();
         for (Gene entry: list) {
@@ -206,6 +224,7 @@ public final class MiscUtil {
         }
         return nbtList;
     }
+    @Deprecated
     public static ArrayList<Gene> fromNbtList(List<NbtCompound> list) {
         ArrayList<Gene> arrayList = new ArrayList<>();
         for (NbtCompound compoundEntry : list) {
@@ -215,6 +234,7 @@ public final class MiscUtil {
         }
         return arrayList;
     }
+    @Deprecated
     public static ArrayList<Gene> fromNbtList(NbtList list) {
         ArrayList<Gene> arrayList = new ArrayList<>();
         for (NbtElement compoundEntry : list) {
@@ -225,6 +245,7 @@ public final class MiscUtil {
         }
         return arrayList;
     }
+    @Deprecated
     public static boolean NbtListContains(NbtList nbtList, String name) {
         if(nbtList == null || nbtList.isEmpty()) return false;
         for (NbtElement nbtElement : nbtList) {
@@ -307,8 +328,8 @@ public final class MiscUtil {
     public static Text getItemName(ItemStack stack) {
         if(stack.hasNbt()) {
             NbtCompound tag = stack.getSubNbt("cannacraft:strain");
-            if (StrainUtil.getStrain(tag).type().equals(StrainMap.Type.UNKNOWN)) tag.putInt("ID", 0);
-            String name = tag.getBoolean("Identified") ? StrainUtil.getStrain(tag).name() : "Unidentified";
+            StrainInfo info = ModMisc.STRAIN.get(stack).getStrainInfo();
+            String name = tag.getBoolean("Identified") ? info.strain().name() : "Unidentified";
             if(stack.isOf(ModItems.WEED_SEED)) {
                 name += stack.getCount() > 1 ? " Seeds": " Seed";
             } else if(stack.isOf(ModItems.WEED_BROWNIE)) {

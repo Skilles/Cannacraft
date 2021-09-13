@@ -87,12 +87,14 @@ public class WeedRegistry {
     }
 
     // Get strain from item
+    @Deprecated
     public static Strain getStrain(ItemStack itemStack) {
         NbtCompound strainTag = getStrainTag(itemStack);
         return StrainUtil.getStrain(strainTag.getInt("ID"), strainTag.getBoolean("Resource"));
     }
 
     // Get thc from item
+    @Deprecated
     public static int getThc(ItemStack itemStack) {
         return getStrainTag(itemStack).getInt("THC");
     }
@@ -102,6 +104,7 @@ public class WeedRegistry {
 
     public static boolean isIdentified(WeedCropEntity entity) { return getStrainTag(entity).getBoolean("Identified"); }
 
+    @Deprecated
     public static boolean isMale(ItemStack itemStack) { return getStrainTag(itemStack).getBoolean("Male"); }
 
     // Get subtag from item
@@ -114,6 +117,7 @@ public class WeedRegistry {
     }
 
     // Get genes from item
+    @Deprecated
     public static List<Gene> getGenes(ItemStack itemStack) {
         List<Gene> output = new ArrayList<>();
         NbtList nbtList = getStrainTag(itemStack).getList("Attributes", NbtType.COMPOUND);
@@ -156,7 +160,7 @@ public class WeedRegistry {
         if (strain == null) strain = randomStrain();
         if (thc == null) thc = randomThc(strain);
 
-        Genome genome = DnaUtil.convertGenome(strain.id(), strain.type(), thc, strain.isResource(), male, genes);
+        Genome genome = DnaUtil.convertGenome(strain.id(), thc, strain.isResource(), male, genes);
 
         ItemStack itemStack = type.item().getDefaultStack();
         itemStack.setSubNbt("cannacraft:strain", DnaUtil.generateNbt(genome, identified, status));
@@ -190,6 +194,12 @@ public class WeedRegistry {
         return strainList.get(idx);
     }
 
+    public static StrainInfo randomStrainInfo(boolean identified, boolean male) {
+        Strain randStrain = randomStrain();
+        return new StrainInfo(randStrain, randomThc(randStrain), identified, male, new ArrayList<>());
+    }
+
+    @Deprecated
     public static ItemStack randomItem(WeedTypes type, boolean genes, boolean identified) {
         ItemStack itemStack = type.item().getDefaultStack();
         Strain strain = randomStrain();

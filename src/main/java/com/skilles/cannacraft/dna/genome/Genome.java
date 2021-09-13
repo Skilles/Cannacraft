@@ -126,9 +126,9 @@ public class Genome {
         }
         for (ChromoType type : missingTypes) {
             if (type.equals(ChromoType.SEX1)) {
-                this.chromosomeMap.put(type, new SexChromosome('X', ChromoType.SEX1));
+                this.chromosomeMap.put(type, new SexChromosome(ChromoType.SEX1, 'X'));
             } else if (type.equals(ChromoType.SEX2)) {
-                this.chromosomeMap.put(type, new SexChromosome(DEFAULT_SEX, ChromoType.SEX2));
+                this.chromosomeMap.put(type, new SexChromosome(ChromoType.SEX2, DEFAULT_SEX));
             } else if (type.equals(ChromoType.INFO)) {
                 this.chromosomeMap.put(type, new InfoChromosome());
             } else {
@@ -175,9 +175,9 @@ public class Genome {
         for (ChromoType type : ChromoType.values) {
             BaseChromosome chromosome;
             if (type.equals(ChromoType.SEX1)) {
-                chromosome = new SexChromosome('X', ChromoType.SEX1);
+                chromosome = new SexChromosome(ChromoType.SEX1, 'X');
             } else if (type.equals(ChromoType.SEX2)) {
-                chromosome = new SexChromosome(male ? 'Y' : 'X', ChromoType.SEX2);
+                chromosome = new SexChromosome(ChromoType.SEX2, male ? 'Y' : 'X');
             } else if (type.equals(ChromoType.INFO)) {
                 chromosome = new InfoChromosome();
             } else {

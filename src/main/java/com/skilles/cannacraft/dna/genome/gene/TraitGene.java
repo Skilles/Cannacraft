@@ -1,5 +1,7 @@
 package com.skilles.cannacraft.dna.genome.gene;
 
+import com.skilles.cannacraft.dna.genome.Meiosis;
+
 import static com.skilles.cannacraft.dna.genome.Enums.*;
 
 public class TraitGene extends BaseGene {
@@ -22,7 +24,7 @@ public class TraitGene extends BaseGene {
         assert this.sequence.length() == GENE_LENGTH;
     }
 
-    public TraitGene(int strength, Phenotype phenotype, State state) {
+    public TraitGene(Phenotype phenotype, int strength, State state) {
         super(GeneType.TRAIT, strength);
         this.phenotype = phenotype;
         this.state = state;
@@ -32,31 +34,11 @@ public class TraitGene extends BaseGene {
     }
 
     private String getGenotype() {
-
-        char upper = this.phenotype.symbol;
-        char lower = Character.toLowerCase(upper);
-
-        StringBuilder output = new StringBuilder();
-
-        switch (this.state) {
-            case RECESSIVE ->  {
-                output.append(lower);
-                output.append(lower);
-            }
-            case DOMINANT -> {
-                output.append(upper);
-                output.append(upper);
-            }
-            case CARRIER -> {
-                output.append(upper);
-                output.append(lower);
-            }
-        }
-        return output.toString();
+        return this.state.withChar(this.phenotype.symbol);
     }
 
-    public static boolean isExpressed(TraitGene gene, boolean male) {
-        return gene.phenotype.recessive == gene.state.equals(State.RECESSIVE);
+    public boolean isExpressed() {
+        return this.value > 0  && Meiosis.isExpressed(this.phenotype, this.state);
     }
 
     @Override

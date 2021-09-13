@@ -3,7 +3,6 @@ package com.skilles.cannacraft;
 import com.skilles.cannacraft.dna.chromosome.TraitChromosome;
 import com.skilles.cannacraft.dna.genome.Genome;
 import com.skilles.cannacraft.dna.genome.gene.TraitGene;
-import com.skilles.cannacraft.strain.StrainMap;
 import com.skilles.cannacraft.util.DnaUtil;
 
 import java.util.ArrayList;
@@ -32,13 +31,13 @@ public class TestDNA {
 
     private static Genome genomeFromGenes() {
         TraitChromosome c1 = new TraitChromosome(ChromoType.PHYSICAL);
-        TraitChromosome c2 = new TraitChromosome(new TraitGene(3, Phenotype.FLY, State.DOMINANT), new TraitGene(6, Phenotype.LUCK, State.CARRIER));
+        TraitChromosome c2 = new TraitChromosome(new TraitGene(Phenotype.FLY, 3, State.DOMINANT), new TraitGene(Phenotype.LUCK, 6, State.CARRIER));
         return new Genome(c1, c2);
     }
 
     private static Exception GeneToGenomeTest() {
         try {
-            Genome genome2 = new Genome(false, new TraitGene(3, Phenotype.FLY, State.DOMINANT), new TraitGene(6, Phenotype.LUCK, State.CARRIER));
+            Genome genome2 = new Genome(false, new TraitGene(Phenotype.FLY, 3, State.DOMINANT), new TraitGene(Phenotype.LUCK, 6, State.CARRIER));
             System.out.println(genome2);
         } catch (Exception e) {
             return e;
@@ -57,9 +56,9 @@ public class TestDNA {
 
     private static Exception EqualityTest() {
         Genome genome = genomeFromGenes();
-        Genome genome2 = new Genome(false, new TraitGene(3, Phenotype.FLY, State.DOMINANT), new TraitGene(6, Phenotype.LUCK, State.CARRIER));
+        Genome genome2 = new Genome(false, new TraitGene(Phenotype.FLY, 3, State.DOMINANT), new TraitGene(Phenotype.LUCK, 6, State.CARRIER));
         Genome genome3 = new Genome("AACAAATGGGTAACAAATGGGTAATAAAAAAAATAAAAATAATAAAAACAATAAAAAGTGGGTAAAAAAAAAAATAAAAAAAATAAATGGGTAAAATCAACAACAAAAAAAAGAATAAAAAGATAAATTGGGTAAAAAAATTAATAAAAAAATCAAATGGGT");
-        Genome genome4 = DnaUtil.convertGenome(0, StrainMap.Type.INDICA, 0, false, false, genome.traitMap.values().stream().toList());
+        Genome genome4 = DnaUtil.convertGenome(0, 0, false, false, genome.traitMap.values().stream().toList());
         if (!genome.equals(genome2)) {
             System.out.println(genome);
             System.out.println(genome2);

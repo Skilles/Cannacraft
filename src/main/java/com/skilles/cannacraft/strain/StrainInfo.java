@@ -19,4 +19,9 @@ public record StrainInfo(Strain strain, int thc, boolean identified, boolean mal
     public StrainInfo asIdentified() {
         return new StrainInfo(this.strain, this.thc, true, this.male, this.geneList);
     }
+
+    public StrainInfo withGenes(List<TraitGene> geneList) {
+        return new StrainInfo(this.strain, this.thc, this.identified, this.male, geneList);
+    }
+
 }

@@ -31,7 +31,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Random;
@@ -182,17 +181,6 @@ public class WeedJoint extends BowItem {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        super.appendTooltip(stack, world, tooltip, context);
-        if(stack.getNbt().contains("cannacraft:strain")) {
-            NbtCompound tag = stack.getSubNbt("cannacraft:strain");
-            if (tag.contains("ID") && !(tag.getInt("ID") == 0)) {
-                MiscUtil.appendTooltips(tooltip, tag, false);
-            }
-        }
-    }
-
-    @Override
     public Predicate<ItemStack> getHeldProjectiles() {
         return super.getHeldProjectiles();
     }
@@ -208,5 +196,16 @@ public class WeedJoint extends BowItem {
     @Override
     public int getMaxUseTime(ItemStack stack) {
         return 50;
+    }
+
+    @Override
+    public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
+        super.appendTooltip(stack, world, tooltip, context);
+        if (stack.hasNbt()) {
+            NbtCompound tag = stack.getSubNbt("cannacraft:strain");
+            if (tag != null && tag.contains("DNA")) {
+                MiscUtil.appendTooltips(tooltip, stack, true);
+            }
+        }
     }
 }

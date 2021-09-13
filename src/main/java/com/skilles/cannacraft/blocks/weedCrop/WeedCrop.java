@@ -214,21 +214,32 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
 
     private void dropItems(World world, BlockPos pos, BlockState state, boolean brokenWithShears) {
         int i;
-        MiscUtil.dropStack(world, pos, ModItems.WEED_SEED, brokenWithShears);
+        dropSeeds(world, pos, brokenWithShears);
         /*if (isBloomed(state)) {
             if(!((WeedCropEntity) world.getBlockEntity(pos)).isMale)
             MiscUtil.dropStack(world, pos, ModItems.WEED_BUNDLE, brokenWithShears);
         }*/
-        for (i = 0; world.getBlockState(pos.up(i)).isOf(ModBlocks.WEED_CROP); i++) {
+        for (i = 1; world.getBlockState(pos.up(i)).isOf(ModBlocks.WEED_CROP); i++) {
             BlockState aboveState = world.getBlockState(pos.up(i));
-            //WeedCropEntity aboveEntity = (WeedCropEntity) world.getBlockEntity(pos.up(i));
+            WeedCropEntity aboveEntity = (WeedCropEntity) world.getBlockEntity(pos.up(i));
             if (isBloomed(aboveState)) {
-                MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_SEED);
-                if (!((WeedCropEntity) world.getBlockEntity(pos.up(i))).isMale())
-                MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_BUNDLE, brokenWithShears);
+                dropSeeds(world, pos.up(i), brokenWithShears);
+                if (!aboveEntity.isMale()) {
+                    MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_BUNDLE, brokenWithShears);
+                }
 
                 //world.breakBlock(pos.up(i), false, player);
             }
+        }
+    }
+
+    private void dropSeeds(World world, BlockPos pos, boolean brokenWithShears) {
+        WeedCropEntity entity = (WeedCropEntity) world.getBlockEntity(pos);
+        final int geneAmount = entity.seedGenomes().size();
+        for (int j = 0; j < geneAmount; j++) {
+            MiscUtil.dropStack(world, pos, ModItems.WEED_SEED, brokenWithShears);
+            entity.seedGenomes().remove(0);
+            entity.markDirty();
         }
     }
 

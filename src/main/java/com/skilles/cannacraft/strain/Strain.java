@@ -5,7 +5,6 @@ import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.util.StrainUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Rarity;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -78,11 +77,7 @@ public class Strain {
     public boolean isResource() { return this.resource; }
 
     public ItemStack toSeedStack() {
-        NbtCompound tag = new NbtCompound();
-        tag.putInt("ID", id);
-        ItemStack stack = ModItems.WEED_SEED.getDefaultStack();
-        stack.setSubNbt("cannacraft:strain", tag);
-        return stack;
+        return ModItems.WEED_SEED.getDefaultStack();
     }
 
     public void init() {

@@ -1,6 +1,5 @@
 package com.skilles.cannacraft.dna.chromosome;
 
-import com.skilles.cannacraft.dna.genome.Genome;
 import com.skilles.cannacraft.dna.genome.gene.BaseGene;
 import com.skilles.cannacraft.dna.genome.gene.InfoGene;
 import com.skilles.cannacraft.dna.genome.gene.SexGene;
@@ -33,8 +32,10 @@ public class BaseChromosome implements Comparable<BaseChromosome>, Serializable 
         this.mapGenes();
         String oldSequence = sequence;
         this.updateSequence();
-        if (!this.sequence.equals(oldSequence)  && !(this instanceof SexChromosome)) {
-            System.err.println("Old sequence changed! " + this);
+        if (!this.sequence.equals(oldSequence)  && !(this instanceof SexChromosome) && oldSequence.endsWith(STOP_CODON)) {
+            System.err.println(this.type + " Sequence changed!");
+            System.err.println("Old " + oldSequence);
+            System.err.println("New " + this.sequence);
         }
     }
 
@@ -51,7 +52,7 @@ public class BaseChromosome implements Comparable<BaseChromosome>, Serializable 
 
     public static BaseGene[] defaultGenes(ChromoType type) {
         if (type.equals(ChromoType.SEX1) || type.equals(ChromoType.SEX2)) {
-            return new BaseGene[] { new SexGene(Genome.DEFAULT_SEX) };
+            return new BaseGene[] { new SexGene('X') };
         } else if (type.equals(ChromoType.INFO)) {
             return new BaseGene[] {
                 new InfoGene(InfoType.STRAIN, 0),
@@ -61,7 +62,7 @@ public class BaseChromosome implements Comparable<BaseChromosome>, Serializable 
         } else {
             return Arrays.stream(Phenotype.values)
                     .filter(geneType -> geneType.chromoType.equals(type))
-                    .map(geneType -> new TraitGene(0, geneType, geneType.recessive ? State.DOMINANT : State.RECESSIVE))
+                    .map(geneType -> new TraitGene(geneType, 0, geneType.recessive ? State.DOMINANT : State.RECESSIVE))
                     .toArray(BaseGene[]::new);
         }
     }

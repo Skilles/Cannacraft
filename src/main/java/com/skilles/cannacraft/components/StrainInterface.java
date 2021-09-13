@@ -5,9 +5,10 @@ import com.skilles.cannacraft.dna.genome.gene.TraitGene;
 import com.skilles.cannacraft.registry.ModMisc;
 import com.skilles.cannacraft.strain.StrainInfo;
 import dev.onyxstudios.cca.api.v3.component.ComponentV3;
-import net.fabricmc.fabric.api.util.TriState;
 
 import java.util.List;
+
+import static com.skilles.cannacraft.util.WeedRegistry.StatusTypes;
 
 public interface StrainInterface extends ComponentV3 {
 
@@ -31,13 +32,15 @@ public interface StrainInterface extends ComponentV3 {
 
     List<TraitGene> getTraits();
 
+    List<TraitGene> getExpressed();
+
     int getThc();
 
     boolean isMale();
 
-    TriState getStatus();
+    StatusTypes getStatus();
 
-    void setStatus(TriState status);
+    void setStatus(StatusTypes status);
 
     void identify();
 
@@ -46,4 +49,5 @@ public interface StrainInterface extends ComponentV3 {
     Genome getGenome();
 
     void copyFrom(ItemStrainComponent other);
+
 }

@@ -1,6 +1,8 @@
 package com.skilles.cannacraft.mixins;
 
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.items.StrainItem;
+import com.skilles.cannacraft.strain.StrainInfo;
+import com.skilles.cannacraft.util.DnaUtil;
 import com.skilles.cannacraft.util.WeedRegistry;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.ItemStack;
@@ -25,10 +27,16 @@ public abstract class ItemEntityMixin {
 
     @Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/world/World;DDDLnet/minecraft/item/ItemStack;)V")
     public void ItemEntity(World world, double x, double y, double z, ItemStack stack, CallbackInfo ci) {
-        if(stack.getItem().equals(ModItems.WEED_SEED) || stack.getItem().equals(ModItems.WEED_BUNDLE)) {
-            if(stack.hasNbt() && WeedRegistry.getStrain(stack).id() == 0) {
+        if (stack.getItem() instanceof StrainItem) {
+            StrainInfo info = WeedRegistry.getStrainInfo(stack);
+            if (stack.hasNbt() && info.strain().id() == 0) {
                 log("Changing tag: " + stack.getNbt());
-                stack.setNbt(WeedRegistry.randomItem(WeedRegistry.WeedTypes.fromStack(stack), false, false).getNbt());
+                WeedRegistry.StatusTypes status = null;
+                if (WeedRegistry.WeedTypes.fromStack(stack).equals(WeedRegistry.WeedTypes.BUNDLE)) {
+                    status = WeedRegistry.StatusTypes.WET;
+                }
+                stack.setNbt(DnaUtil.generateNbt(DnaUtil.randomGenome(), false, status));
+                // stack.setNbt(WeedRegistry.randomItem(WeedRegistry.WeedTypes.fromStack(stack), false, false).getNbt());
             }
         }
     }

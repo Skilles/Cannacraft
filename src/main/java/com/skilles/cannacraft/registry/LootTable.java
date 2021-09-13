@@ -1,6 +1,7 @@
 package com.skilles.cannacraft.registry;
 
 import com.google.common.collect.Lists;
+import com.skilles.cannacraft.dna.genome.Genome;
 import net.fabricmc.fabric.api.loot.v1.FabricLootPoolBuilder;
 import net.fabricmc.fabric.api.loot.v1.FabricLootSupplierBuilder;
 import net.fabricmc.fabric.api.loot.v1.event.LootTableLoadingCallback;
@@ -28,17 +29,15 @@ public class LootTable {
     static FabricLootPoolBuilder lootPool() {
         NbtCompound subTag = new NbtCompound();
         NbtCompound baseTag = new NbtCompound();
-        subTag.putInt("ID", 0);
+        subTag.putString("DNA", new Genome().toString());
         baseTag.put("cannacraft:strain", subTag);
         return FabricLootPoolBuilder.builder()
                 .rolls(ConstantLootNumberProvider.create(1))
                 .withCondition(RandomChanceLootCondition.builder(dropLootChance).build()).withEntry(ItemEntry.builder(ModItems.WEED_SEED).apply(SetNbtLootFunction.builder(baseTag)).build());
     }
     private static final FabricLootPoolBuilder lootPool = lootPool();
-    public static void registerLoot()
-    {
-        if(enable)
-        {
+    public static void registerLoot() {
+        if (enable) {
             INSERTS.add(new LootTableInsert(lootPool,
                     new Identifier("minecraft", "chests/desert_pyramid"),
                     new Identifier("minecraft", "chests/jungle_temple"),
@@ -48,9 +47,8 @@ public class LootTable {
             ));
 
             LootTableLoadingCallback.EVENT.register(((resourceManager, lootManager, identifier, supplier, lootTableSetter) -> {
-                INSERTS.forEach(i->{
-                    if(ArrayUtils.contains(i.tables, identifier))
-                    {
+                INSERTS.forEach(i -> {
+                    if (ArrayUtils.contains(i.tables, identifier)) {
                         i.insert(supplier);
                     }
                 });

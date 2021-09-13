@@ -100,6 +100,8 @@ public class Enums {
 
         public final ChromoType chromoType;
 
+        public final String defaultGenotype;
+
         public static int size;
 
         private static final Map<Integer, Phenotype> lookup = new HashMap<>();
@@ -113,6 +115,13 @@ public class Enums {
             this.sexLinked = sexLinked;
             this.rarity = rarity;
             this.chromoType = chromoType;
+            if (recessive) {
+                String lower = String.valueOf(Character.toLowerCase(symbol));
+                this.defaultGenotype = lower + lower;
+            } else {
+                String upper = String.valueOf(symbol);
+                this.defaultGenotype = upper + upper;
+            }
         }
 
         public static Phenotype get(int index) {
@@ -193,6 +202,29 @@ public class Enums {
             for (State state : State.values) {
                 lookup.put(state.index, state);
             }
+        }
+
+        public String withChar(char symbol) {
+            char upper = Character.toUpperCase(symbol);
+            char lower = Character.toLowerCase(upper);
+
+            StringBuilder output = new StringBuilder();
+
+            switch (this) {
+                case RECESSIVE ->  {
+                    output.append(lower);
+                    output.append(lower);
+                }
+                case DOMINANT -> {
+                    output.append(upper);
+                    output.append(upper);
+                }
+                case CARRIER -> {
+                    output.append(upper);
+                    output.append(lower);
+                }
+            }
+            return output.toString();
         }
     }
 

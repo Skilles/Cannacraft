@@ -38,7 +38,8 @@ public class Meiosis {
     // TODO: mutations
     private static TraitGene crossGene(TraitGene gene1, TraitGene gene2) {
         assert gene1.phenotype.equals(gene2.phenotype);
-        return new TraitGene(crossStrength(gene1.value, gene2.value), gene1.phenotype, crossState(gene1.state, gene2.state));
+        State crossedState = crossState(gene1.state, gene2.state);
+        return new TraitGene(gene1.phenotype, crossStrength(gene1, gene2, crossedState), crossedState);
     }
 
     private static State crossState(State state1, State state2) {
@@ -63,11 +64,43 @@ public class Meiosis {
                 random.nextInt(2) == 1 ? State.DOMINANT : State.RECESSIVE;
     }
 
-    private static int crossStrength(int strength1, int strength2) {
-        // TODO: add more probability
-        if (strength1 == 0 && strength2 == 0) return 0;
-        if (strength1 == 0 || strength2 == 0) return Integer.max(strength1, strength2) - 1;
-        return (strength1 + strength2) / 2;
+    private static int crossStrength(TraitGene gene1, TraitGene gene2, State crossedState) {
+        // TODO: add more probability, mutations
+
+        int strength1 = gene1.value;
+        int strength2 = gene2.value;
+
+        int maxValue = Integer.max(strength1, strength2);
+        int minValue = Integer.min(strength1, strength2);
+
+        // Checks if gene should be expressed
+        if (isExpressed(gene1.phenotype, crossedState)) {
+
+            // If both genes are unexpressed keep them unexpressed
+            if (strength1 == 0 && strength2 == 0) {
+                return 0;
+            }
+            // If one gene is unexpressed have a 50% chance of expressing that gene
+            if (strength1 == 0 || strength2 == 0) {
+                return random.nextInt(2) == 0 ? maxValue : 0;
+            }
+            // Otherwise, returns average of that gene with a 50% chance of a +1 bonus
+            return roundedAverage(strength1, strength2) + (random.nextInt(2) == 0 ? 1 : 0);
+        }
+        // Returns the average rounded up if unexpressed
+        return roundedAverage(strength1, strength2);
+    }
+
+    public static boolean isExpressed(Phenotype phenotype, State state) {
+        if (phenotype.recessive) {
+            return state == State.RECESSIVE;
+        } else {
+            return state == State.DOMINANT || state == State.CARRIER;
+        }
+    }
+
+    private static int roundedAverage(int num1, int num2) {
+        return (int) Math.round((((double) num1) + ((double) num2)) / 2);
     }
 
     /** Takes two genomes and crosses their genes together, generating a number of
@@ -89,7 +122,7 @@ public class Meiosis {
         List<Genome> newGenomes = new ArrayList<>();
         Strain crossedStrain = CrossUtil.crossStrains(motherInfo.strain(), fatherInfo.strain(), register);
         int[] crossedThcs = CrossUtil.multiCrossThc(motherInfo.thc(), fatherInfo.thc(), amount);
-        int maxGenes = motherGenes.size() + 2;
+        int maxGenes = motherGenes.size();
         for (int j = 0; j < amount; j++) {
             List<BaseGene> seedGenes = new ArrayList<>();
             for (int i = 0; i < maxGenes; i++) {
