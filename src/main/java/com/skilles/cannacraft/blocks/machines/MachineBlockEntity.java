@@ -2,6 +2,7 @@ package com.skilles.cannacraft.blocks.machines;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -63,6 +64,36 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineI
                 }
             }
         }
+    }
+    public static void tick(World world, BlockPos pos, BlockState state, MachineBlockEntity blockEntity) {
+        if (world == null || world.isClient) return;
+        if (isNextTo(world, pos, Blocks.GLOWSTONE) && blockEntity.powerStored < blockEntity.getMaxStoredPower()) {
+            blockEntity.addEnergy(2);
+            markDirty(world, pos, state);
+        }
+        if (blockEntity.isWorking()) {
+            if (!world.isReceivingRedstonePower(pos)) {
+                processTick(blockEntity); // playSound is called here
+                state = state.with(MachineBlock.ACTIVE, true);
+                world.setBlockState(pos, state, Block.NOTIFY_ALL);
+                markDirty(world, pos, state);
+            }
+            if (blockEntity.canCraft(blockEntity.inventory) && blockEntity.processingTime == timeToProcess) { // when done crafting
+                blockEntity.craft(blockEntity.inventory);
+                blockEntity.processingTime = 1; // keep working
+                markDirty(world, pos, state);
+            } else if (!blockEntity.canCraft(blockEntity.inventory)) {
+                blockEntity.processingTime = 0;
+                markDirty(world, pos, state);
+            }
+        } else if (blockEntity.canCraft(blockEntity.inventory) && blockEntity.powerStored != 0) { // start if has power
+            blockEntity.processingTime = 1;
+        } else { // when no items or can't craft
+            blockEntity.processingTime = 0;
+            state = state.with(MachineBlock.ACTIVE, false);
+            world.setBlockState(pos, state, Block.NOTIFY_ALL);
+        }
+        markDirty(world, pos, state);
     }
     public boolean isWorking() {
         if(needsPower) { // TODO: use solar power if no generators found

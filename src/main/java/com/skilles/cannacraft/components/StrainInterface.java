@@ -3,6 +3,7 @@ package com.skilles.cannacraft.components;
 import com.skilles.cannacraft.registry.ModMisc;
 import com.skilles.cannacraft.strain.StrainMap;
 import dev.onyxstudios.cca.api.v3.component.ComponentV3;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 
@@ -28,7 +29,10 @@ public interface StrainInterface extends ComponentV3 {
     StrainMap.Type getType();
     int getThc();
     boolean isMale();
+    boolean isResource();
 
+    TriState getStatus();
+    void setStatus(TriState status);
 
     void identify();
     boolean identified();

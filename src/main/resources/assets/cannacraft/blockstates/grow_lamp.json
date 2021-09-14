@@ -1,0 +1,32 @@
+{
+  "variants": {
+    "lit=false,facing=north": {
+      "model": "cannacraft:block/grow_lamp",
+      "y": 90
+    },
+    "lit=true,facing=north": {
+      "model": "cannacraft:block/grow_lamp_on",
+      "y": 90
+    },
+    "lit=false,facing=south": {
+      "model": "cannacraft:block/grow_lamp",
+      "y": 90
+    },
+    "lit=true,facing=south": {
+      "model": "cannacraft:block/grow_lamp_on",
+      "y": 90
+    },
+    "lit=false,facing=east": {
+      "model": "cannacraft:block/grow_lamp"
+    },
+    "lit=true,facing=east": {
+      "model": "cannacraft:block/grow_lamp_on"
+    },
+    "lit=false,facing=west": {
+      "model": "cannacraft:block/grow_lamp"
+    },
+    "lit=true,facing=west": {
+      "model": "cannacraft:block/grow_lamp_on"
+    }
+  }
+}

@@ -12,7 +12,7 @@ import net.minecraft.util.Identifier;
 
 public class SeedChestScreen extends HandledScreen<SeedChestScreenHandler> {
 
-    private static final Identifier TEXTURE = new Identifier("minecraft", "textures/gui/container/dispenser.png");
+    private static final Identifier TEXTURE = new Identifier("minecraft", "textures/gui/container/dispenser.png"); // TODO: custom texture
 
     public SeedChestScreen(SeedChestScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);

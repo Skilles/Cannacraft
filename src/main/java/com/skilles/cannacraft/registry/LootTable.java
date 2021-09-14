@@ -58,18 +58,10 @@ public class LootTable {
         }
     }
 
-    public static class LootTableInsert
-    {
-        public final Identifier[] tables;
-        public final FabricLootPoolBuilder lootPool;
-        public LootTableInsert(FabricLootPoolBuilder lootPool, Identifier... tables)
-        {
-            this.tables = tables;
-            this.lootPool = lootPool;
-        }
+    public record LootTableInsert(FabricLootPoolBuilder lootPool,
+                                  Identifier... tables) {
 
-        public void insert(FabricLootSupplierBuilder supplier)
-        {
+        public void insert(FabricLootSupplierBuilder supplier) {
             supplier.pool(lootPool);
         }
     }

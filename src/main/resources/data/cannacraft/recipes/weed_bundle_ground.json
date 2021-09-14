@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "cannacraft:weed_fruit"
+    },
+    {
+      "item": "cannacraft:weed_grinder"
+    }
+  ],
+  "result": {
+    "item": "cannacraft:weed_fruit",
+    "count": 1
+  },
+  "group": "cannacraft"
+}

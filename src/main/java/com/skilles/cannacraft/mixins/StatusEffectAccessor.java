@@ -9,6 +9,9 @@ public interface StatusEffectAccessor {
     @Accessor("amplifier")
     void setAmplifier(int amplifier);
 
+    @Accessor
+    void setPermanent(boolean bool);
+
     @Accessor("duration")
     void setDuration(int duration);
 }

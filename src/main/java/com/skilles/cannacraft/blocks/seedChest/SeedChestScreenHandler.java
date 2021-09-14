@@ -39,7 +39,7 @@ public class SeedChestScreenHandler extends ScreenHandler {
                 this.addSlot(new Slot(inventory, l + m * 9, 8 + l * 18, 17 + m * 18) {
                     public boolean canInsert(ItemStack stack) {
                         // Only allow tagged seeds
-                        return stack.getItem() == ModItems.WEED_SEED && stack.hasTag() && stack.getOrCreateSubTag("cannacraft:strain").getBoolean("Identified");
+                        return stack.getItem() == ModItems.WEED_SEED && stack.hasNbt() && stack.getOrCreateSubNbt("cannacraft:strain").getBoolean("Identified");
                     }
                 });
             }

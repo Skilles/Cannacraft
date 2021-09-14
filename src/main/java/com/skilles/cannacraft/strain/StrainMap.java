@@ -6,6 +6,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.skilles.cannacraft.util.StrainUtil;
+import org.apache.logging.log4j.Level;
 
 import java.io.FileWriter;
 import java.io.Reader;
@@ -20,14 +21,15 @@ import static com.skilles.cannacraft.Cannacraft.log;
 /**
  * This class is responsible for a lot of strain related data management
  */
-public final class StrainMap {
+public class StrainMap {
 
     private static final GsonBuilder builder = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting();
     private static final Gson gson = builder.create();
 
-    public static int ogStrainCount = 4;
-    public static final BiMap<Integer, Strain> strainArray = HashBiMap.create();
-    public static final Map<String, Strain> strainList = new HashMap<>(); // for name lookup
+    //public static int ogStrainCount = 4;
+    public static BiMap<Integer, Strain> strainArray = HashBiMap.create();
+    public static BiMap<Integer, Strain> resourceStrainArray = HashBiMap.create();
+    public static Map<String, Strain> strainList = new HashMap<>(); // for name lookup
     public enum Type {
         INDICA,
         SATIVA,
@@ -37,7 +39,9 @@ public final class StrainMap {
 
     public static void registerStrains() {
         load();
-        validateStrains();
+        //StrainUtil.resetStrains();
+        //StrainUtil.initDefaultStrains();
+        StrainUtil.validateStrains();
         log("Strains initialized: "+ strainArray);
         log("Strains initialized: "+ strainList);
         //GeneticsManager.test();
@@ -50,7 +54,7 @@ public final class StrainMap {
             log("Strains saved to file");
         } catch(Exception e) {
             e.printStackTrace();
-            log("Error saving file");
+            log(Level.ERROR,"Error saving file");
         }
     }
     public static void load() {
@@ -62,17 +66,10 @@ public final class StrainMap {
                 strainArray.put(entry.getKey(), entry.getValue());
                 strainList.put(entry.getValue().name(), entry.getValue());
             }
+            resourceStrainArray.putAll(StrainUtil.defaultResourceStrains);
         } catch(Exception e) {
-            log("Error loading strains");
+            log(Level.ERROR, "Error loading strains");
             StrainUtil.resetStrains();
-        }
-    }
-    private static void validateStrains() {
-        for (Strain strain: strainArray.values()) {
-            if(strain.getItem() == null) {
-                strain.init();
-                log(strain.name()+" corrupted, attempting to fix");
-            }
         }
     }
 }

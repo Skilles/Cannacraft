@@ -1,12 +1,11 @@
 package com.skilles.cannacraft.blocks.machines.strainAnalyzer;
 
-import com.skilles.cannacraft.blocks.machines.MachineBlock;
 import com.skilles.cannacraft.blocks.machines.MachineBlockEntity;
 import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.registry.ModItems;
-import net.minecraft.block.Block;
+import com.skilles.cannacraft.util.WeedRegistry;
+import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
@@ -16,7 +15,6 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class StrainAnalyzerEntity extends MachineBlockEntity {
@@ -32,14 +30,11 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
         this.propertyDelegate = new PropertyDelegate() {
             @Override
             public int get(int index) {
-                switch(index) {
-                    case 0:
-                        return StrainAnalyzerEntity.this.processingTime;
-                    case 1:
-                        return StrainAnalyzerEntity.this.powerStored;
-                    default:
-                        return 0;
-                }
+                return switch (index) {
+                    case 0 -> StrainAnalyzerEntity.this.processingTime;
+                    case 1 -> StrainAnalyzerEntity.this.powerStored;
+                    default -> 0;
+                };
             }
 
             @Override
@@ -58,62 +53,28 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
             }
         };
     }
-    public static void tick(World world, BlockPos pos, BlockState state, StrainAnalyzerEntity blockEntity) {
-        if (world == null || world.isClient) return;
-        if (isNextTo(world, pos, Blocks.GLOWSTONE) && blockEntity.powerStored < blockEntity.getMaxStoredPower()) {
-            blockEntity.addEnergy(2);
-            markDirty(world, pos, state);
-        }
-        if (blockEntity.isWorking()) {
-            if (!world.isReceivingRedstonePower(pos)) {
-                processTick(blockEntity); // playSound is called here
-                state = state.with(MachineBlock.ACTIVE, true);
-                world.setBlockState(pos, state, Block.NOTIFY_ALL);
-                markDirty(world, pos, state);
-            }
-            if (canCraft(blockEntity.inventory) && blockEntity.processingTime == timeToProcess) { // when done crafting
-                craft(blockEntity.inventory);
-                blockEntity.processingTime = 1; // keep working
-                markDirty(world, pos, state);
-            } else if (!canCraft(blockEntity.inventory)) {
-                blockEntity.processingTime = 0;
-                markDirty(world, pos, state);
-            }
-        } else if (canCraft(blockEntity.inventory) && blockEntity.powerStored != 0) { // start if has power
-            blockEntity.processingTime = 1;
-        } else { // when no items or can't craft
-            blockEntity.processingTime = 0;
-            state = state.with(MachineBlock.ACTIVE, false);
-            world.setBlockState(pos, state, Block.NOTIFY_ALL);
-        }
-        markDirty(world, pos, state);
-    }
-    public static boolean canCraft(DefaultedList<ItemStack> inventory) {
+    public boolean canCraft(DefaultedList<ItemStack> inventory) {
             ItemStack stack = inventory.get(1);
             ItemStack output = inventory.get(0);
             if(stack.equals(ItemStack.EMPTY)) return false;
-                if (stack.isOf(ModItems.WEED_SEED) && stack.getCount() >= 1 && stack.hasTag() && !stack.getSubTag("cannacraft:strain").getBoolean("Identified")) {
-                    NbtCompound outputTag = output.copy().getSubTag("cannacraft:strain");
-                    NbtCompound subTag = stack.copy().getSubTag("cannacraft:strain");
-                    if(outputTag == null) return true;
-                    //  if unidentified and NBT aligns
-                    return subTag.getInt("ID") == outputTag.getInt("ID") && subTag.getInt("THC") == outputTag.getInt("THC");
+            if(output.equals(ItemStack.EMPTY)) return true;
+            if (WeedRegistry.checkItem(stack) && stack.getCount() >= 1 && stack.hasNbt() && !WeedRegistry.isIdentified(stack)) {
+                NbtCompound outputTag = output.copy().getSubNbt("cannacraft:strain");
+                NbtCompound subTag = stack.copy().getSubNbt("cannacraft:strain");
+                //  if unidentified and NBT aligns
+                return subTag.getInt("ID") == outputTag.getInt("ID") && subTag.getInt("THC") == outputTag.getInt("THC") && subTag.getList("Attributes", NbtType.COMPOUND) == outputTag.getList("Attributes", NbtType.COMPOUND);
             }
         return false;
     }
-    public static int craft(DefaultedList<ItemStack> inventory) {
+    public int craft(DefaultedList<ItemStack> inventory) {
         ItemStack stack = inventory.get(1);
-        NbtCompound tag = stack.getTag().copy();
         ItemStack outputSlot = inventory.get(0);
         ItemStack output = ModItems.WEED_SEED.getDefaultStack();
 
-
         if(outputSlot.isEmpty()) {
-            NbtCompound strainTag = tag.getCompound("cannacraft:strain").copy();
+            NbtCompound strainTag = stack.getSubNbt("cannacraft:strain").copy();
             strainTag.putBoolean("Identified", true);
-            NbtCompound outputTag = new NbtCompound();
-            outputTag.put("cannacraft:strain", strainTag);
-            output.setTag(outputTag);
+            output.setSubNbt("cannacraft:strain", strainTag);
             inventory.set(0, output);
         }
         else if (outputSlot.isOf(output.getItem())) {

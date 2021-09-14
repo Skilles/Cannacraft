@@ -1,8 +1,10 @@
 package com.skilles.cannacraft.items;
 
 import com.skilles.cannacraft.CannacraftClient;
+import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.util.HighUtil;
 import com.skilles.cannacraft.util.MiscUtil;
+import com.skilles.cannacraft.util.WeedRegistry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
@@ -19,6 +21,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.stat.Stats;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -43,11 +46,12 @@ public class WeedJoint extends BowItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         ItemStack offhandStack = user.getOffHandStack();
-        NbtCompound tag = itemStack.getOrCreateTag();
-        if(offhandStack.isOf(Items.FLINT_AND_STEEL) || user.getMainHandStack().isOf(Items.FLINT_AND_STEEL)) {
+        NbtCompound tag = itemStack.getOrCreateNbt();
+        if(offhandStack.isOf(Items.FLINT_AND_STEEL) || user.getMainHandStack().isOf(Items.FLINT_AND_STEEL) || offhandStack.isOf(ModItems.WEED_LIGHTER) || user.getMainHandStack().isOf(ModItems.WEED_LIGHTER)) {
             tag.putBoolean("Lit", true);
             user.getInventory().insertStack(user.getOffHandStack());
             user.getOffHandStack().decrement(1);
+            user.incrementStat(Stats.USED.getOrCreateStat(this));
             return TypedActionResult.success(itemStack, true);
         }
         if(tag.getBoolean("Lit")) {
@@ -58,10 +62,10 @@ public class WeedJoint extends BowItem {
         }
     }
     private boolean isLit(ItemStack stack) {
-        return stack.hasTag() && stack.getTag().getBoolean("Lit");
+        return stack.hasNbt() && stack.getNbt().getBoolean("Lit");
     }
     // TODO: add left hand & fix bodyYaw mismatch
-    private Vec3d itemVector(PlayerEntity player, int flag) {
+    private static Vec3d itemVector(PlayerEntity player, int flag) {
         Vec3d look = flag == 0 ? player.getRotationVector() : Vec3d.fromPolar(new Vec2f(player.getPitch(), player.bodyYaw)); // multiplayer offset
         Vec3d playerPos = player.getPos().add(0, player.getHeight(), 0);
         //The next 3 variables are directions on the screen relative to the players look direction. So right = to the right of the player, regardless of facing direction.
@@ -94,9 +98,8 @@ public class WeedJoint extends BowItem {
         laserPos = laserPos.add(forward);
         return laserPos;
     }
-    private void spawnSmoke(Entity entity) {
-        if (entity instanceof PlayerEntity && CannacraftClient.config.getMisc().smoke) {
-            PlayerEntity player = (PlayerEntity) entity;
+    public static void spawnSmoke(Entity entity) {
+        if (entity instanceof PlayerEntity player && CannacraftClient.config.getMisc().smoke) {
             if (!player.world.isClient()) {
                 Vec3d laserPos = itemVector(player, 1);
                 // Send packets to other players
@@ -111,11 +114,8 @@ public class WeedJoint extends BowItem {
             } else {
                 Vec3d laserPos;
                 MinecraftClient client = MinecraftClient.getInstance();
-                if (client.options.getPerspective().isFirstPerson() && !client.options.hudHidden) { // using vectors
-                    laserPos = itemVector(player, 0);
-                } else {
-                    laserPos = itemVector(player, 1);
-                }
+                // using vectors
+                laserPos = client.options.getPerspective().isFirstPerson() && !client.options.hudHidden ? itemVector(player, 0) : itemVector(player, 1);
                 client.world.addParticle(ParticleTypes.SMOKE,
                         laserPos.x,
                         laserPos.y,
@@ -156,12 +156,12 @@ public class WeedJoint extends BowItem {
 
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
-        NbtCompound tag = stack.getOrCreateTag();
+        NbtCompound tag = stack.getOrCreateNbt();
         if(user instanceof PlayerEntity && isLit(stack)) {
             if (remainingUseTicks == 1) {
                 if (tag.contains("cannacraft:strain")) {
                     if (!world.isClient) {
-                        HighUtil.applyHigh(user);
+                        HighUtil.applyHigh(WeedRegistry.getStrainInfo(stack), user);
                         stack.damage(1, user, (p) -> {
                             p.sendToolBreakStatus(user.getActiveHand());
                         });
@@ -184,10 +184,10 @@ public class WeedJoint extends BowItem {
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
-        if(stack.getTag().contains("cannacraft:strain")) {
-            NbtCompound tag = stack.getSubTag("cannacraft:strain");
+        if(stack.getNbt().contains("cannacraft:strain")) {
+            NbtCompound tag = stack.getSubNbt("cannacraft:strain");
             if (tag.contains("ID") && !(tag.getInt("ID") == 0)) {
-                MiscUtil.appendTooltips(tooltip, tag);
+                MiscUtil.appendTooltips(tooltip, tag, false);
             }
         }
     }

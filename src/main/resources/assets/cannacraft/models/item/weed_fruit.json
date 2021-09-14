@@ -1,6 +1,88 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "cannacraft:items/weed_fruit"
-  }
+    "layer0": "cannacraft:item/weed_fruit/wet/weed_fruit0"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "count": 0.0
+      },
+      "model": "cannacraft:item/weed_fruit/ground/weed_fruit0"
+    },
+    {
+      "predicate": {
+        "count": 0.33
+      },
+      "model": "cannacraft:item/weed_fruit/ground/weed_fruit1"
+    },
+    {
+      "predicate": {
+        "count": 0.66
+      },
+      "model": "cannacraft:item/weed_fruit/ground/weed_fruit2"
+    },
+    {
+      "predicate": {
+        "count": 1.0
+      },
+      "model": "cannacraft:item/weed_fruit/ground/weed_fruit3"
+    },
+    {
+      "predicate": {
+        "status": 0.5,
+        "count": 0.0
+      },
+      "model": "cannacraft:item/weed_fruit/dry/weed_fruit0"
+    },
+    {
+      "predicate": {
+        "status": 0.5,
+        "count": 0.33
+      },
+      "model": "cannacraft:item/weed_fruit/dry/weed_fruit1"
+    },
+    {
+      "predicate": {
+        "status": 0.5,
+        "count": 0.66
+      },
+      "model": "cannacraft:item/weed_fruit/dry/weed_fruit2"
+    },
+    {
+      "predicate": {
+        "status": 0.5,
+        "count": 1.0
+      },
+      "model": "cannacraft:item/weed_fruit/dry/weed_fruit3"
+    },
+    {
+      "predicate": {
+        "status": 1,
+        "count": 0.0
+      },
+      "model": "cannacraft:item/weed_fruit/wet/weed_fruit0"
+    },
+    {
+      "predicate": {
+        "status": 1,
+        "count": 0.33
+      },
+      "model": "cannacraft:item/weed_fruit/wet/weed_fruit1"
+    },
+    {
+      "predicate": {
+        "status": 1,
+        "count": 0.66
+      },
+      "model": "cannacraft:item/weed_fruit/wet/weed_fruit2"
+    },
+    {
+      "predicate": {
+        "status": 1,
+        "count": 1.0
+      },
+      "model": "cannacraft:item/weed_fruit/wet/weed_fruit3"
+    }
+  ]
 }

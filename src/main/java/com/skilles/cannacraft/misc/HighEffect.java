@@ -7,8 +7,8 @@ import com.skilles.cannacraft.util.MiscUtil;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.AttributeContainer;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffectType;
 import net.minecraft.entity.player.PlayerEntity;
 
 import static com.skilles.cannacraft.Cannacraft.log;
@@ -16,7 +16,7 @@ import static com.skilles.cannacraft.Cannacraft.log;
 public class HighEffect extends StatusEffect {
 
     public HighEffect() {
-        super(StatusEffectType.BENEFICIAL, 0x98D982);
+        super(StatusEffectCategory.BENEFICIAL, 0x98D982);
     }
 
     @Override
@@ -25,8 +25,7 @@ public class HighEffect extends StatusEffect {
     }
     @Override
     public void applyUpdateEffect(LivingEntity entity, int amplifier) {
-        if(entity instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) entity;
+        if(entity instanceof PlayerEntity player) {
             StatusEffectInstance currentEffect = entity.getStatusEffect(this);
             if(currentEffect.getDuration() % 600 == 0) {
                 ((StatusEffectAccessor) currentEffect).setAmplifier(HighUtil.durationToAmplifier(currentEffect.getDuration()));

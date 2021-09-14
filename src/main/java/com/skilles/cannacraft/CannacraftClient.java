@@ -1,7 +1,7 @@
 package com.skilles.cannacraft;
 
-import com.skilles.cannacraft.registry.ModBlocks;
 import com.skilles.cannacraft.config.ModConfig;
+import com.skilles.cannacraft.registry.ModBlocks;
 import com.skilles.cannacraft.registry.ModScreens;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
@@ -27,6 +27,9 @@ public class CannacraftClient implements ClientModInitializer, ModMenuApi  {
     @Override
     public void onInitializeClient() {
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.WEED_CROP, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.GROW_LIGHT, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.WEED_RACK, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.WEED_BONG, RenderLayer.getTranslucent());
         ModScreens.registerScreens();
         AutoConfig.register(ModConfig.class, GsonConfigSerializer::new);
         config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();

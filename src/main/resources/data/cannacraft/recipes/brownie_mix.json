@@ -1,0 +1,22 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+            "item": "cannacraft:weed_distillate"
+        },
+        {
+            "item": "minecraft:egg"
+        },
+        {
+            "item": "minecraft:cocoa_beans"
+        },
+        {
+            "item": "minecraft:sugar"
+        }
+    ],
+    "result": {
+        "item": "cannacraft:brownie_mix",
+        "count": 1
+    },
+    "group": "cannacraft"
+}

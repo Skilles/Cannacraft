@@ -36,10 +36,10 @@ public class WeedSeed extends AliasedBlockItem {
 
     @Override
     public Text getName(ItemStack stack) {
-        if (stack.hasTag()) {
-            NbtCompound tag = stack.getSubTag("cannacraft:strain");
-            if(StrainUtil.getStrain(tag.getInt("ID")).type().equals(StrainMap.Type.UNKNOWN)) tag.putInt("ID", 0);
-            return tag.getBoolean("Identified") ? Text.of(StrainUtil.getStrain(tag.getInt("ID")).name() + " Seeds") : Text.of("Unidentified Seeds");
+        if (stack.hasNbt()) {
+            NbtCompound tag = stack.getSubNbt("cannacraft:strain");
+            if(StrainUtil.getStrain(tag).type().equals(StrainMap.Type.UNKNOWN)) tag.putInt("ID", 0);
+            return MiscUtil.getItemName(stack);
         }
         return super.getName(stack);
     }
@@ -56,7 +56,7 @@ public class WeedSeed extends AliasedBlockItem {
                         + " Genes: " + clientStackInterface.getGenetics()
                 );
             } else {
-                log(clientStack.getTag());
+                log(clientStack.getNbt());
             }
         }
         return TypedActionResult.success(playerEntity.getStackInHand(hand));
@@ -75,7 +75,7 @@ public class WeedSeed extends AliasedBlockItem {
                 BlockEntity blockEntity = context.getWorld().getBlockEntity(context.getBlockPos());
                 NbtCompound tag = blockEntity.writeNbt(new NbtCompound());
                 if (context.getPlayer().isSneaking()) {
-                    System.out.println("Strain of crop: " + StrainUtil.getStrain(tag.getInt("ID")).name()
+                    System.out.println("Strain of crop: " + StrainUtil.getStrain(tag).name()
                             + " Identified: " + tag.getBoolean("identified")
                             + " THC: " + tag.getInt("THC"));
                     log(tag);
@@ -95,9 +95,11 @@ public class WeedSeed extends AliasedBlockItem {
     @Override
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
-        NbtCompound tag = stack.getSubTag("cannacraft:strain");
-        if (tag != null && tag.contains("ID") && !(tag.getInt("ID") == 0)) { // checks if ID is set to actual strain
-            MiscUtil.appendTooltips(tooltip, tag);
+        if(stack.hasNbt()) {
+            NbtCompound tag = stack.getSubNbt("cannacraft:strain");
+            if (tag.contains("ID") && !(tag.getInt("ID") == 0)) {
+                MiscUtil.appendTooltips(tooltip, tag, true);
+            }
         }
 
 

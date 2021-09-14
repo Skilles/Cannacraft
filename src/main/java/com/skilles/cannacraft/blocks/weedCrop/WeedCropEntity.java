@@ -5,7 +5,7 @@ import com.skilles.cannacraft.config.ModConfig;
 import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.strain.Gene;
 import com.skilles.cannacraft.strain.GeneTypes;
-import com.skilles.cannacraft.strain.StrainMap;
+import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.util.CrossUtil;
 import com.skilles.cannacraft.util.MiscUtil;
 import me.shedaniel.autoconfig.ConfigData;
@@ -22,11 +22,12 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
 import static com.skilles.cannacraft.Cannacraft.log;
-import static com.skilles.cannacraft.util.StrainUtil.*;
+import static com.skilles.cannacraft.util.StrainUtil.getStrain;
 
 // TODO: drop seedId, seedThc if male
 // TODO: cross plants by collecting pollen from male
@@ -48,12 +49,14 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
     private int thc;
     private int seedThc;
     private boolean identified;
-    private boolean isMale;
+    boolean isMale;
     private int seedId;
+    private boolean resource;
     private int breedTimer = 0;
     private NbtList attributes;
     private static final int maxBreedTime = 50;
     private int cachedLimit;
+    public boolean boosted;
 
     public void setData(int index, int thc, boolean identified, boolean isMale, NbtList attributes) {
         this.index = index;
@@ -64,10 +67,22 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
         this.seedId = index;
         this.attributes = attributes;
     }
+    public void setData(NbtCompound tag, NbtList attributes) {
+        this.index = tag.getInt("ID");
+        this.thc = tag.getInt("THC");
+        this.identified = tag.getBoolean("Identified");
+        this.isMale = tag.getBoolean("Male");
+        this.resource = tag.getBoolean("Resource");
+        this.seedId = index;
+        this.seedThc = thc;
+        this.attributes = attributes;
+        log("Data for BE crop set" + tag);
+    }
     float multiplier() {
         float multiplier = 1;
         if(hasGene(GeneTypes.SPEED)) multiplier *= (1.0F + ((float) getGene(GeneTypes.SPEED).level()) / 2.0F); // 1: 50%, 2: 100%, 3: 150%
         multiplier *= config.getCrop().speed;
+        if(boosted) multiplier *= 2;
         return multiplier;
     }
 
@@ -83,16 +98,9 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
         return breedTimer;
     }
     public boolean isBreeding() {
-        if(hasGene(GeneTypes.SPEED)) {
-            if (breedTimer >= (maxBreedTime / multiplier())) {
-                stopBreeding();
-                return false;
-            }
-        } else {
-            if (breedTimer >= maxBreedTime) {
-                stopBreeding();
-                return false;
-            }
+        if (breedTimer >= (maxBreedTime / multiplier())) {
+            stopBreeding();
+            return false;
         }
         return breedTimer > 0;
     }
@@ -100,27 +108,11 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
         return breedTimer < 0;
     }
     public void incrementBreedTick() {
-        if(isBreeding()) {
-           breedTimer++;
-        }
+        if(isBreeding()) breedTimer++;
     }
     public boolean canBreed() {
-        if(breedingProgress() != -1) {
-            WeedCropEntity blockEntity = this;
-            NbtCompound ogTag = blockEntity.writeNbt(new NbtCompound());
-            int COUNT = 0;
-            if (!ogTag.getBoolean("Male")) {
-                List<Integer> thcValues = new ArrayList<>();
-                for (Direction direction : Direction.Type.HORIZONTAL) {
-                    BlockEntity blockEntity2 = world.getBlockEntity(pos.offset(direction));
-                    if (blockEntity2 instanceof WeedCropEntity) {
-                        NbtCompound tag = blockEntity2.writeNbt(new NbtCompound());
-                        if (tag.getBoolean("Male")) {
-                            COUNT++;
-                        }
-                    }
-                }
-            }
+        if(breedingProgress() != -1 && !this.isMale) {
+            int COUNT = (int) Direction.Type.HORIZONTAL.stream().filter(direction -> world.getBlockEntity(pos.offset(direction)) instanceof WeedCropEntity cropToBreed && cropToBreed.isMale && this.resource == cropToBreed.resource).count();
             return COUNT > 0;
         } else {
             return false;
@@ -149,60 +141,37 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
         return cachedLimit;
     }
     /**
-     * Crosses name/type/thc with adjacent male. Gets random male if more than one. THC will not change if male THC is lower than female.
+     * Crosses name/type/thc with adjacent male. Gets highest THC male if more than one.
+     * TODO: add check/randomness if ID is unknown
      */
     void breedCrops(World world, BlockPos pos, Random random) {
         if(canBreed()) {
-            WeedCropEntity blockEntity = this;
-            NbtCompound ogTag = blockEntity.writeNbt(new NbtCompound());
             // Cross thc/names/type
-            List<String> stringArray = new ArrayList<>();
-            List<StrainMap.Type> typeArray = new ArrayList<>();
-            int id = ogTag.getInt("ID");
-            int thc = ogTag.getInt("Seed THC");
-            int maleId = 0;
-            List<Integer> thcValues = new ArrayList<>();
+
+            List<WeedCropEntity> nearCrops = new ArrayList<>();
+
             for (Direction direction : Direction.Type.HORIZONTAL) {
                 BlockEntity blockEntity2 = world.getBlockEntity(pos.offset(direction));
-                if (blockEntity2 instanceof WeedCropEntity) {
-                    NbtCompound tag = blockEntity2.writeNbt(new NbtCompound());
-                    if (tag.getBoolean("Male")) {
-                        if (thc < tag.getInt("Seed THC")) {
-                            thcValues.add(tag.getInt("Seed THC")); // adds iterative highest thc values
-                            maleId = tag.getInt("ID"); // highest thc male id
-                            thc = tag.getInt("Seed THC"); // highest thc value
-                        }
-                        stringArray.add(getStrain(tag.getInt("Seed ID")).name()); // all names of surrounding males
-                        typeArray.add(getStrain(tag.getInt("Seed ID")).type());
-                    }
+                if (blockEntity2 instanceof WeedCropEntity weedBlockEntity2 && weedBlockEntity2.isMale) {
+                    nearCrops.add(weedBlockEntity2);
                 }
             }
-            if (maleId == 0) {
-                thc = ogTag.getInt("Seed THC");
-                maleId = stringArray.size() > 1 ? indexOf((stringArray.get(MiscUtil.random().nextInt(stringArray.size() - 1)))) : indexOf(stringArray.get(0));
-            }
+            WeedCropEntity alphaMale = config.getCrop().randomBreed ? nearCrops.get(random.nextInt(nearCrops.size())) : nearCrops.stream().max(Comparator.comparingInt(entity -> entity.thc)).get();
             // Set thc
-            ogTag.putInt("Seed THC", CrossUtil.crossThc(thc, ogTag.getInt("THC")));
-            log("THC: " + ogTag.getInt("Seed THC"));
-            // Set name/type
-            int randId = random.nextInt(stringArray.size());
-            String name1 = getStrain(id).name();
-            String name2 = getStrain(maleId).name();
-            StrainMap.Type type1 = getStrain(id).type();
-            StrainMap.Type type2 = typeArray.get(randId);
-            String crossedName = CrossUtil.crossStrains(name1, name2);
-            if (!isPresent(crossedName)) addStrain(crossedName, CrossUtil.crossTypes(type1, type2));
-            ogTag.putInt("Seed ID", indexOf(crossedName));
+            this.seedThc = CrossUtil.crossThc(alphaMale.thc, this.thc);
+            // Set strain
+            NbtCompound myTag = this.writeNbt(new NbtCompound());
+            NbtCompound maleTag = alphaMale.writeNbt(new NbtCompound());
+            Strain crossedStrain = CrossUtil.crossStrains(getStrain(myTag), getStrain(maleTag));
+            log("Strain 1 " + getStrain(myTag));
+            log("Strain 2 " + getStrain(maleTag));
+            log("Name of crossed strain: " + crossedStrain.name());
+            this.seedId = crossedStrain.id();
 
-            // Save nbt
-            blockEntity.readNbt(ogTag);
-            world.markDirty(pos);
-
-            ogTag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
-
-            log("New tag: " + ogTag);
+            log("New tag: " + this.writeNbt(new NbtCompound()));
 
             world.setBlockState(pos, WeedCrop.withBreeding(world.getBlockState(pos), false), 2);
+            world.markDirty(pos);
             world.playSound(
                     null,
                     pos,
@@ -253,7 +222,6 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
 
     @Override
     public void sync() {
-        if(!world.isClient)
-            BlockEntityClientSerializable.super.sync();
+        if(!world.isClient) BlockEntityClientSerializable.super.sync();
     }
 }

@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "ingredient": {
+    "item": "cannacraft:weed_fruit"
+  },
+  "result": "cannacraft:weed_fruit",
+  "experience": 2,
+  "cookingtime": 200,
+  "group": "cannacraft"
+}

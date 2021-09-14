@@ -19,7 +19,6 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.Collections;
-import java.util.Comparator;
 
 public class SeedChestEntity extends BlockEntity implements NamedScreenHandlerFactory, ImplementedInventory {
     private final DefaultedList<ItemStack> inventory = DefaultedList.ofSize(36, ItemStack.EMPTY);
@@ -75,10 +74,10 @@ public class SeedChestEntity extends BlockEntity implements NamedScreenHandlerFa
         if(!inventory.isEmpty()) {
             Collections.sort(inventory, (o1, o2) -> {
                 if(o1.isOf(ModItems.WEED_SEED) && o2.isOf(ModItems.WEED_SEED)) {
-                    NbtCompound tag1 = o1.getSubTag("cannacraft:strain");
-                    NbtCompound tag2 = o2.getSubTag("cannacraft:strain");
-                    String name1 = StrainUtil.getStrain(tag1.getInt("ID")).name();
-                    String name2 = StrainUtil.getStrain(tag2.getInt("ID")).name();
+                    NbtCompound tag1 = o1.getSubNbt("cannacraft:strain");
+                    NbtCompound tag2 = o2.getSubNbt("cannacraft:strain");
+                    String name1 = StrainUtil.getStrain(tag1).name();
+                    String name2 = StrainUtil.getStrain(tag2).name();
                     return name1.compareTo(name2);
                 }
                 return 0;

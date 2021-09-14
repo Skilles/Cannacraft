@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.8-SNAPSHOT'
+	id 'fabric-loom' version '0.9-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -26,6 +26,9 @@ repositories {
 	maven {
 		url = "https://maven.terraformersmc.com/"
 	}
+	maven {
+		url = "https://maven.blamejared.com"
+	}
 }
 
 dependencies {
@@ -51,7 +54,7 @@ dependencies {
 	modApi 'teamreborn:energy:0.1.1'
 	include 'teamreborn:energy:0.1.1'
 
-	annotationProcessor "net.fabricmc:fabric-mixin-compile-extensions:0.4.3"
+	annotationProcessor "net.fabricmc:fabric-mixin-compile-extensions:0.4.5"
 	// compile against the API
 	//modCompileOnly "mcp.mobius.waila:wthit-api:fabric-${project.wthit_api_version}"
 	modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}") {
@@ -62,6 +65,10 @@ dependencies {
 
 	// run against the full jar
 	//modRuntime "mcp.mobius.waila.wthit-fabric:wthit-fabric-${project.wthit_version}"
+	modImplementation "com.ptsmods:devlogin:1.2"
+
+	// Patchouli
+	modImplementation "vazkii.patchouli:Patchouli:${project.patchouli_version}"
 }
 
 processResources {
@@ -79,9 +86,7 @@ tasks.withType(JavaCompile).configureEach {
 	// If Javadoc is generated, this must be specified in that task too.
 	it.options.encoding = "UTF-8"
 
-	// The Minecraft launcher currently installs Java 8 for users, so your mod probably wants to target Java 8 too
-	// JDK 9 introduced a new way of specifying this that will make sure no newer classes or methods are used.
-	// We'll use that if it's available, but otherwise we'll use the older option.
+	// Minecraft 1.17 (21w19a) upwards uses Java 16.
 	it.options.release = 16
 }
 

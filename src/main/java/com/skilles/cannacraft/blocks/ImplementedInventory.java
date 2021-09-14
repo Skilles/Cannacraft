@@ -11,6 +11,7 @@ import net.minecraft.util.collection.DefaultedList;
  *
  * Originally by Juuz
  */
+@FunctionalInterface
 public interface ImplementedInventory extends Inventory {
 
     /**
@@ -30,7 +31,7 @@ public interface ImplementedInventory extends Inventory {
      * Creates a new inventory with the specified size.
      */
     static ImplementedInventory ofSize(int size) {
-        return of(DefaultedList.ofSize(size, ItemStack.EMPTY));
+        return () -> (DefaultedList.ofSize(size, ItemStack.EMPTY));
     }
 
     /**

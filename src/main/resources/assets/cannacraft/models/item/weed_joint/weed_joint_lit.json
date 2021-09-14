@@ -30,7 +30,7 @@
       "predicate": {
         "pulling": 1
       },
-      "model": "cannacraft:item/weed_joint_using"
+      "model": "cannacraft:item/weed_joint/weed_joint_using"
     }
   ]
 }

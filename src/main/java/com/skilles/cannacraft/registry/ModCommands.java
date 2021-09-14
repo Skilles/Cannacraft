@@ -6,7 +6,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.skilles.cannacraft.strain.StrainMap;
 import com.skilles.cannacraft.util.CrossUtil;
-import com.skilles.cannacraft.util.MiscUtil;
 import com.skilles.cannacraft.util.StrainUtil;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.item.ItemStack;
@@ -18,6 +17,8 @@ import net.minecraft.util.Util;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
+import static com.skilles.cannacraft.util.WeedRegistry.WeedTypes;
+import static com.skilles.cannacraft.util.WeedRegistry.randomItem;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -36,7 +37,7 @@ public class ModCommands {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack itemStack = self.getMainHandStack();
         if (itemStack.getItem().equals(ModItems.WEED_SEED)) {
-            //NbtCompound tag = itemStack.getOrCreateSubTag("cannacraft:strain");
+            //NbtCompound tag = itemStack.getOrCreateSubNbt("cannacraft:strain");
             if (gender.equalsIgnoreCase("male")) {
                 ModMisc.STRAIN.get(itemStack).setMale(true);
             } else if (gender.equalsIgnoreCase("female")) {
@@ -61,12 +62,12 @@ public class ModCommands {
                 int j = 0;
                 for (i = 0; self.getInventory().size() > i; i++) {
                     ItemStack itemStack = self.getInventory().getStack(i);
-                    if (itemStack != null && itemStack.getItem().equals(ModItems.WEED_SEED) && !ModMisc.STRAIN.get(itemStack).identified()) {
+                    if (itemStack != null && (itemStack.isOf(ModItems.WEED_SEED) || itemStack.isOf(ModItems.WEED_BUNDLE)) && !ModMisc.STRAIN.get(itemStack).identified()) {
                         ModMisc.STRAIN.get(itemStack).identify();
                         j++;
                     }
                 }
-                self.sendSystemMessage(Text.of(j + " seeds identified"), Util.NIL_UUID);
+                self.sendSystemMessage(Text.of(j + " items identified"), Util.NIL_UUID);
             }
         }
         return 1;
@@ -88,8 +89,8 @@ public class ModCommands {
     public static int clearGenes(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack stack = self.getMainHandStack();
-        if(stack.hasTag()) {
-            NbtCompound tag = stack.getSubTag("cannacraft:strain");
+        if(stack.hasNbt()) {
+            NbtCompound tag = stack.getSubNbt("cannacraft:strain");
             tag.remove("Attributes");
         }
         self.sendSystemMessage(Text.of("Genes removed"), Util.NIL_UUID);
@@ -150,7 +151,8 @@ public class ModCommands {
                             .then(argument("index", IntegerArgumentType.integer(0, StrainUtil.getStrainCount()))
                             .executes(ctx -> {
                                 final ServerPlayerEntity self = ctx.getSource().getPlayer();
-                                self.sendSystemMessage(Text.of("Strain removed: "+ StrainUtil.getStrain(getInteger(ctx, "index"))), Util.NIL_UUID);
+                                // TODO: add logic for resource strains
+                                self.sendSystemMessage(Text.of("Strain removed: "+ StrainUtil.getStrain(getInteger(ctx, "index"), false)), Util.NIL_UUID);
                                 StrainUtil.removeStrain(getInteger(ctx, "index"));
                                 return 1;
                             })))
@@ -164,26 +166,32 @@ public class ModCommands {
                             .then(argument("name2", StringArgumentType.string())
                             .executes(ctx -> {
                                 final ServerPlayerEntity self = ctx.getSource().getPlayer();
-                                self.sendSystemMessage(Text.of(CrossUtil.crossStrains(getString(ctx, "name1"), getString(ctx, "name2"))), Util.NIL_UUID);
+                                self.sendSystemMessage(Text.of(CrossUtil.crossNames(getString(ctx, "name1"), getString(ctx, "name2"))), Util.NIL_UUID);
                                 return 1;
                             }))))
                         .then(literal("random")
                             .executes(ctx -> {
                                 final ServerPlayerEntity self = ctx.getSource().getPlayer();
-                                ItemStack stack = new ItemStack(ModItems.WEED_SEED);
-                                NbtCompound tag = stack.getOrCreateSubTag("cannacraft:strain");
-                                MiscUtil.randomizeTag(tag);
-                                //ModMisc.STRAIN.get(stack).setStrain(Math.abs(GeneticsManager.random().nextInt(StrainMap.getStrainCount() - 1)) + 1);
-                                ModMisc.STRAIN.get(stack).setThc(StrainUtil.normalDist(18, 5, 13));
-                                self.giveItemStack(stack);
+                                self.giveItemStack(randomItem(WeedTypes.SEED, true, true));
                                 self.sendSystemMessage(Text.of("Random seed given"), Util.NIL_UUID);
                                 return 1;
-                            })
-                        .then(argument("sex", StringArgumentType.string())
-                            .executes(ctx -> {
-                                setSex(ctx, getString(ctx, "sex"));
-                                return 1;
-                            })))
+                            }).then(argument("type", StringArgumentType.string())
+                                .executes(ctx -> {
+                                    final ServerPlayerEntity self = ctx.getSource().getPlayer();
+                                    self.giveItemStack(randomItem(WeedTypes.fromString(getString(ctx, "type")), true, true));
+                                    return 1;
+                                })
+                                .then(argument("amount", IntegerArgumentType.integer())
+                                    .executes(ctx -> {
+                                        final ServerPlayerEntity self = ctx.getSource().getPlayer();
+                                        for(int i = 0; i < getInteger(ctx, "amount"); i++) {
+                                            self.giveItemStack(randomItem(WeedTypes.fromString(getString(ctx, "type")), true, true));
+                                        }
+                                        self.sendSystemMessage(Text.of(getInteger(ctx, "amount") + " random seeds given"), Util.NIL_UUID);
+                                        return 1;
+                                    }))))
+
+
                         .then(literal("clear")
                             .executes(ctx -> {
                                 StrainUtil.resetStrains();

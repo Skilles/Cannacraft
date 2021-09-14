@@ -1,29 +1,31 @@
 package com.skilles.cannacraft.util;
 
 import com.google.common.collect.Lists;
-import com.skilles.cannacraft.strain.GeneTypes;
-import com.skilles.cannacraft.strain.StrainMap;
+import com.skilles.cannacraft.strain.*;
+import net.fabricmc.fabric.api.util.NbtType;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
-import static com.skilles.cannacraft.Cannacraft.log;
 import static com.skilles.cannacraft.strain.StrainMap.strainList;
 
 public class CrossUtil {
-    private static final Map<String, Integer> suffixesMap = new HashMap<String, Integer>() {{
-        put("OG", 5);
-        put("Kush", 2);
-        put("Cookies", 1);
-        put("Dream", 1);
-        put("Poison", 0);
-        put("Crack", 0);
-        put("Dawg", 0);
-        put("Punch", 1);
-        put("Trix", 0);
-        put("Cake", 0);
-    }
+    private static final Map<String, Integer> suffixesMap = new HashMap<>() {
+        {
+            put("OG", 5);
+            put("Kush", 2);
+            put("Cookies", 1);
+            put("Dream", 1);
+            put("Poison", 0);
+            put("Crack", 0);
+            put("Dawg", 0);
+            put("Punch", 1);
+            put("Trix", 0);
+            put("Cake", 0);
+        }
     };
 
     public static int crossThc(int thc1, int thc2) {
@@ -58,11 +60,12 @@ public class CrossUtil {
 
     /**
      * TODO: follow standard of mother + father
+     * TODO: return Strain instead of string
      * @param name1 by default is the first word
      * @param name2 by default is the second word
-     * @return returns the crossed name of strains according to the prefix list
+     * @return the crossed name of strains according to the prefix list
      */
-    public static String crossStrains(String name1, String name2) {
+    public static String crossNames(String name1, String name2) {
         List<String> nameOneFinal = Arrays.asList(StringUtils.split(name1));
         List<String> nameTwoFinal = Arrays.asList(StringUtils.split(name2));
         final List<String> finalNames = new ArrayList<String>() {{
@@ -91,13 +94,13 @@ public class CrossUtil {
         }};
         // Set suffix and remove from names
         Map<String, Integer> tempSuffixMap = new HashMap<>();
-        for(int i = 0; i < finalNames.size(); i++) {
-            if(suffixesMap.containsKey(finalNames.get(i))) {
-                tempSuffixMap.put(finalNames.get(i), suffixesMap.get(finalNames.get(i)));
+        for (String finalName : finalNames) {
+            if (suffixesMap.containsKey(finalName)) {
+                tempSuffixMap.put(finalName, suffixesMap.get(finalName));
                 // Checks if suffix is part of name1 or name2, then removes if it is
-                if(nameOne.contains(finalNames.get(i))) {
+                if (nameOne.contains(finalName)) {
                     filterName(nameOne, tempSuffixMap, names);
-                } else if(nameTwo.contains(finalNames.get(i))){
+                } else if (nameTwo.contains(finalName)) {
                     filterName(nameTwo, tempSuffixMap, names);
                 }
             }
@@ -123,10 +126,44 @@ public class CrossUtil {
                 newName1 = nameOne.get(0);
             }
         }
-        log(names);
         return newName1+ " " + newName2;
     }
 
+    /**
+     * Crosses two strains (name and type) and adds them to the list if not present
+     * @param female strain of female
+     * @param male strain of male
+     * @param register whether to add to the strain registry
+     * @return crossed strain
+     */
+    public static Strain crossStrains(Strain female, Strain male, boolean register) {
+        Strain crossedStrain;
+        if(female.isResource() && male.isResource()) {
+            crossedStrain = crossResources(female, male);
+        } else {
+            return new Strain(crossNames(female.name(), male.name()), crossTypes(female.type(), male.type()), register);
+        }
+        return strainList.get(crossedStrain.name());
+    }
+    public static Strain crossStrains(Strain female, Strain male) {
+        return crossStrains(female, male, false);
+    }
+    /**
+     * Crosses two resource strains using predefined recipes
+     * @param female strain of female
+     * @param male strain of male
+     * @return crossed strain
+     */
+    public static Strain crossResources(Strain female, Strain male) {
+        StrainUtil.StrainItems fItem = female.strainItem;
+        StrainUtil.StrainItems mItem = male.strainItem;
+        for(ResourcePair pair : StrainUtil.resourcePairs) {
+            if((pair.strain1() == fItem || pair.strain1() == mItem) && (pair.strain2() == fItem || pair.strain2() == mItem))
+                return pair.getOutputStrain();
+        }
+        if (MiscUtil.random().nextFloat() > 0.7F) return male;
+        return female;
+    }
     /**
      * This method eventually sorts the output list to only contain names that are not part of the suffix name
      * @param name name to filter
@@ -180,9 +217,46 @@ public class CrossUtil {
                 return StrainMap.Type.UNKNOWN;
         }
     }
-
+    public static NbtList crossGenes(ItemStack stack1, ItemStack stack2) {
+        ArrayList<Gene> list1 = MiscUtil.fromNbtList(stack1.getSubNbt("cannacraft:strain").getList("Attributes", NbtType.COMPOUND));
+        ArrayList<Gene> list2 = MiscUtil.fromNbtList(stack2.getSubNbt("cannacraft:strain").getList("Attributes", NbtType.COMPOUND));
+        ArrayList<Gene> output = new ArrayList<>();
+        list1.forEach(gene1 -> {
+            Optional<Gene> gene2 = list2.stream().filter(j -> gene1.type() == j.type()).findFirst();
+            // Removes gene from list2 if it finds a match, otherwise adds it to the output
+            gene2.ifPresentOrElse( x -> {
+                    output.add(crossGenes(x, gene2.get()));
+                    list2.remove(gene2.get());
+            }, () -> output.add(gene1));
+        });
+        output.addAll(list2);
+        return MiscUtil.toNbtList(output);
+    }
+    public static ItemStack crossItems(ItemStack stack1, ItemStack stack2, boolean register) {
+        Strain newStrain = CrossUtil.crossStrains(WeedRegistry.getStrain(stack1), WeedRegistry.getStrain(stack2), register);
+        int newThc = CrossUtil.crossThc(WeedRegistry.getThc(stack1), WeedRegistry.getThc(stack2));
+        NbtList newGenes = CrossUtil.crossGenes(stack1, stack2);
+        return WeedRegistry.strainToItem(newStrain, null, newThc, newGenes, WeedRegistry.WeedTypes.fromStack(stack1), true);
+    }
+    protected static Gene crossGenes(Gene gene1, Gene gene2) {
+        int level1 = gene1.level();
+        int level2 = gene2.level();
+        /*switch (Math.abs(level2 - level1)) {
+            case 0:
+                break;
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + Math.abs(level2 - level1));
+        }*/
+        return new Gene(gene1.type(), (level1 + level2) / 2);
+    }
     // terrible code
-    public static Pair<GeneTypes, Integer> crossGenes(int level1, int level2, GeneTypes type) {
+    private static Pair<GeneTypes, Integer> crossGenes(int level1, int level2, GeneTypes type) {
         int levelDiff = Math.abs(level1 - level2);
         int newLevel = 0;
         Random random = new Random();
@@ -193,14 +267,13 @@ public class CrossUtil {
                 break;
             case 1:
                 int i = random.nextInt(2); // 0 - 1
-                switch(i) {
-                    case 0: // 50%
-                        newLevel = Integer.min(level1, level2);
-                        break;
-                    case 1: // 50%
-                        newLevel = Integer.max(level1, level2);
-                        break;
-                }
+                newLevel = switch (i) {
+                    case 0 -> // 50%
+                            Integer.min(level1, level2);
+                    case 1 -> // 50%
+                            Integer.max(level1, level2);
+                    default -> newLevel;
+                };
             case 2:
                 i = random.nextInt(4); // 0 - 3
                 if(i == 0) { // 0 25%

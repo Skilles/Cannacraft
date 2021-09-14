@@ -33,7 +33,6 @@ import java.util.Random;
 
 import static com.skilles.cannacraft.CannacraftClient.config;
 import static com.skilles.cannacraft.util.MiscUtil.*;
-import static com.skilles.cannacraft.util.MiscUtil.trimTag;
 
 // TODO: use networking/scheduler, migrate tick to BE
 public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertilizable {
@@ -75,6 +74,8 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     }
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
+        if(pos.down().equals(neighborPos) && neighborState.isOf(Blocks.AIR))
+            return Blocks.AIR.getDefaultState();
         if(pos.down().equals(neighborPos) && neighborState.isOf(Blocks.DIRT))
             MiscUtil.dropStack(world, pos, ModItems.WEED_SEED);
         return !state.canPlaceAt(world, pos) && neighborState.isOf(Blocks.DIRT) ? Blocks.AIR.getDefaultState() : state;
@@ -135,9 +136,11 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     }
     private int getBelow(World world, BlockPos pos) {
         int i = 1;
-        if (!world.getBlockState(pos.down()).isOf(Blocks.FARMLAND) && !world.getBlockState(pos.down()).isOf(Blocks.GRASS_BLOCK)) {
+        if (getStage(world.getBlockState(pos)) != 1) {
             for (i = 1; world.getBlockState(pos.down(i)).isOf(this); ++i) { // i = how many stages
             }
+        } else {
+            i = 0;
         }
         return i;
     }
@@ -175,7 +178,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         ItemStack newStack = new ItemStack(ModItems.WEED_SEED);
         NbtCompound tag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
         if (tag != null) {
-            newStack.putSubTag("cannacraft:strain", trimTag(tag));
+            newStack.setSubNbt("cannacraft:strain", trimTag(tag));
         }
         return newStack;
     }
@@ -189,53 +192,49 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
 
     @Override
     public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) { // drops cannabis with BE's NBT
-       boolean brokenWithShears = false;
-       if(player.getMainHandStack().isOf(Items.SHEARS)) brokenWithShears = true;
-       if(!world.isClient) {
-           int i;
-           MiscUtil.dropStack(world, pos, ModItems.WEED_SEED, brokenWithShears);
-           if (isBloomed(state)) {
-               MiscUtil.dropStack(world, pos, ModItems.WEED_BUNDLE, brokenWithShears);
-           }
-           for(i = 1; world.getBlockState(pos.up(i)).isOf(ModBlocks.WEED_CROP); i++){
-               BlockState aboveState = world.getBlockState(pos.up(i));
-               //WeedCropEntity aboveEntity = (WeedCropEntity) world.getBlockEntity(pos.up(i));
-               if(isBloomed(aboveState)) {
-                   MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_SEED);
-                   MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_BUNDLE, brokenWithShears);
-                   world.breakBlock(pos.up(i), false, player);
-               }
-           }
-
+       boolean brokenWithShears = player.getMainHandStack().isOf(Items.SHEARS);
+        if(!world.isClient) {
+           dropItems(world, pos, state, brokenWithShears);
        }
         super.onBreak(world, pos, state, player);
     }
+    private void dropItems(World world, BlockPos pos, BlockState state, boolean brokenWithShears) {
+        int i;
+        MiscUtil.dropStack(world, pos, ModItems.WEED_SEED, brokenWithShears);
+        /*if (isBloomed(state)) {
+            if(!((WeedCropEntity) world.getBlockEntity(pos)).isMale)
+            MiscUtil.dropStack(world, pos, ModItems.WEED_BUNDLE, brokenWithShears);
+        }*/
+        for(i = 0; world.getBlockState(pos.up(i)).isOf(ModBlocks.WEED_CROP); i++){
+            BlockState aboveState = world.getBlockState(pos.up(i));
+            //WeedCropEntity aboveEntity = (WeedCropEntity) world.getBlockEntity(pos.up(i));
+            if(isBloomed(aboveState)) {
+                MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_SEED);
+                if(!((WeedCropEntity) world.getBlockEntity(pos.up(i))).isMale)
+                MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_BUNDLE, brokenWithShears);
 
+                //world.breakBlock(pos.up(i), false, player);
+            }
+        }
+    }
     /**
      * @return 1 = stage one, 2 = intermediate stage, 3 = final stage, 4 = connector
      */
-    private int getStage(BlockState state) {
+    private static int getStage(BlockState state) {
         if(state.get(AGE) == CONNECTOR_AGE) return 4;
-        switch (state.get(MAXAGE)) {
-            case STAGE_ONE_MAX:
-                return 1;
-            case STAGE_TWO_MAX:
-                return 2;
-            default:
-                return 3;
-        }
+        return switch (state.get(MAXAGE)) {
+            case STAGE_ONE_MAX -> 1;
+            case STAGE_TWO_MAX -> 2;
+            default -> 3;
+        };
     }
     private BlockState withStage(int stage) {
-        switch (stage) {
-            default:
-                return this.getDefaultState();
-            case 2:
-                return withMaxAge(8).with(AGE, 5);
-            case 3:
-                return withMaxAge(FINAL_BLOOM).with(AGE, 5);
-            case 4:
-                return withAge(CONNECTOR_AGE);
-        }
+        return switch (stage) {
+            default -> this.getDefaultState();
+            case 2 -> withMaxAge(8).with(AGE, 5);
+            case 3 -> withMaxAge(FINAL_BLOOM).with(AGE, 5);
+            case 4 -> withAge(CONNECTOR_AGE);
+        };
     }
     /**
      * Blooms 1st, 2nd/medium, or final stages
@@ -247,7 +246,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
             world.setBlockState(pos, withAge(FINAL_BLOOM));
         }
     }
-    private boolean isBloomed(BlockState state) {
+    public boolean isBloomed(BlockState state) {
         return state.get(AGE) == FIRST_BLOOM || state.get(AGE) == FINAL_BLOOM;
     }
     @Override
@@ -285,17 +284,18 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
                 if (random.nextFloat() < (f/14)*(blockEntity.multiplier()/2)) {
                     if (finalGrow(state) && canGrow.orElse(true)) { // if has yield, about to grow, and below grow limit
                         growStage(pos, world, canGrow);
-                        world.markDirty(pos);
                         world.setBlockState(pos, withStage(4), 2); // convert 2nd stage to connector
                     } else {
                         world.setBlockState(pos, state.with(AGE, j + 1), 2);
                     }
+                    world.markDirty(pos);
                 }
             }
         } else if (getStage(state) == 1) { // first stage
             if (j < this.getMaxAge(state) && (world.getLightLevel(pos) >= 9)) {
                 if (random.nextFloat() < (f/14)*(blockEntity.multiplier()/2)) {
                     world.setBlockState(pos, state.with(AGE, j + 1), 2);
+                    world.markDirty(pos);
                 }
             } else if (getAge(state) == STAGE_ONE_MAX) { // onGrow
                 if (blockEntity.canBreed()) { // if can breed
@@ -319,6 +319,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
                     }
                 }
                 world.setBlockState(pos, state.with(AGE, j + 1), 2);
+                world.markDirty(pos);
             }
         }
     }
@@ -341,12 +342,11 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         this.applySpreadTick(state, world, pos, random);
     }
     private void applySpreadTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-       if((!config.getDebug().spreadGrown || state.get(AGE) == 3) && config.getCrop().spread && random.nextFloat() <= config.getCrop().spreadChance) {
-           Direction direction = isAdjacentTo(world, pos.down(), true, Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.FARMLAND);
-           if(direction != null) {
-               BlockPos neighborPos = pos.down().offset(direction);
-               world.setBlockState(neighborPos.up(), state.with(AGE, 0));
-               copyNbt(world, pos, neighborPos.up());
+       if((!config.getDebug().spreadGrown || isBloomed(state)) && config.getCrop().spread && random.nextFloat() <= config.getCrop().spreadChance/100F) {
+           BlockPos spreadPos = getValidSpreadPos(world, pos, random);
+           if(spreadPos != null) {
+               world.setBlockState(spreadPos, this.getDefaultState());
+               copyNbt(world, pos, spreadPos);
            }
        }
     }
@@ -422,14 +422,14 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     }
 
     public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
-        if (itemStack.hasTag()) {
-            NbtCompound tag =  itemStack.getSubTag("cannacraft:strain");
+        if (itemStack.hasNbt()) {
+            NbtCompound tag =  itemStack.getSubNbt("cannacraft:strain");
             BlockEntity blockEntity = world.getBlockEntity(pos);
             //tag.putInt("ID", ModMisc.STRAIN.get(itemStack).getIndex()); // index 0 = null bug workaround
             if (blockEntity instanceof WeedCropEntity && tag != null && tag.contains("ID")) {
                 NbtList attributes = new NbtList();
                 if(tag.contains("Attributes")) attributes = tag.getList("Attributes", NbtType.COMPOUND);
-                ((WeedCropEntity) blockEntity).setData(tag.getInt("ID"), tag.getInt("THC"), tag.getBoolean("Identified"), tag.getBoolean("Male"), attributes);
+                ((WeedCropEntity) blockEntity).setData(tag, attributes);
                 world.markDirty(pos);
             }
         }

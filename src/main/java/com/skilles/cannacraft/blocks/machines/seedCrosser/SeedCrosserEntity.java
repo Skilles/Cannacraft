@@ -1,20 +1,17 @@
 package com.skilles.cannacraft.blocks.machines.seedCrosser;
 
-import com.skilles.cannacraft.blocks.machines.MachineBlock;
 import com.skilles.cannacraft.blocks.machines.MachineBlockEntity;
 import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.registry.ModItems;
-import com.skilles.cannacraft.strain.StrainMap;
+import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.util.CrossUtil;
 import com.skilles.cannacraft.util.StrainUtil;
+import com.skilles.cannacraft.util.WeedRegistry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -30,8 +27,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import static com.skilles.cannacraft.Cannacraft.log;
-
 public class SeedCrosserEntity extends MachineBlockEntity {
     private final double powerMultiplier = 1; // Energy use multiplier
     private final boolean needsPower = true;
@@ -44,23 +39,17 @@ public class SeedCrosserEntity extends MachineBlockEntity {
         this.propertyDelegate = new PropertyDelegate() {
             @Override
             public int get(int index) {
-                switch(index) {
-                    case 0:
-                        return SeedCrosserEntity.this.processingTime;
-                    case 1:
-                        return SeedCrosserEntity.this.powerStored;
-                    default:
-                        return 0;
-                }
+                return switch (index) {
+                    case 0 -> SeedCrosserEntity.this.processingTime;
+                    case 1 -> SeedCrosserEntity.this.powerStored;
+                    default -> 0;
+                };
             }
             @Override
             public void set(int index, int value) {
-                switch(index) {
-                    case 0:
-                        SeedCrosserEntity.this.processingTime = value;
-                        break;
-                    case 1:
-                        SeedCrosserEntity.this.powerStored = value;
+                switch (index) {
+                    case 0 -> SeedCrosserEntity.this.processingTime = value;
+                    case 1 -> SeedCrosserEntity.this.powerStored = value;
                 }
             }
             @Override
@@ -69,36 +58,6 @@ public class SeedCrosserEntity extends MachineBlockEntity {
             }
         };
     }
-    public static void tick(World world, BlockPos pos, BlockState state, SeedCrosserEntity blockEntity) {
-        if (world == null || world.isClient) return;
-        if (isNextTo(world, pos, Blocks.GLOWSTONE) && blockEntity.powerStored < blockEntity.getMaxStoredPower()) {
-            blockEntity.addEnergy(2);
-            markDirty(world, pos, state);
-        }
-        if (blockEntity.isWorking()) {
-            if (!world.isReceivingRedstonePower(pos)) {
-                processTick(blockEntity); // playSound is called here
-                state = state.with(MachineBlock.ACTIVE, true);
-                world.setBlockState(pos, state, Block.NOTIFY_ALL);
-                markDirty(world, pos, state);
-            }
-            if (canCraft(blockEntity.inventory) && blockEntity.processingTime == timeToProcess) { // when done crafting
-                blockEntity.playSound(craft(blockEntity.inventory)); // craft and play sound if new strain
-                blockEntity.processingTime = 1; // keep working
-                markDirty(world, pos, state);
-            } else if (!canCraft(blockEntity.inventory)) {
-                blockEntity.processingTime = 0;
-                markDirty(world, pos, state);
-            }
-        } else if (canCraft(blockEntity.inventory) && blockEntity.powerStored != 0) { // start if has power
-            blockEntity.processingTime = 1;
-        } else { // when no items or can't craft
-            blockEntity.processingTime = 0;
-            state = state.with(MachineBlock.ACTIVE, false);
-            world.setBlockState(pos, state, Block.NOTIFY_ALL);
-        }
-        markDirty(world, pos, state);
-    }
     @Override
     public void playSound(int flag) {
         World world  = getWorld();
@@ -106,25 +65,14 @@ public class SeedCrosserEntity extends MachineBlockEntity {
         assert world != null;
         if(!world.isClient) {
             if(this.processingTime % 25 == 0 && flag == 0) {
-                if (this.processingTime != timeToProcess) {
-                    world.playSound(
-                            null, // Player - if non-null, will play sound for every nearby player *except* the specified player
-                            pos, // The position of where the sound will come from
-                            runSound, // The sound that will play, in this case, the sound the anvil plays when it lands.
-                            SoundCategory.BLOCKS, // This determines which of the volume sliders affect this sound
-                            0.15f, //Volume multiplier, 1 is normal, 0.5 is half volume, etc
-                            1f // Pitch multiplier, 1 is normal, 0.5 is half pitch, etc
-                    );
-                } else {
-                    world.playSound(
-                            null,
-                            pos,
-                            runSound,
-                            SoundCategory.BLOCKS,
-                            0.15f,
-                            2f
-                    );
-                }
+                world.playSound(
+                        null, // Player - if non-null, will play sound for every nearby player *except* the specified player
+                        pos, // The position of where the sound will come from
+                        runSound, // The sound that will play, in this case, the sound the anvil plays when it lands.
+                        SoundCategory.BLOCKS, // This determines which of the volume sliders affect this sound
+                        0.15f, //Volume multiplier, 1 is normal, 0.5 is half volume, etc
+                        this.processingTime != timeToProcess ? 1f : 2f // Pitch multiplier, 1 is normal, 0.5 is half pitch, etc
+                );
             } else if(flag == 1) {
                 world.playSound(
                         null,
@@ -136,63 +84,39 @@ public class SeedCrosserEntity extends MachineBlockEntity {
                 );
                 // Sends message to nearby players
                 for (ServerPlayerEntity player : PlayerLookup.tracking((ServerWorld) world, pos)) {
-                    player.sendSystemMessage(Text.of(StrainUtil.getStrain(StrainUtil.getStrainCount() - 1).name() + " has been created!"), Util.NIL_UUID);
+                    player.sendSystemMessage(Text.of(StrainUtil.getLatestStrain().name() + " has been created!"), Util.NIL_UUID);
                 }
             }
         }
     }
-    protected static boolean canCraft(DefaultedList<ItemStack> inventory) {
-            ItemStack stack = inventory.get(1);
-            ItemStack stack2 = inventory.get(2);
-            ItemStack output = inventory.get(0);
-            if(stack.equals(ItemStack.EMPTY) || stack2.equals(ItemStack.EMPTY)) return false;
-            if (stack.hasTag() && stack2.hasTag()) {
-                NbtCompound tag = stack.getSubTag("cannacraft:strain");
-                NbtCompound tag2 = stack2.getSubTag("cannacraft:strain");
-                if (tag.getBoolean("Identified") && tag2.getBoolean("Identified")) {
-                    if(tag.equals(tag2)) return false;
-                    if (output.isEmpty()) {
-                        return true;
-                    } else {
-                        NbtCompound outputTag = output.getSubTag("cannacraft:strain");
-                        String newName = CrossUtil.crossStrains(StrainUtil.getStrain(tag.getInt("ID")).name(), StrainUtil.getStrain(tag2.getInt("ID")).name());
-                        int newThc = CrossUtil.crossThc(tag.getInt("THC"), tag2.getInt("THC"));
-                        return StrainUtil.isPresent(newName) && outputTag.getInt("ID") == StrainUtil.indexOf(newName) && newThc == outputTag.getInt("THC");
-                    }
-                }
-            }
+    public boolean canCraft(DefaultedList<ItemStack> inventory) {
+        ItemStack stack = inventory.get(1);
+        ItemStack stack2 = inventory.get(2);
+        ItemStack output = inventory.get(0);
+        if(stack.equals(ItemStack.EMPTY) || stack2.equals(ItemStack.EMPTY)) return false;
+        if (stack.hasNbt() && stack2.hasNbt() && WeedRegistry.isIdentified(stack) && WeedRegistry.isIdentified(stack2)) {
+            if (stack.getNbt() == stack2.getNbt()) return false;
+            if (output.isEmpty()) return true;
+
+            Strain newStrain = CrossUtil.crossStrains(WeedRegistry.getStrain(stack), WeedRegistry.getStrain(stack2));
+            int newThc = CrossUtil.crossThc(WeedRegistry.getThc(stack), WeedRegistry.getThc(stack2));
+            return WeedRegistry.getStrain(output) == newStrain && newThc == WeedRegistry.getThc(output);
+        }
         return false;
     }
-    protected static int craft(DefaultedList<ItemStack> inventory) {
+    public int craft(DefaultedList<ItemStack> inventory) {
         int flag = 0; // flag if no new strain was added
 
         ItemStack stack = inventory.get(1);
         ItemStack stack2 = inventory.get(2);
         ItemStack outputSlot = inventory.get(0);
-        ItemStack output = ModItems.WEED_SEED.getDefaultStack();
-        NbtCompound tag = stack.getSubTag("cannacraft:strain");
-        NbtCompound tag2 = stack2.getSubTag("cannacraft:strain");
 
-        String newName = CrossUtil.crossStrains(StrainUtil.getStrain(tag.getInt("ID")).name(), StrainUtil.getStrain(tag2.getInt("ID")).name());
-        StrainMap.Type newType = CrossUtil.crossTypes(StrainUtil.getStrain(tag.getInt("ID")).type(), StrainUtil.getStrain(tag2.getInt("ID")).type());
-        int newThc = CrossUtil.crossThc(tag.getInt("THC"), tag2.getInt("THC"));
-
-        if(!StrainUtil.getNames().containsKey(newName)) {
-            StrainUtil.addStrain(newName, newType);
-            log("New strain: "+ StrainUtil.getStrain(StrainUtil.getStrainCount() - 1)); // print latest strain
-            flag = 1; // flag if strain was added
-        }
-        NbtCompound strainTag = new NbtCompound();
-        strainTag.putInt("ID", StrainUtil.indexOf(newName));
-        strainTag.putBoolean("Identified", true);
-        strainTag.putInt("THC", newThc);
-        NbtCompound outputTag = new NbtCompound();
-        outputTag.put("cannacraft:strain", strainTag);
-        output.setTag(outputTag);
+        ItemStack output = CrossUtil.crossItems(stack, stack2, true);
 
         if(outputSlot.isEmpty()) {
             inventory.set(0, output);
-        } else if(outputSlot.getTag().equals(outputTag)) {
+            flag = 1;
+        } else {
             outputSlot.increment(1);
         }
         stack.decrement(1);

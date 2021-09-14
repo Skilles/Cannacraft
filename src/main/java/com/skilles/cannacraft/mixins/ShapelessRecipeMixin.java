@@ -1,6 +1,7 @@
 package com.skilles.cannacraft.mixins;
 
 import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.util.WeedRegistry;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.ShapelessRecipe;
@@ -11,6 +12,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import static com.skilles.cannacraft.Cannacraft.id;
 
 /**
  * Copies strain NBT in crafting recipes
@@ -24,16 +27,29 @@ public abstract class ShapelessRecipeMixin {
 
     @Inject(method = "craft", at = @At(value = "RETURN"), cancellable = true)
     public void inject(CraftingInventory craftingInventory, CallbackInfoReturnable<ItemStack> cir) {
-        if(this.id.equals(new Identifier("cannacraft:weed_joint"))) {
+        if(WeedRegistry.WeedTypes.isOf(this.getOutput())) {
             int slotId = 0;
             for(int i = 0; i < craftingInventory.size(); i++) {
-                if(craftingInventory.getStack(i).isOf(ModItems.WEED_BUNDLE)) slotId = i;
+                if(WeedRegistry.WeedTypes.isOf(craftingInventory.getStack(i))) slotId = i;
             }
             ItemStack input = craftingInventory.getStack(slotId).copy();
             ItemStack output = this.getOutput().copy();
-            if(input.hasTag()) {
-                output.putSubTag("cannacraft:strain", input.getSubTag("cannacraft:strain"));
-                cir.setReturnValue(output);
+            if(input.hasNbt()) {
+                output.setSubNbt("cannacraft:strain", input.getSubNbt("cannacraft:strain"));
+                if(output.getItem() == ModItems.WEED_BUNDLE) {
+                    if(this.id.equals(id("weed_bundle_ground"))) {
+                        if(WeedRegistry.getStatus(input) == WeedRegistry.StatusTypes.DRY) {
+                            output.getSubNbt("cannacraft:strain").putFloat("Status", 0.0F);
+                            cir.setReturnValue(output);
+                        } else {
+                            cir.setReturnValue(ItemStack.EMPTY);
+                        }
+                    }
+                } else if(this.id.equals(id("weed_joint"))) {
+                    cir.setReturnValue(WeedRegistry.getStatus(input) == WeedRegistry.StatusTypes.GROUND ? output : ItemStack.EMPTY);
+                } else {
+                    cir.setReturnValue(output);
+                }
             }
         }
     }

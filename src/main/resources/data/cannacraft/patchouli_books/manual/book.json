@@ -1,0 +1,11 @@
+{
+  "name": "Cannamanual",
+  "landing_text": "The Cannacraft Manual",
+  "version": 1,
+  "dont_generate_book": true,
+  "custom_book_item": "cannacraft:manual",
+  "creative_tab": "cannacraft.general",
+  "pause_game": false,
+  "advancements_tab": "cannacraft",
+  "model": "patchouli:book_green"
+}
