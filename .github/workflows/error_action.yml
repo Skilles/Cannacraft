@@ -10,6 +10,8 @@ jobs:
         with:
           fetch-depth: 0
       - name: Check for errors.
-        uses: github/super-linter@v3
+        uses: github/super-linter@v4
         env:
           VALIDATE_ALL_CODEBASE: false
+          DEFAULT_BRANCH: 1.17-dev
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
