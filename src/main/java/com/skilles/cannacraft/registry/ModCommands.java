@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.skilles.cannacraft.components.EntityInterface;
 import com.skilles.cannacraft.dna.genome.Enums;
 import com.skilles.cannacraft.dna.genome.Genome;
 import com.skilles.cannacraft.dna.genome.gene.TraitGene;
@@ -210,8 +211,13 @@ public class ModCommands {
                                         .executes(ctx -> {
                                             final ServerPlayerEntity self = ctx.getSource().getPlayer();
                                             Strain argStrain = StrainUtil.toStrain(getString(ctx, "strain"));
-                                            ModMisc.PLAYER.get(self).getCannadex().discoverStrains(argStrain);
-                                            self.sendSystemMessage(Text.of("Unlocked strain " + argStrain.name()), Util.NIL_UUID);
+                                            EntityInterface playerStrainComponent = ModMisc.PLAYER.get(self);
+                                            if (!playerStrainComponent.isDiscovered(argStrain)) {
+                                                playerStrainComponent.discoverStrain(argStrain, null);
+                                                self.sendSystemMessage(Text.of("Unlocked strain " + argStrain.name()), Util.NIL_UUID);
+                                            } else {
+                                                self.sendSystemMessage(Text.of("Strain is already discovered!"), Util.NIL_UUID);
+                                            }
                                             return 1;
                                         })))
                         .then(literal("info")

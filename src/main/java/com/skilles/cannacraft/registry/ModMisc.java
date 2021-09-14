@@ -7,6 +7,7 @@ import com.skilles.cannacraft.components.ItemStrainComponent;
 import com.skilles.cannacraft.components.PlayerStrainComponent;
 import com.skilles.cannacraft.components.StrainInterface;
 import com.skilles.cannacraft.misc.HighEffect;
+import com.skilles.cannacraft.misc.Network;
 import com.skilles.cannacraft.util.BundleUtil;
 import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistryV3;
@@ -55,7 +56,7 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
     }
     @Override
     public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
-        registry.registerForPlayers(PLAYER, player -> new PlayerStrainComponent(), RespawnCopyStrategy.LOSSLESS_ONLY);
+        registry.registerForPlayers(PLAYER, PlayerStrainComponent::new, RespawnCopyStrategy.ALWAYS_COPY);
     }
 
     private static void registerRecipes() {
@@ -107,5 +108,6 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
         registerModelPredicates();
         registerVillagers();
         registerRenderers();
+        Network.register();
     }
 }

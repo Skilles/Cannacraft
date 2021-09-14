@@ -4,6 +4,7 @@ import com.skilles.cannacraft.blocks.ImplementedInventory;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCropEntity;
 import com.skilles.cannacraft.dna.genome.Genome;
 import com.skilles.cannacraft.dna.genome.gene.TraitGene;
+import com.skilles.cannacraft.misc.WeedToast;
 import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.registry.ModMisc;
@@ -60,6 +61,10 @@ public final class MiscUtil {
         Genome genome = ModMisc.STRAIN.get(stack).getGenome();
         boolean identified = tag.getBoolean("Identified");
         StrainInfo info = DnaUtil.convertStrain(genome, identified);
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (!ModMisc.PLAYER.get(client.player).isDiscovered(info.strain())) {
+            client.getToastManager().add(new WeedToast(WeedToast.Type.DISCOVER, info.strain()));
+        }
         String sex = info.male() ? "Male" : "Female";
         int id = info.strain().id();
         int thc = info.thc();
@@ -73,8 +78,11 @@ public final class MiscUtil {
             if (stack.isOf(ModItems.WEED_SEED)) {
                 tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText(sex).formatted(Formatting.DARK_GREEN)));
             }
-            if (!genes.isEmpty() && shiftGenes) {
-                tooltip.add(new LiteralText("Press ").append( new LiteralText("SHIFT ").formatted(Formatting.GOLD).append( new LiteralText("to view Genes").formatted(Formatting.WHITE))));
+            if (shiftGenes) {
+                if (!genes.isEmpty()) {
+                    tooltip.add(new LiteralText("Press ").append(new LiteralText("SHIFT ").formatted(Formatting.GOLD).append(new LiteralText("to view Genes").formatted(Formatting.WHITE))));
+                }
+                tooltip.add(new LiteralText("Press ").formatted(Formatting.GRAY).append(new LiteralText("CTRL ").formatted(Formatting.AQUA).append(new LiteralText("to view DNA").formatted(Formatting.GRAY))));
             }
         } else {
             tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText("Unidentified").formatted(Formatting.GREEN)));
@@ -351,5 +359,19 @@ public final class MiscUtil {
             }
         }
         return null;
+    }
+
+    public static String[] splitEqual(String s, int parts) {
+        int length = s.length(); //Get string length
+        int whereToSplit; //store where will split
+
+        if (length % 2 == 0) {
+            whereToSplit = length / parts; //if length number is pair then it'll split equal
+        } else {
+            whereToSplit = (length + 1) / parts; //else the first value will have one char more than the other
+        }
+
+        return s.split("(?<=\\G.{" + whereToSplit + "})"); //split the string
+
     }
 }

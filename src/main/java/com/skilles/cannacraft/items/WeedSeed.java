@@ -3,6 +3,7 @@ package com.skilles.cannacraft.items;
 import com.skilles.cannacraft.blocks.machines.MachineBlock;
 import com.skilles.cannacraft.blocks.machines.MachineBlockEntity;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
+import com.skilles.cannacraft.strain.cannadex.Cannadex;
 import com.skilles.cannacraft.util.MiscUtil;
 import com.skilles.cannacraft.util.StrainUtil;
 import net.minecraft.block.Block;
@@ -81,6 +82,7 @@ public class WeedSeed extends AliasedBlockItem {
         if (stack.hasNbt()) {
             NbtCompound tag = stack.getSubNbt("cannacraft:strain");
             if (tag.contains("DNA")) {
+                Cannadex.clientDiscoverStrain(stack);
                 MiscUtil.appendTooltips(tooltip, stack, true);
             }
         }
