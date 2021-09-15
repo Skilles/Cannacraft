@@ -5,6 +5,7 @@ import com.skilles.cannacraft.registry.ModEntities;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.util.CrossUtil;
+import com.skilles.cannacraft.util.DnaUtil;
 import com.skilles.cannacraft.util.StrainUtil;
 import com.skilles.cannacraft.util.WeedRegistry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
@@ -28,9 +29,13 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class SeedCrosserEntity extends MachineBlockEntity {
+
     private final double powerMultiplier = 1; // Energy use multiplier
+
     private final boolean needsPower = true;
+
     protected final PropertyDelegate propertyDelegate;
+
     protected static final int timeToProcess = 175;
 
     public SeedCrosserEntity(BlockPos pos, BlockState state) {
@@ -58,13 +63,14 @@ public class SeedCrosserEntity extends MachineBlockEntity {
             }
         };
     }
+
     @Override
     public void playSound(int flag) {
         World world  = getWorld();
         SoundEvent runSound = SoundEvents.BLOCK_HONEY_BLOCK_SLIDE;
         assert world != null;
-        if(!world.isClient) {
-            if(this.processingTime % 25 == 0 && flag == 0) {
+        if (!world.isClient) {
+            if (this.processingTime % 25 == 0 && flag == 0) {
                 world.playSound(
                         null, // Player - if non-null, will play sound for every nearby player *except* the specified player
                         pos, // The position of where the sound will come from
@@ -73,7 +79,7 @@ public class SeedCrosserEntity extends MachineBlockEntity {
                         0.15f, //Volume multiplier, 1 is normal, 0.5 is half volume, etc
                         this.processingTime != timeToProcess ? 1f : 2f // Pitch multiplier, 1 is normal, 0.5 is half pitch, etc
                 );
-            } else if(flag == 1) {
+            } else if (flag == 1) {
                 world.playSound(
                         null,
                         pos,
@@ -89,11 +95,12 @@ public class SeedCrosserEntity extends MachineBlockEntity {
             }
         }
     }
+
     public boolean canCraft(DefaultedList<ItemStack> inventory) {
         ItemStack stack = inventory.get(1);
         ItemStack stack2 = inventory.get(2);
         ItemStack output = inventory.get(0);
-        if(stack.equals(ItemStack.EMPTY) || stack2.equals(ItemStack.EMPTY)) return false;
+        if (stack.equals(ItemStack.EMPTY) || stack2.equals(ItemStack.EMPTY)) return false;
         if (stack.hasNbt() && stack2.hasNbt() && WeedRegistry.isIdentified(stack) && WeedRegistry.isIdentified(stack2)) {
             if (stack.getNbt() == stack2.getNbt()) return false;
             if (output.isEmpty()) return true;
@@ -104,6 +111,7 @@ public class SeedCrosserEntity extends MachineBlockEntity {
         }
         return false;
     }
+
     public int craft(DefaultedList<ItemStack> inventory) {
         int flag = 0; // flag if no new strain was added
 
@@ -111,9 +119,9 @@ public class SeedCrosserEntity extends MachineBlockEntity {
         ItemStack stack2 = inventory.get(2);
         ItemStack outputSlot = inventory.get(0);
 
-        ItemStack output = CrossUtil.crossItems(stack, stack2, true);
+        ItemStack output = DnaUtil.crossItems(stack, stack2, 1, true).get(0);
 
-        if(outputSlot.isEmpty()) {
+        if (outputSlot.isEmpty()) {
             inventory.set(0, output);
             flag = 1;
         } else {
@@ -123,11 +131,13 @@ public class SeedCrosserEntity extends MachineBlockEntity {
         stack2.decrement(1);
         return flag;
     }
+
     @Nullable
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
         return new SeedCrosserScreenHandler(syncId, inv, this, this.propertyDelegate);
     }
+
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
         return stack.isOf(ModItems.WEED_SEED);

@@ -15,11 +15,13 @@ import net.minecraft.util.Identifier;
 
 @Environment(EnvType.CLIENT)
 public class WeedExtractorScreen extends HandledScreen<WeedExtractorScreenHandler> {
+
     private static final Identifier TEXTURE = Cannacraft.id("textures/gui/container/strain_analyzer.png");
 
     public WeedExtractorScreen(WeedExtractorScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
     }
+
     @Override
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -41,13 +43,14 @@ public class WeedExtractorScreen extends HandledScreen<WeedExtractorScreenHandle
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         int i = this.x;
         int j = this.y;
-        if(mouseX >= i + 150 && mouseX < i + 168 && mouseY >= j + 8 && mouseY < j + 70) { // if hovering over power bar
+        if (mouseX >= i + 150 && mouseX < i + 168 && mouseY >= j + 8 && mouseY < j + 70) { // if hovering over power bar
             renderTooltip(matrices, new LiteralText("Energy: "+this.handler.powerStored()).formatted(Formatting.GOLD), x + 168, y + 20);
         }
         this.renderBackground(matrices);
         super.render(matrices, mouseX, mouseY, delta);
         this.drawMouseoverTooltip(matrices, mouseX, mouseY);
     }
+
     @Override
     protected void init() {
         super.init();

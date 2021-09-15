@@ -21,31 +21,32 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
+import static net.minecraft.client.gui.screen.Screen.hasControlDown;
 import static net.minecraft.client.gui.screen.Screen.hasShiftDown;
 
 @Mixin(Screen.class)
-public class ScreenMixin {
+public abstract class ScreenMixin {
     @Shadow
-    protected
-    MinecraftClient client;
+    protected MinecraftClient client;
 
     @Inject(method = "getTooltipFromItem", at = @At(value = "RETURN", target = "Lnet/minecraft/client/gui/screen/Screen;getTooltipFromItem(Lnet/minecraft/item/ItemStack;)Ljava/util/List;"), cancellable = true)
     private void keyTooltip(ItemStack stack, CallbackInfoReturnable<List<Text>> cir) {
-        if(stack.isOf(ModItems.WEED_SEED) && hasShiftDown() && stack.hasNbt()) {
+        if (stack.isOf(ModItems.WEED_SEED) && stack.hasNbt()) {
             NbtCompound tag = stack.getSubNbt("cannacraft:strain");
-            if (!tag.contains("NBT")) {
+            if (!tag.contains("DNA")) {
                 cir.cancel();
             }
             StrainInterface stackInterface = ModMisc.STRAIN.get(stack);
-            List<TraitGene> expressedGenes = stackInterface.getExpressed();
-            if (tag.getBoolean("Identified") && !expressedGenes.isEmpty()) {
-                List<Text> tooltip = cir.getReturnValue();
-                int offset = client.options.advancedItemTooltips ? 4 : 2;
-                tooltip.set(tooltip.size() - offset, new LiteralText("Genes: ").formatted(Formatting.GRAY));
-                for (TraitGene gene : expressedGenes) {
-                    tooltip.add(7, new LiteralText("- ").formatted(Formatting.DARK_GRAY).append(new LiteralText(WordUtils.capitalizeFully(gene.phenotype.name())).formatted(Formatting.AQUA)).append(new LiteralText(" | ").formatted(Formatting.GRAY)).append(new LiteralText(String.valueOf(gene.value)).formatted(Formatting.GOLD)));
+            if (hasShiftDown()) {
+                List<TraitGene> expressedGenes = stackInterface.getExpressed();
+                if (tag.getBoolean("Identified") && !expressedGenes.isEmpty()) {
+                    List<Text> tooltip = cir.getReturnValue();
+                    expandGenes(expressedGenes, tooltip, client.options.advancedItemTooltips);
                 }
-                cir.setReturnValue(tooltip);
+            } else if (hasControlDown() && tag.getBoolean("Identified")) {
+                String dnaString = stackInterface.getGenome().toString();
+                List<Text> tooltip = cir.getReturnValue();
+                expandDna(dnaString, tooltip, client.options.guiScale);
             }
         } else if (stack.isOf(ModItems.WEED_BUNDLE) && stack.hasNbt()) {
             NbtCompound tag = stack.getSubNbt("cannacraft:strain");
@@ -58,13 +59,28 @@ public class ScreenMixin {
                 StrainInterface stackInterface = ModMisc.STRAIN.get(stack);
                 List<TraitGene> expressedGenes = stackInterface.getExpressed();
                 if (!expressedGenes.isEmpty()) {
-                    tooltip.set(tooltip.size() - 2, new LiteralText("Genes: ").formatted(Formatting.GRAY));
-                    for (TraitGene gene : expressedGenes) {
-                        tooltip.add(7, new LiteralText("- ").formatted(Formatting.DARK_GRAY).append(new LiteralText(WordUtils.capitalizeFully(gene.phenotype.name())).formatted(Formatting.AQUA)).append(new LiteralText(" | ").formatted(Formatting.GRAY)).append(new LiteralText(String.valueOf(gene.value)).formatted(Formatting.GOLD)));
-                    }
+                    expandGenes(expressedGenes, tooltip, client.options.advancedItemTooltips);
                 }
             }
-            cir.setReturnValue(tooltip);
         }
     }
+
+    private static void expandGenes(List<TraitGene> expressedGenes, List<Text> tooltip, boolean advanced) {
+        int offset = advanced ? 4 : 2;
+        tooltip.set(6, new LiteralText("Genes:").formatted(Formatting.GRAY));
+        for (TraitGene gene : expressedGenes) {
+            tooltip.add(7, new LiteralText("- ").formatted(Formatting.DARK_GRAY).append(new LiteralText(WordUtils.capitalizeFully(gene.phenotype.name())).formatted(Formatting.AQUA)).append(new LiteralText(" | ").formatted(Formatting.GRAY)).append(new LiteralText(String.valueOf(gene.value)).formatted(Formatting.GOLD)));
+        }
+        tooltip.remove(tooltip.size() - offset);
+    }
+
+    private static void expandDna(String dnaString, List<Text> tooltip, int guiScale) {
+        tooltip.set(7, new LiteralText("DNA:").formatted(Formatting.GRAY));
+        String[] subStrings = MiscUtil.splitEqual(dnaString, guiScale);
+        for (String subString : subStrings) {
+            tooltip.add(8, new LiteralText(subString));
+        }
+        tooltip.remove(6);
+    }
+
 }

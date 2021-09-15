@@ -71,9 +71,9 @@ public class SeedChestEntity extends BlockEntity implements NamedScreenHandlerFa
     @Override
     public void setStack(int slot, ItemStack stack) {
         ImplementedInventory.super.setStack(slot, stack);
-        if(!inventory.isEmpty()) {
+        if (!inventory.isEmpty()) {
             Collections.sort(inventory, (o1, o2) -> {
-                if(o1.isOf(ModItems.WEED_SEED) && o2.isOf(ModItems.WEED_SEED)) {
+                if (o1.isOf(ModItems.WEED_SEED) && o2.isOf(ModItems.WEED_SEED)) {
                     NbtCompound tag1 = o1.getSubNbt("cannacraft:strain");
                     NbtCompound tag2 = o2.getSubNbt("cannacraft:strain");
                     String name1 = StrainUtil.getStrain(tag1).name();

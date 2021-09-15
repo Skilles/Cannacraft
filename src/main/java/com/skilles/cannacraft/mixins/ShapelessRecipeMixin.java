@@ -25,27 +25,27 @@ public abstract class ShapelessRecipeMixin {
 
     @Shadow @Final private Identifier id;
 
-    @Inject(method = "craft", at = @At(value = "RETURN"), cancellable = true)
+    @Inject(method = "craft(Lnet/minecraft/inventory/CraftingInventory;)Lnet/minecraft/item/ItemStack;", at = @At(value = "RETURN"), cancellable = true)
     public void inject(CraftingInventory craftingInventory, CallbackInfoReturnable<ItemStack> cir) {
-        if(WeedRegistry.WeedTypes.isOf(this.getOutput())) {
+        if (WeedRegistry.WeedTypes.isOf(this.getOutput())) {
             int slotId = 0;
-            for(int i = 0; i < craftingInventory.size(); i++) {
-                if(WeedRegistry.WeedTypes.isOf(craftingInventory.getStack(i))) slotId = i;
+            for (int i = 0; i < craftingInventory.size(); i++) {
+                if (WeedRegistry.WeedTypes.isOf(craftingInventory.getStack(i))) slotId = i;
             }
             ItemStack input = craftingInventory.getStack(slotId).copy();
             ItemStack output = this.getOutput().copy();
-            if(input.hasNbt()) {
+            if (input.hasNbt()) {
                 output.setSubNbt("cannacraft:strain", input.getSubNbt("cannacraft:strain"));
-                if(output.getItem() == ModItems.WEED_BUNDLE) {
-                    if(this.id.equals(id("weed_bundle_ground"))) {
-                        if(WeedRegistry.getStatus(input) == WeedRegistry.StatusTypes.DRY) {
+                if (output.getItem() == ModItems.WEED_BUNDLE) {
+                    if (this.id.equals(id("weed_bundle_ground"))) {
+                        if (WeedRegistry.getStatus(input) == WeedRegistry.StatusTypes.DRY) {
                             output.getSubNbt("cannacraft:strain").putFloat("Status", 0.0F);
                             cir.setReturnValue(output);
                         } else {
                             cir.setReturnValue(ItemStack.EMPTY);
                         }
                     }
-                } else if(this.id.equals(id("weed_joint"))) {
+                } else if (this.id.equals(id("weed_joint"))) {
                     cir.setReturnValue(WeedRegistry.getStatus(input) == WeedRegistry.StatusTypes.GROUND ? output : ItemStack.EMPTY);
                 } else {
                     cir.setReturnValue(output);

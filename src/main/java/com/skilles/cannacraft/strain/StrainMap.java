@@ -24,12 +24,16 @@ import static com.skilles.cannacraft.Cannacraft.log;
 public class StrainMap {
 
     private static final GsonBuilder builder = new GsonBuilder().enableComplexMapKeySerialization().setPrettyPrinting();
+
     private static final Gson gson = builder.create();
 
     //public static int ogStrainCount = 4;
     public static BiMap<Integer, Strain> strainArray = HashBiMap.create();
+
     public static BiMap<Integer, Strain> resourceStrainArray = HashBiMap.create();
+
     public static Map<String, Strain> strainList = new HashMap<>(); // for name lookup
+
     public enum Type {
         INDICA,
         SATIVA,
@@ -52,11 +56,12 @@ public class StrainMap {
         try (Writer writer = new FileWriter("strains.json")) {
             gson.toJson(strainArray, writer);
             log("Strains saved to file");
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             log(Level.ERROR,"Error saving file");
         }
     }
+
     public static void load() {
         try (Reader reader = Files.newBufferedReader(Paths.get("strains.json"))) {
             java.lang.reflect.Type type = new TypeToken<Map<Integer, Strain>>() {
@@ -66,8 +71,12 @@ public class StrainMap {
                 strainArray.put(entry.getKey(), entry.getValue());
                 strainList.put(entry.getValue().name(), entry.getValue());
             }
-            resourceStrainArray.putAll(StrainUtil.defaultResourceStrains);
-        } catch(Exception e) {
+            for (Map.Entry<Integer, Strain> entry : StrainUtil.defaultResourceStrains.entrySet()) {
+                Strain strain = entry.getValue();
+                resourceStrainArray.put(entry.getKey(), strain);
+                strainList.put(strain.name(), strain);
+            }
+        } catch (Exception e) {
             log(Level.ERROR, "Error loading strains");
             StrainUtil.resetStrains();
         }

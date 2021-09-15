@@ -15,9 +15,9 @@ public class HighUtil {
      * @return an integer from 0 to 3 representing the amplifier for the effect
      */
     public static int durationToAmplifier(int duration) {
-        if(duration <= 1200) {
+        if (duration <= 1200) {
             return 0;
-        } else if(duration <= 1800) {
+        } else if (duration <= 1800) {
             return 1;
         } else if (duration <= 2400) {
             return 2;
@@ -25,6 +25,7 @@ public class HighUtil {
             return 3;
         }
     }
+
     /**
      * Sends a player a message according to how high they are
      * @param player the player to send the message to
@@ -75,16 +76,16 @@ public class HighUtil {
         int switchNum = 0;
         int thc = strainInfo.thc();
         ModMisc.PLAYER.get(user).setStrain(strainInfo.strain().id());
-        if(thc <= 18) switchNum = 1;
-        if(19 <= thc && thc <= 25) switchNum = 2;
-        if(26 <= thc) switchNum = 3;
+        if (thc <= 18) switchNum = 1;
+        if (19 <= thc && thc <= 25) switchNum = 2;
+        if (26 <= thc) switchNum = 3;
         duration = switch (switchNum) {
             case 1 -> 1200;
             case 2 -> 1800;
             case 3 -> 2400;
             default -> 0;
         };
-        if(user.hasStatusEffect(ModMisc.HIGH)) {
+        if (user.hasStatusEffect(ModMisc.HIGH)) {
             StatusEffectInstance currentEffect = user.getStatusEffect(ModMisc.HIGH);
             duration = switch (switchNum) {
                 case 1 -> currentEffect.getDuration() + 600;
@@ -94,7 +95,7 @@ public class HighUtil {
             };
         }
         amplifier = durationToAmplifier(duration);
-        /*if(amplifier >  2 && !user.world.isDay()) {
+        /*if (amplifier >  2 && !user.world.isDay()) {
             BlockPos pos = user.getBlockPos();
             //BlockState blockState = Blocks.GREEN_BED.getDefaultState();
             //user.world.setBlockState(pos, blockState.with(BedBlock.OCCUPIED, true), 4);

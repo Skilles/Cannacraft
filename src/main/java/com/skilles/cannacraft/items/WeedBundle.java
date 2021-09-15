@@ -16,9 +16,11 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 
 public class WeedBundle extends StrainItem {
+
     public WeedBundle(Settings settings) {
         super(settings);
     }
+
     @Override
     public Text getName(ItemStack stack) {
         if (stack.hasNbt()) {
@@ -31,10 +33,10 @@ public class WeedBundle extends StrainItem {
             } else {
                 name += "Unidentified Cannabis";
             }
-            if(strainTag.contains("Status")) {
-                if(strainTag.getInt("Status") == 1) {
+            if (strainTag.contains("Status")) {
+                if (strainTag.getInt("Status") == 1) {
                     StringUtils.prependIfMissing(name, "Ground ");
-                } else if(strainTag.getInt("Status") == 2) {
+                } else if (strainTag.getInt("Status") == 2) {
                     StringUtils.prependIfMissing(name, "Wet ");
                 }
             }
@@ -42,11 +44,13 @@ public class WeedBundle extends StrainItem {
         }
         return super.getName(stack);
     }
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
         StrainItem.debugAction(world, playerEntity, hand);
         return TypedActionResult.pass(playerEntity.getStackInHand(hand));
     }
+
     @Override
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);

@@ -19,15 +19,18 @@ public class ModConfig implements ConfigData {
 
     @Override
     public void validatePostLoad() throws ValidationException {
-        if(crop.speed > 4.0F) {
+        if (crop.speed > 4.0F) {
             crop.speed = 4.0F;
-        } else if(crop.speed < 0) {
+        } else if (crop.speed < 0) {
             crop.speed = 0;
         }
         ConfigData.super.validatePostLoad();
     }
+
     public CropSection getCrop() { return crop; }
+
     public DebugSection getDebug() { return debug; }
+
     public MiscSection getMisc() { return misc; }
     /*public static Screen configScreen() {
             ConfigBuilder builder= ConfigBuilder.create()

@@ -54,7 +54,7 @@ public abstract class StrainItem extends Item {
 
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        if(stack.hasNbt()) {
+        if (stack.hasNbt()) {
             NbtCompound tag = stack.getSubNbt("cannacraft:strain");
             if (tag.contains("DNA")) {
                 MiscUtil.appendTooltips(tooltip, stack, false);

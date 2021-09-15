@@ -57,7 +57,7 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
 
     private int cachedLimit;
 
-    private int seedCount = 10;
+    private int seedCount = 2;
 
     private Genome genome;
 
@@ -124,7 +124,7 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
     }
 
     public void incrementBreedTick() {
-        if(isBreeding()) breedTimer++;
+        if (isBreeding()) breedTimer++;
     }
 
     public boolean canBreed() {
@@ -141,8 +141,8 @@ public class WeedCropEntity extends BlockEntity implements BlockEntityClientSeri
     }
 
     public int growLimit() {
-        if(this.cachedLimit != 0) return cachedLimit;
-        if(hasGene(Phenotype.YIELD)) {
+        if (this.cachedLimit != 0) return cachedLimit;
+        if (hasGene(Phenotype.YIELD)) {
             cachedLimit = getGene(Phenotype.YIELD).value + 2;
         } else {
             cachedLimit = 2;

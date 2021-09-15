@@ -30,22 +30,29 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Random;
 
 public abstract class MachineBlock extends BlockWithEntity {
+
     public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
+
     public static final BooleanProperty ACTIVE = BooleanProperty.of("active");
+
     public static ScreenHandler handler;
     public MachineBlock(Settings settings) {
         super(settings);
         setDefaultState(getStateManager().getDefaultState().with(FACING, Direction.NORTH).with(ACTIVE, false));
     }
+
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         if (!world.isClient) {
             NamedScreenHandlerFactory screenHandler = state.createScreenHandlerFactory(world, pos);
-            handler = player.currentScreenHandler;
-            player.openHandledScreen(screenHandler);
+            if (screenHandler != null) {
+                handler = player.currentScreenHandler;
+                player.openHandledScreen(screenHandler);
+            }
         }
         return ActionResult.SUCCESS;
     }
+
     @Override
     public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
         if (state.get(ACTIVE)) {

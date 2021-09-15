@@ -22,17 +22,21 @@ public class Cannacraft implements ModInitializer {
     public static Identifier id(String path) {
         return new Identifier(MOD_ID, path);
     }
-    public static Logger LOGGER = LogManager.getLogger();
+
+    private static final Logger LOGGER = LogManager.getLogger(Cannacraft.class);
 
     public static void log(Level level, String message) {
-        LOGGER.log(level, "[Cannacraft] "+message);
+        LOGGER.log(level, "[Cannacraft] " + message);
     }
+
     public static void log(String message) {
-        log(Level.INFO, message);
+        LOGGER.info(message);
     }
+
     public static void log(Object message) {
         log(String.valueOf(message));
     }
+
     @Override
     public void onInitialize() {
         ModItems.registerItems();

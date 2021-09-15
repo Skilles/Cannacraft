@@ -24,6 +24,7 @@ import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
 public class WeedRack extends BlockWithEntity {
+
     public static final DirectionProperty FACING;
 
     public WeedRack(Settings settings) {
@@ -85,7 +86,6 @@ public class WeedRack extends BlockWithEntity {
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         Direction dir = state.get(FACING);
         return switch (dir) {
-            case NORTH -> NORTH_SHAPE;
             case SOUTH -> SOUTH_SHAPE;
             case EAST -> EAST_SHAPE;
             case WEST -> WEST_SHAPE;

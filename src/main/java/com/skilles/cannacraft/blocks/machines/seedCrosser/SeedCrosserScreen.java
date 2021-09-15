@@ -15,6 +15,7 @@ import net.minecraft.util.Identifier;
 
 @Environment(EnvType.CLIENT)
 public class SeedCrosserScreen extends HandledScreen<SeedCrosserScreenHandler> {
+
     private static final Identifier TEXTURE = Cannacraft.id("textures/gui/container/seed_crosser.png");
 
     public SeedCrosserScreen(SeedCrosserScreenHandler handler, PlayerInventory inventory, Text title) {
@@ -43,7 +44,7 @@ public class SeedCrosserScreen extends HandledScreen<SeedCrosserScreenHandler> {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         int i = this.x;
         int j = this.y;
-        if(mouseX >= i + 150 && mouseX < i + 168 && mouseY >= j + 8 && mouseY < j + 70) { // if hovering over power bar
+        if (mouseX >= i + 150 && mouseX < i + 168 && mouseY >= j + 8 && mouseY < j + 70) { // if hovering over power bar
             renderTooltip(matrices, new LiteralText("Energy: "+this.handler.powerStored()).formatted(Formatting.GOLD), i + 168, j + 20);
         }
         this.renderBackground(matrices);

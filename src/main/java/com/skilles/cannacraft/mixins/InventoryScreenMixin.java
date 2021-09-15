@@ -45,17 +45,19 @@ public abstract class InventoryScreenMixin {
     boolean isHigh = MinecraftClient.getInstance().player.hasStatusEffect(ModMisc.HIGH);
     @Unique
     Collection<StatusEffectInstance> effectCollection = MinecraftClient.getInstance().player.getStatusEffects();
+
     /**
      * Replaces HungerMixin
      **/
     @ModifyVariable(method = "drawStatusEffectDescriptions(Lnet/minecraft/client/util/math/MatrixStack;IILjava/lang/Iterable;)V", at = @At(value = "STORE"), ordinal = 0)
     private String munchies(String string) {
-        if(isHigh && string.equalsIgnoreCase(I18n.translate("effect.minecraft.hunger"))) {
+        if (isHigh && string.equalsIgnoreCase(I18n.translate("effect.minecraft.hunger"))) {
             return I18n.translate("effect.cannacraft.hunger");
         } else {
             return string;
         }
     }
+
     /**
      * Sets high to be the first effect
      */
@@ -66,6 +68,7 @@ public abstract class InventoryScreenMixin {
                 Comparator.comparing((StatusEffect effect) -> !effect.equals(ModMisc.HIGH)))
                 .thenComparing(Ordering.natural())).collect(Collectors.toCollection(LinkedList::new));
     }
+
     /**
      * Sets the spacing between the effect boxes
      */
@@ -73,25 +76,29 @@ public abstract class InventoryScreenMixin {
     private int setJ(int j) {
         return isHigh ? 26 : 33;
     }
+
     /**
      * These injects capture local variables for comparison in later method calls
      */
     @Inject(method = "drawStatusEffectBackgrounds(Lnet/minecraft/client/util/math/MatrixStack;IILjava/lang/Iterable;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/AbstractInventoryScreen;drawTexture(Lnet/minecraft/client/util/math/MatrixStack;IIIIII)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
     private void captureBackground(MatrixStack matrices, int i, int j, Iterable<StatusEffectInstance> iterable, CallbackInfo ci, int k, Iterator var6, StatusEffectInstance statusEffectInstance) {
-        if(isHigh) {
+        if (isHigh) {
             backgroundType = statusEffectInstance.getEffectType();
         }
     }
+
     @Inject(method = "drawStatusEffectSprites(Lnet/minecraft/client/util/math/MatrixStack;IILjava/lang/Iterable;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/AbstractInventoryScreen;drawSprite(Lnet/minecraft/client/util/math/MatrixStack;IIIIILnet/minecraft/client/texture/Sprite;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
     private void captureSprite(MatrixStack matrices, int i, int j, Iterable<StatusEffectInstance> iterable, CallbackInfo ci, StatusEffectSpriteManager statusEffectSpriteManager, int k, Iterator var7, StatusEffectInstance statusEffectInstance, StatusEffect statusEffect, Sprite sprite) {
-        if(isHigh) {
+        if (isHigh) {
             spriteType = statusEffect;
         }
     }
+
     @Inject(method = "drawStatusEffectBackgrounds(Lnet/minecraft/client/util/math/MatrixStack;IILjava/lang/Iterable;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/AbstractInventoryScreen;drawTexture(Lnet/minecraft/client/util/math/MatrixStack;IIIIII)V"))
     private void drawNewTexture(CallbackInfo ci) {
-        if(isHigh && !backgroundType.equals(ModMisc.HIGH)) RenderSystem.setShaderTexture(0, new Identifier("cannacraft","textures/gui/container/background.png"));
+        if (isHigh && !backgroundType.equals(ModMisc.HIGH)) RenderSystem.setShaderTexture(0, new Identifier("cannacraft","textures/gui/container/background.png"));
     }
+
     /**
      * These methods adjust the offset for the sprite, background, and texts
      */
@@ -105,9 +112,10 @@ public abstract class InventoryScreenMixin {
             args.set(6, 26);
         }
     }
+
     @ModifyArgs(method = "drawStatusEffectSprites(Lnet/minecraft/client/util/math/MatrixStack;IILjava/lang/Iterable;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/AbstractInventoryScreen;drawSprite(Lnet/minecraft/client/util/math/MatrixStack;IIIIILnet/minecraft/client/texture/Sprite;)V"))
     private void sprite(Args args) {
-        if(isHigh && !spriteType.equals(ModMisc.HIGH)) {
+        if (isHigh && !spriteType.equals(ModMisc.HIGH)) {
             int width = args.get(4);
             int height = args.get(5);
             int y = args.get(2);
@@ -118,6 +126,7 @@ public abstract class InventoryScreenMixin {
             args.set(1, x + 2);
         }
     }
+
     /**
      * This offset modifier requires more logic in order to also offset the duration
      * Not sure if better than redirect
@@ -128,25 +137,25 @@ public abstract class InventoryScreenMixin {
     boolean contains = false;
     @ModifyArgs(method = "drawStatusEffectDescriptions(Lnet/minecraft/client/util/math/MatrixStack;IILjava/lang/Iterable;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/font/TextRenderer;drawWithShadow(Lnet/minecraft/client/util/math/MatrixStack;Ljava/lang/String;FFI)I"))
     private void text(Args args) {
-        if(isHigh) {
+        if (isHigh) {
             String name = args.get(1);
             String highName = I18n.translate("effect.cannacraft.high");
             float x = args.get(2);
             float y = args.get(3);
-            if((int) args.get(4) == 8355711) {
+            if ((int) args.get(4) == 8355711) {
                 runTime = 2;
             } else {
                 runTime = 1;
             }
-            if(name.contains(highName)){
+            if (name.contains(highName)) {
                 contains = true;
-            } else if(runTime == 1){
+            } else if (runTime == 1) {
                 contains = false;
             }
-            if(!contains){
+            if (!contains) {
                 args.set(2, x-5);
                 args.set(3, y + 4);
-                if(runTime == 2) {
+                if (runTime == 2) {
                     args.set(2, x-5);
                     args.set(3, y + 4);
                     contains = false;

@@ -24,11 +24,17 @@ import java.util.List;
 import java.util.Map;
 
 public class GeneratorEntity extends MachineBlockEntity {
+
     int burnTime;
+
     int fuelTime;
+
     boolean isBurning;
+
     private static final int OUTPUT_SPEED = 5;
+
     protected final PropertyDelegate propertyDelegate;
+
     List<BlockEntity> adjLeachers = new ArrayList<>();
 
     public GeneratorEntity(BlockPos pos, BlockState state) {
@@ -69,12 +75,11 @@ public class GeneratorEntity extends MachineBlockEntity {
         return 0;
     }
 
-
     public static void tick(World world, BlockPos pos, BlockState state, GeneratorEntity blockEntity) {
         if (world == null || world.isClient) return;
 
-        if(blockEntity.powerStored > 0) {
-            for(Direction direction : Direction.values()) {
+        if (blockEntity.powerStored > 0) {
+            for (Direction direction : Direction.values()) {
                 BlockPos checkPos = pos.offset(direction);
                 BlockEntity adjEntity = world.getBlockEntity(checkPos);
                 if (adjEntity != null && Energy.valid(adjEntity)) {
@@ -83,11 +88,11 @@ public class GeneratorEntity extends MachineBlockEntity {
                 }
             }
         }
-        if(blockEntity.burnTime == 0) blockEntity.isBurning = false;
-        if(blockEntity.isBurning) {
+        if (blockEntity.burnTime == 0) blockEntity.isBurning = false;
+        if (blockEntity.isBurning) {
             blockEntity.burnTime--;
             blockEntity.addEnergy(10);
-        } else if(blockEntity.canCraft(blockEntity.inventory)) {
+        } else if (blockEntity.canCraft(blockEntity.inventory)) {
             blockEntity.craft(blockEntity.inventory);
         }
     }

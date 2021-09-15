@@ -37,6 +37,7 @@ import java.util.Random;
 import java.util.function.Predicate;
 
 public class WeedJoint extends BowItem {
+
     public WeedJoint(Settings settings) {
         super(settings);
     }
@@ -46,23 +47,25 @@ public class WeedJoint extends BowItem {
         ItemStack itemStack = user.getStackInHand(hand);
         ItemStack offhandStack = user.getOffHandStack();
         NbtCompound tag = itemStack.getOrCreateNbt();
-        if(offhandStack.isOf(Items.FLINT_AND_STEEL) || user.getMainHandStack().isOf(Items.FLINT_AND_STEEL) || offhandStack.isOf(ModItems.WEED_LIGHTER) || user.getMainHandStack().isOf(ModItems.WEED_LIGHTER)) {
+        if (offhandStack.isOf(Items.FLINT_AND_STEEL) || user.getMainHandStack().isOf(Items.FLINT_AND_STEEL) || offhandStack.isOf(ModItems.WEED_LIGHTER) || user.getMainHandStack().isOf(ModItems.WEED_LIGHTER)) {
             tag.putBoolean("Lit", true);
             user.getInventory().insertStack(user.getOffHandStack());
             user.getOffHandStack().decrement(1);
             user.incrementStat(Stats.USED.getOrCreateStat(this));
             return TypedActionResult.success(itemStack, true);
         }
-        if(tag.getBoolean("Lit")) {
+        if (tag.getBoolean("Lit")) {
             user.setCurrentHand(hand);
             return TypedActionResult.consume(itemStack);
         } else {
             return TypedActionResult.fail(itemStack);
         }
     }
+
     private boolean isLit(ItemStack stack) {
         return stack.hasNbt() && stack.getNbt().getBoolean("Lit");
     }
+
     // TODO: add left hand & fix bodyYaw mismatch
     private static Vec3d itemVector(PlayerEntity player, int flag) {
         Vec3d look = flag == 0 ? player.getRotationVector() : Vec3d.fromPolar(new Vec2f(player.getPitch(), player.bodyYaw)); // multiplayer offset
@@ -79,12 +82,12 @@ public class WeedJoint extends BowItem {
 
         //Height modifiers
         double y = player.getY() + 1.2D;
-        if(player.getPose().equals(EntityPose.CROUCHING)) y -= 0.5D;
-        if(player.getPose().equals(EntityPose.SWIMMING)) y -= 1.0D;
+        if (player.getPose().equals(EntityPose.CROUCHING)) y -= 0.5D;
+        if (player.getPose().equals(EntityPose.SWIMMING)) y -= 1.0D;
 
         Vec3d laserPos = playerPos;
         //Multiplayer offsets
-        if(flag != 0) {
+        if (flag != 0) {
             right = new Vec3d(-0.7F * MathHelper.sin(-(player.bodyYaw + 30) * 0.017453292F - (float) Math.PI),0,0);
             forward = new Vec3d(0, 0, -0.7F * MathHelper.cos(-(player.bodyYaw + 30) * 0.017453292F - (float) Math.PI));
             down = Vec3d.ZERO;
@@ -97,6 +100,7 @@ public class WeedJoint extends BowItem {
         laserPos = laserPos.add(forward);
         return laserPos;
     }
+
     public static void spawnSmoke(Entity entity) {
         if (entity instanceof PlayerEntity player && CannacraftClient.config.getMisc().smoke) {
             if (!player.world.isClient()) {
@@ -123,28 +127,29 @@ public class WeedJoint extends BowItem {
             }
         }
     }
+
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
         // TODO: add lifespan
         Random random = new Random();
-            if (selected && isLit(stack)) {
-                if(!((LivingEntity) entity).isUsingItem()) {
-                    if (random.nextInt(60) == 0) {
-                        BlockPos pos = entity.getBlockPos();
-                        world.playSound((double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, SoundEvents.BLOCK_CAMPFIRE_CRACKLE, SoundCategory.BLOCKS, 0.1F + random.nextFloat(), random.nextFloat() * 0.7F + 2.6F, true);
-                    }
-                    if (random.nextInt(2) == 0) {
-                        for (int i = 0; i < random.nextInt(2) + 1; ++i) {
-                            spawnSmoke(entity);
-                        }
-                    }
-                } else {
+        if (selected && isLit(stack)) {
+            if (!((LivingEntity) entity).isUsingItem()) {
+                if (random.nextInt(60) == 0) {
                     BlockPos pos = entity.getBlockPos();
-                    if(random.nextBoolean()) {
-                        world.playSound((double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, SoundEvents.BLOCK_FIRE_AMBIENT, SoundCategory.BLOCKS, 0.35F + random.nextFloat(), random.nextFloat() * 0.7F + 1.6F, true);
+                    world.playSound((double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, SoundEvents.BLOCK_CAMPFIRE_CRACKLE, SoundCategory.BLOCKS, 0.1F + random.nextFloat(), random.nextFloat() * 0.7F + 2.6F, true);
+                }
+                if (random.nextInt(2) == 0) {
+                    for (int i = 0; i < random.nextInt(2) + 1; ++i) {
+                        spawnSmoke(entity);
                     }
                 }
+            } else {
+                BlockPos pos = entity.getBlockPos();
+                if (random.nextBoolean()) {
+                    world.playSound((double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, SoundEvents.BLOCK_FIRE_AMBIENT, SoundCategory.BLOCKS, 0.35F + random.nextFloat(), random.nextFloat() * 0.7F + 1.6F, true);
+                }
             }
+        }
         super.inventoryTick(stack, world, entity, slot, selected);
     }
 
@@ -156,7 +161,7 @@ public class WeedJoint extends BowItem {
     @Override
     public void onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
         NbtCompound tag = stack.getOrCreateNbt();
-        if(user instanceof PlayerEntity && isLit(stack)) {
+        if (user instanceof PlayerEntity && isLit(stack)) {
             if (remainingUseTicks == 1) {
                 if (tag.contains("cannacraft:strain")) {
                     if (!world.isClient) {
@@ -170,7 +175,7 @@ public class WeedJoint extends BowItem {
                     user.sendSystemMessage(Text.of("...what did you pack in here?"), Util.NIL_UUID);
                 }
             }
-            if(CannacraftClient.config.getMisc().smoke) {
+            if (CannacraftClient.config.getMisc().smoke) {
                 Random random = new Random();
                 BlockPos pos = user.getBlockPos().up(1);
                 for (int i = 0; i < random.nextInt(2) + (getMaxUseTime(stack) - remainingUseTicks) / 5; ++i) {
@@ -187,7 +192,7 @@ public class WeedJoint extends BowItem {
 
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if(remainingUseTicks == 1) {
+        if (remainingUseTicks == 1) {
             user.stopUsingItem();
         }
         super.usageTick(world, user, stack, remainingUseTicks);

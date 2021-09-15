@@ -19,10 +19,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class StrainAnalyzerEntity extends MachineBlockEntity {
 
-
     private final double powerMultiplier = 1; // Energy use multiplier
+
     private final boolean needsPower = true;
+
     private final PropertyDelegate propertyDelegate;
+
     protected static final int timeToProcess = 175;
 
     public StrainAnalyzerEntity(BlockPos pos, BlockState state) {
@@ -53,11 +55,12 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
             }
         };
     }
+
     public boolean canCraft(DefaultedList<ItemStack> inventory) {
             ItemStack stack = inventory.get(1);
             ItemStack output = inventory.get(0);
-            if(stack.equals(ItemStack.EMPTY)) return false;
-            if(output.equals(ItemStack.EMPTY)) return true;
+            if (stack.equals(ItemStack.EMPTY)) return false;
+            if (output.equals(ItemStack.EMPTY)) return true;
             if (WeedRegistry.checkItem(stack) && stack.getCount() >= 1 && stack.hasNbt() && !WeedRegistry.isIdentified(stack)) {
                 NbtCompound outputTag = output.copy().getSubNbt("cannacraft:strain");
                 NbtCompound subTag = stack.copy().getSubNbt("cannacraft:strain");
@@ -66,12 +69,13 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
             }
         return false;
     }
+
     public int craft(DefaultedList<ItemStack> inventory) {
         ItemStack stack = inventory.get(1);
         ItemStack outputSlot = inventory.get(0);
         ItemStack output = ModItems.WEED_SEED.getDefaultStack();
 
-        if(outputSlot.isEmpty()) {
+        if (outputSlot.isEmpty()) {
             NbtCompound strainTag = stack.getSubNbt("cannacraft:strain").copy();
             strainTag.putBoolean("Identified", true);
             output.setSubNbt("cannacraft:strain", strainTag);
@@ -89,6 +93,7 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
     public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
         return new StrainAnalyzerScreenHandler(syncId, inv, this, this.propertyDelegate);
     }
+
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
         return stack.isOf(ModItems.WEED_BUNDLE);

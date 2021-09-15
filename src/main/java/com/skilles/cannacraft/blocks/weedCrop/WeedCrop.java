@@ -39,13 +39,21 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
 
     //public static final IntProperty STRAIN = IntProperty.of("strain", 0, 2); // maybe add custom textures per strain
     public static final IntProperty MAXAGE = IntProperty.of("maxage", 3, 9);
+
     public static final BooleanProperty BREEDING = BooleanProperty.of("breeding");
+
     public static final IntProperty AGE = IntProperty.of("age", 0, 10); // age 0-3 is 1st stage, age 4 is connector; age 5-8 is 2nd stage; age 9 is final stage flowering, age 10 is 1st stage flowering TODO: add more age
+
     private static final int CONNECTOR_AGE = 4;
+
     private static final int FIRST_BLOOM = 10;
+
     private static final int FINAL_BLOOM = 9;
+
     private static final int STAGE_ONE_MAX = 3;
+
     private static final int STAGE_TWO_MAX = 8;
+
     private static final VoxelShape[] AGE_TO_SHAPE = new VoxelShape[]{
             Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D),
             Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 6.0D, 16.0D),
@@ -68,7 +76,9 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     public BlockState withMaxAge(int age) {
         return this.getDefaultState().with(MAXAGE, age);
     }
+
     public static BlockState withBreeding(BlockState state, boolean breeding) { return state.with(BREEDING, breeding); }
+
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
         return new WeedCropEntity(pos, state);
@@ -76,9 +86,9 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
 
     @Override
     public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-        if(pos.down().equals(neighborPos) && neighborState.isOf(Blocks.AIR))
+        if (pos.down().equals(neighborPos) && neighborState.isOf(Blocks.AIR))
             return Blocks.AIR.getDefaultState();
-        if(pos.down().equals(neighborPos) && neighborState.isOf(Blocks.DIRT))
+        if (pos.down().equals(neighborPos) && neighborState.isOf(Blocks.DIRT))
             MiscUtil.dropStack(world, pos, ModItems.WEED_SEED);
         return !state.canPlaceAt(world, pos) && neighborState.isOf(Blocks.DIRT) ? Blocks.AIR.getDefaultState() : state;
     }
@@ -117,9 +127,9 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
     @Override
     public void grow(ServerWorld world, Random random, BlockPos pos, BlockState state) {
         if (!world.isAir(pos.up()) && isMature(state)) { // if block is above and is fully grown
-            if(world.getBlockState(pos.up()).isOf(this)) { // if block above is stage 2
+            if (world.getBlockState(pos.up()).isOf(this)) { // if block above is stage 2
                 BlockState aboveState = world.getBlockState(pos.up());
-                if(isMature(aboveState)) {// if stage 2 is fully grown
+                if (isMature(aboveState)) {// if stage 2 is fully grown
                     MiscUtil.dropStack(world, pos, ModItems.WEED_BUNDLE);
                 } else { // apply growth to stage 2
                     this.applyGrowth(world, pos.up(), aboveState);
@@ -216,7 +226,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         int i;
         dropSeeds(world, pos, brokenWithShears);
         /*if (isBloomed(state)) {
-            if(!((WeedCropEntity) world.getBlockEntity(pos)).isMale)
+            if (!((WeedCropEntity) world.getBlockEntity(pos)).isMale)
             MiscUtil.dropStack(world, pos, ModItems.WEED_BUNDLE, brokenWithShears);
         }*/
         for (i = 1; world.getBlockState(pos.up(i)).isOf(ModBlocks.WEED_CROP); i++) {
@@ -247,7 +257,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
      * @return 1 = stage one, 2 = intermediate stage, 3 = final stage, 4 = connector
      */
     private static int getStage(BlockState state) {
-        if(state.get(AGE) == CONNECTOR_AGE) return 4;
+        if (state.get(AGE) == CONNECTOR_AGE) return 4;
         return switch (state.get(MAXAGE)) {
             case STAGE_ONE_MAX -> 1;
             case STAGE_TWO_MAX -> 2;
@@ -268,7 +278,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
      * Blooms 1st, 2nd/medium, or final stages
      */
     private void bloomAll(World world, BlockPos pos) {
-        if(getStage(world.getBlockState(pos)) != 3) {
+        if (getStage(world.getBlockState(pos)) != 3) {
             world.setBlockState(pos, withAge(FIRST_BLOOM));
         } else {
             world.setBlockState(pos, withAge(FINAL_BLOOM));
@@ -342,7 +352,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
                     }
                 }
             }
-        } else if (getStage(state) == 3){ // final stage
+        } else if (getStage(state) == 3) { // final stage
             if (random.nextFloat() < (f / 14) * (blockEntity.multiplier() / 2)) {
                 if (this.getAge(state) + 1 >= FINAL_BLOOM) { // if about to flower, flower all other stages
                     for (int z = 1; z < getBelow(world, pos); z++) { // will only run if z is 1,2,3
@@ -393,9 +403,11 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         }
         copyNbt(world, pos, pos.up());
     }
+
     private void growStage(BlockPos pos, ServerWorld world) {
         growStage(pos, world, canGrowNext(world, pos));
     }
+
     /* BlockState flags:
     1 NOTIFY_NEIGHBORS
     2 NOTIFY_LISTENERS
@@ -417,8 +429,8 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
             blockPos = blockPos.down(k - 1);
         }
         /*
-        for(int i = -1; i <= 1; ++i) {
-            for(int j = -1; j <= 1; ++j) {
+        for (int i = -1; i <= 1; ++i) {
+            for (int j = -1; j <= 1; ++j) {
                 float g = 0.0F;
                 BlockState blockState = world.getBlockState(blockPos.add(i, 0, j));
                 if (blockState.isOf(Blocks.FARMLAND)) {

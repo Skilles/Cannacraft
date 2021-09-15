@@ -5,19 +5,15 @@ import com.skilles.cannacraft.blocks.ImplementedInventory;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
 import com.skilles.cannacraft.items.WeedSeed;
 import com.skilles.cannacraft.strain.Strain;
-import com.skilles.cannacraft.util.MiscUtil;
 import com.skilles.cannacraft.util.StrainUtil;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
-import net.minecraft.item.Items;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerFactory;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
@@ -28,6 +24,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.Comparator;
 import java.util.List;
 
@@ -44,7 +41,7 @@ public class SeedBag extends Item {
     }
 
     public static int addSorter(ISorter sorter) {
-        if(sorters.contains(sorter)) {
+        if (sorters.contains(sorter)) {
             return sorters.indexOf(sorter);
         } else {
             sorters.add(sorter);
@@ -65,7 +62,7 @@ public class SeedBag extends Item {
     }
 
     public boolean incrementSorter(ItemStack stack, int delta) {
-        if(this.isActivated(stack)) {
+        if (this.isActivated(stack)) {
             IContents contents = this.getContents(stack);
             int newPos = contents.getSorterIndex() + delta;
             newPos = (newPos < 0) ? (newPos + sorters.size()) : (newPos % sorters.size());
@@ -78,7 +75,7 @@ public class SeedBag extends Item {
     @Override
     public ActionResult useOnBlock(@NotNull ItemUsageContext context) {
         IContents contents = this.getContents(context.getStack());
-        if(this.isActivated(context.getStack())) {
+        if (this.isActivated(context.getStack())) {
             Hand hand = context.getHand();
             PlayerEntity player = context.getPlayer();
             if (hand == Hand.OFF_HAND) {
@@ -99,10 +96,10 @@ public class SeedBag extends Item {
     @Override
     public TypedActionResult<ItemStack> use(@NotNull World world, @NotNull PlayerEntity player, @NotNull Hand hand) {
         // From off hand: interact with main to insert / extract seeds
-        if(hand == Hand.OFF_HAND) {
+        if (hand == Hand.OFF_HAND) {
             ItemStack stack = player.getStackInHand(hand);
             IContents contents = this.getContents(stack);
-            if(this.isActivated(stack) && this.attemptExtractOrInsertSeed(player, contents)) {
+            if (this.isActivated(stack) && this.attemptExtractOrInsertSeed(player, contents)) {
                 return TypedActionResult.success(stack);
             }
         }
@@ -146,24 +143,24 @@ public class SeedBag extends Item {
 
     protected boolean attemptExtractOrInsertSeed(PlayerEntity player, IContents contents) {
         ItemStack held = player.getStackInHand(Hand.MAIN_HAND);
-        if(held.isEmpty()) {
+        if (held.isEmpty()) {
             boolean last = player.isSneaking();
-            if(last) {
+            if (last) {
                 ItemStack out = contents.extractLastSeed(1, true);
-                if(!out.isEmpty()) {
+                if (!out.isEmpty()) {
                     player.setStackInHand(Hand.MAIN_HAND, contents.extractLastSeed(1, false));
                     return true;
                 }
             } else {
                 ItemStack out =  contents.extractFirstSeed(1, true);
-                if(!out.isEmpty()) {
+                if (!out.isEmpty()) {
                     player.setStackInHand(Hand.MAIN_HAND, contents.extractFirstSeed(1, false));
                     return true;
                 }
             }
-        } else if(held.getItem() instanceof WeedSeed) {
+        } else if (held.getItem() instanceof WeedSeed) {
             ItemStack remaining = contents.insertSeed(held, true);
-            if(remaining.isEmpty() || remaining.getCount() != held.getCount()) {
+            if (remaining.isEmpty() || remaining.getCount() != held.getCount()) {
                 player.setStackInHand(Hand.MAIN_HAND, contents.insertSeed(held, false));
                 return true;
             }
@@ -214,7 +211,7 @@ public class SeedBag extends Item {
         void setSorterIndex(int index);
 
         default ItemStack insertSeed(ItemStack stack, boolean simulate) {
-            if(!simulate) {
+            if (!simulate) {
                 this.setStack(0, stack);
             }
             return this.getItems().get(0);
@@ -264,7 +261,7 @@ public class SeedBag extends Item {
         public int compare(Strain o1, Strain o2) {
             int s1 = o1.id();
             int s2 = o2.id();
-            if(s1 != s2) {
+            if (s1 != s2) {
                 return s1 - s2;
             }
             return 0;

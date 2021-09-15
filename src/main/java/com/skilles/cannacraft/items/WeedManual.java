@@ -15,8 +15,6 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
-import org.apache.logging.log4j.Level;
-import org.jetbrains.annotations.Nullable;
 import vazkii.patchouli.api.PatchouliAPI;
 
 import java.util.List;
@@ -31,14 +29,14 @@ public class WeedManual extends Item {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if(world.isClient) {
+        if (world.isClient) {
             PatchouliAPI.get().openBookGUI(id("manual"));
         }
         return super.use(world, user, hand);
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+    public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
         tooltip.add(new TranslatableText("cannacraft.manual.tooltip").formatted(Formatting.DARK_GRAY));
         super.appendTooltip(stack, world, tooltip, context);
     }
@@ -50,7 +48,7 @@ public class WeedManual extends Item {
         BlockEntity blockEntity = world.getBlockEntity(context.getBlockPos());
         if (blockEntity instanceof WeedCropEntity) {
             NbtCompound tag = blockEntity.writeNbt(new NbtCompound());
-            log(Level.DEBUG, tag.asString());
+            log(tag.asString());
             return ActionResult.SUCCESS;
         }
         return super.useOnBlock(context);

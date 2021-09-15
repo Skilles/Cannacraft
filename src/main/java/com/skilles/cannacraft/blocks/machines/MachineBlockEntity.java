@@ -24,25 +24,33 @@ import team.reborn.energy.EnergySide;
 import team.reborn.energy.EnergyTier;
 
 public abstract class MachineBlockEntity extends BlockEntity implements MachineInterface {
+
     protected DefaultedList<ItemStack> inventory;
+
     protected int powerStored;
+
     protected int processingTime;
+
     private final boolean needsPower = true;
+
     private static final int timeToProcess = 175;
+
     private final int powerMultiplier = 0;
 
     public MachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, DefaultedList<ItemStack> inventory) {
         super(type, pos, state);
         this.inventory = inventory;
     }
+
     protected void playSound() { this.playSound(0) ;}
+
     @Override
     public void playSound(int flag) {
         World world  = getWorld();
         SoundEvent runSound = SoundEvents.BLOCK_FIRE_AMBIENT;
         assert world != null;
-        if(!world.isClient) {
-            if(this.processingTime % 25 == 0) {
+        if (!world.isClient) {
+            if (this.processingTime % 25 == 0) {
                 if (this.processingTime != timeToProcess) {
                     world.playSound(
                             null, // Player - if non-null, will play sound for every nearby player *except* the specified player
@@ -65,6 +73,7 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineI
             }
         }
     }
+
     public static void tick(World world, BlockPos pos, BlockState state, MachineBlockEntity blockEntity) {
         if (world == null || world.isClient) return;
         if (isNextTo(world, pos, Blocks.GLOWSTONE) && blockEntity.powerStored < blockEntity.getMaxStoredPower()) {
@@ -95,18 +104,21 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineI
         }
         markDirty(world, pos, state);
     }
+
     public boolean isWorking() {
-        if(needsPower) { // TODO: use solar power if no generators found
+        if (needsPower) { // TODO: use solar power if no generators found
             return processingTime != 0 && powerStored != 0;
         } else {
             return processingTime != 0;
         }
     }
+
     protected static void processTick(MachineBlockEntity blockEntity) {
         blockEntity.processingTime++;
-        if(blockEntity.needsPower) blockEntity.useEnergy(blockEntity.powerMultiplier);
+        if (blockEntity.needsPower) blockEntity.useEnergy(blockEntity.powerMultiplier);
         blockEntity.playSound();
     }
+
     /**
      * Energy & ImplementedInventory
      */
@@ -118,6 +130,7 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineI
             return new int[] {1};
         }
     }
+
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
         return false;
@@ -147,6 +160,7 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineI
     public double getMaxStoredPower() {
         return 10000;
     }
+
     @Override
     public double getStored(EnergySide face) {
         return this.powerStored;
@@ -158,19 +172,23 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineI
     public void addEnergy(double amount) {
         setStored(powerStored + amount);
     }
+
     @Override
     public double getEnergy() {
         return getStored(EnergySide.UNKNOWN);
     }
+
     @Override
     public void useEnergy(double amount) {
         if (amount > powerStored) amount = powerStored;
         setStored(powerStored - amount);
     }
+
     @Override
     public void setEnergy(double amount) {
         setStored(amount);
     }
+
     @Override
     public void sideTransfer(World world, BlockPos pos, BlockEntity blockEntity) {
         for (Direction side : Direction.values()) {
@@ -184,6 +202,7 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineI
                     .move();
         }
     }
+
     protected static boolean isNextTo(World world, BlockPos pos, Block block) {
         for (Direction side : Direction.values()) {
             Block sideBlock = world.getBlockState(pos.offset(side)).getBlock();
@@ -193,10 +212,12 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineI
         }
         return false;
     }
+
     @Override
     public EnergyTier getTier() {
         return EnergyTier.LOW;
     }
+
     @Override
     public DefaultedList<ItemStack> getItems() {
         return inventory;

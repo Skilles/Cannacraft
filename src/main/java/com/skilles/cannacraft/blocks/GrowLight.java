@@ -46,7 +46,7 @@ public class GrowLight extends Block {
 
     public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         if (state.get(LIT)) {
-            if(!world.isReceivingRedstonePower(pos))
+            if (!world.isReceivingRedstonePower(pos))
                 world.setBlockState(pos, state.cycle(LIT), 2);
 
             BlockPos.stream(pos.add(RANGE, 0, -RANGE).down(), pos.down().add(-RANGE, 0, RANGE))
@@ -74,7 +74,7 @@ public class GrowLight extends Block {
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        if(state.get(FACING).getAxis() == Direction.Axis.Z) {
+        if (state.get(FACING).getAxis() == Direction.Axis.Z) {
             return Block.createCuboidShape(0.0D, 12.0D, 5.0D, 16.0D, 16.0D, 11.0D);
         }
         return Block.createCuboidShape(5.0D, 12.0D, 0.0D, 11.0D, 16.0D, 16.0D);

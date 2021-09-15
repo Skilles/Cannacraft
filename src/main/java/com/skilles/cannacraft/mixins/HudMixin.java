@@ -36,25 +36,21 @@ public abstract class HudMixin {
     @Shadow protected abstract void renderPortalOverlay(float nauseaStrength);
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;lerp(FFF)F"))
-    private void renderTint(MatrixStack matrices, float tickDelta, CallbackInfo ci)
-    {
+    private void renderTint(MatrixStack matrices, float tickDelta, CallbackInfo ci) {
         ClientPlayerEntity player = this.client.player;
-        if (player != null && this.client.interactionManager != null)
-        {
+        if (player != null && this.client.interactionManager != null) {
             if (isHigh(player)) {
                 this.renderHighTint(player);
             }
         }
     }
 
-    private boolean isHigh(PlayerEntity player)
-    {
+    private boolean isHigh(PlayerEntity player) {
         return player.hasStatusEffect(ModMisc.HIGH);
     }
 
-    private void renderHighTint(ClientPlayerEntity player)
-    {
-        if(isHigh(player)) {
+    private void renderHighTint(ClientPlayerEntity player) {
+        if (isHigh(player)) {
             float threshold = (float)(1 + player.getStatusEffect(ModMisc.HIGH).getAmplifier())/2;
             float f = threshold - threshold/2; //(threshold-1) / threshold + 1.0F / threshold * 2.0F;
             RenderSystem.disableDepthTest();

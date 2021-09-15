@@ -42,20 +42,20 @@ public class WeedBong extends BlockWithEntity {
         WeedBongEntity bongEntity = (WeedBongEntity) world.getBlockEntity(pos);
         ItemStack handStack = hand == Hand.MAIN_HAND ? player.getMainHandStack() : player.getOffHandStack();
         assert bongEntity != null;
-        if(bongEntity.cooldown) return ActionResult.FAIL;
-        if(bongEntity.packed) {
-            if(handStack.isEmpty()) {
-                if(bongEntity.lit) {
-                    if(bongEntity.startedHitting) {
+        if (bongEntity.cooldown) return ActionResult.FAIL;
+        if (bongEntity.packed) {
+            if (handStack.isEmpty()) {
+                if (bongEntity.lit) {
+                    if (bongEntity.startedHitting) {
                         bongEntity.clicks++;
                         bongEntity.hitTimer = 0;
-                        if(bongEntity.clicks > 20) {
+                        if (bongEntity.clicks > 20) {
                             log("Hitted the bong!");
                             bongEntity.cooldown = true;
                             bongEntity.clicks = 0;
                             bongEntity.startedHitting = false;
                             bongEntity.timer /= 2;
-                            if(++bongEntity.hits == 5) {
+                            if (++bongEntity.hits == 5) {
                                 bongEntity.packed = false;
                                 bongEntity.lit = false;
                                 bongEntity.cooldown = false;
@@ -63,7 +63,7 @@ public class WeedBong extends BlockWithEntity {
                                 bongEntity.hits = 0;
                             }
                             // HighUtil.applyHigh(bongEntity.packedInfo, player);
-                            if(world.isClient) {
+                            if (world.isClient) {
                                 for (int i = 0; i < 10; i++) {
                                     WeedJoint.spawnSmoke(player);
                                 }
@@ -75,12 +75,12 @@ public class WeedBong extends BlockWithEntity {
                     }
                     return ActionResult.SUCCESS;
                 }
-            } else if(handStack.getItem() instanceof FlintAndSteelItem) {
+            } else if (handStack.getItem() instanceof FlintAndSteelItem) {
                 bongEntity.lit = true;
                 log("Lit the bong");
                 return ActionResult.SUCCESS;
             }
-        } else if(handStack.isOf(ModItems.WEED_BUNDLE) && getStatus(handStack).equals(StatusTypes.GROUND)) {
+        } else if (handStack.isOf(ModItems.WEED_BUNDLE) && getStatus(handStack).equals(StatusTypes.GROUND)) {
             bongEntity.packedInfo = getStrainInfo(handStack);
             bongEntity.packed = true;
             handStack.decrement(1);

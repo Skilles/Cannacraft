@@ -55,9 +55,9 @@ public class WeedExtractorEntity extends MachineBlockEntity {
     public boolean canCraft(DefaultedList<ItemStack> inventory) {
             ItemStack stack = inventory.get(1);
             ItemStack output = inventory.get(0);
-            if(stack.equals(ItemStack.EMPTY)) return false;
+            if (stack.equals(ItemStack.EMPTY)) return false;
                 if (stack.isOf(ModItems.WEED_BUNDLE) && stack.getCount() > 0 && stack.hasNbt() && getStatus(stack) == StatusTypes.WET) {
-                    if(output.equals(ItemStack.EMPTY)) return true;
+                    if (output.equals(ItemStack.EMPTY)) return true;
                     return getOutput(stack).isItemEqual(output);
             }
         return false;
@@ -67,7 +67,7 @@ public class WeedExtractorEntity extends MachineBlockEntity {
         ItemStack outputSlot = inventory.get(0);
         ItemStack output = getOutput(stack);
         output.setNbt(stack.getNbt());
-        if(outputSlot.isEmpty()) inventory.set(0, output);
+        if (outputSlot.isEmpty()) inventory.set(0, output);
         else if (outputSlot.isOf(output.getItem())) outputSlot.increment(1);
 
         stack.decrement(1);

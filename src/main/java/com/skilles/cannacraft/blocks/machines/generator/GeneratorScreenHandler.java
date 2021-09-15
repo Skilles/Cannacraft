@@ -30,13 +30,13 @@ public class GeneratorScreenHandler extends ScreenHandler {
 
         this.addSlot(new Slot(inventory, 0, 48, 35));
 
-        for(int l = 0; l < 3; ++l) {
-            for(int k = 0; k < 9; ++k) {
+        for (int l = 0; l < 3; ++l) {
+            for (int k = 0; k < 9; ++k) {
                 this.addSlot(new Slot(playerInventory, k + l * 9 + 9, 8 + k * 18, 84 + l * 18));
             }
         }
 
-        for(int l = 0; l < 9; ++l) {
+        for (int l = 0; l < 9; ++l) {
             this.addSlot(new Slot(playerInventory, l, 8 + l * 18, 142));
         }
         this.addProperties(propertyDelegate);

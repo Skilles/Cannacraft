@@ -14,8 +14,8 @@ import net.minecraft.screen.slot.Slot;
 
 public class StrainAnalyzerScreenHandler extends ScreenHandler {
 
-
     private final Inventory inventory;
+
     private final PropertyDelegate propertyDelegate;
 
     public StrainAnalyzerScreenHandler(int syncId, PlayerInventory playerInventory) {
@@ -34,13 +34,13 @@ public class StrainAnalyzerScreenHandler extends ScreenHandler {
         this.addSlot(new Slot(inventory, 1, 48, 35));
         this.addSlot(new FurnaceOutputSlot(playerInventory.player, inventory, 0, 110, 36));
 
-        for(int l = 0; l < 3; ++l) {
-            for(int k = 0; k < 9; ++k) {
+        for (int l = 0; l < 3; ++l) {
+            for (int k = 0; k < 9; ++k) {
                 this.addSlot(new Slot(playerInventory, k + l * 9 + 9, 8 + k * 18, 84 + l * 18));
             }
         }
 
-        for(int l = 0; l < 9; ++l) {
+        for (int l = 0; l < 9; ++l) {
             this.addSlot(new Slot(playerInventory, l, 8 + l * 18, 142));
         }
         this.addProperties(propertyDelegate);
@@ -72,14 +72,16 @@ public class StrainAnalyzerScreenHandler extends ScreenHandler {
         return newStack;
     }
 
-
     @Override
     public boolean canUse(PlayerEntity player) {
         return this.inventory.canPlayerUse(player);
     }
+
     public int processingTime() {
         return this.propertyDelegate.get(0);
     }
+
     public int powerStored() { return this.propertyDelegate.get(1); }
+
     public int getArrowWidth() { return (int) (processingTime() / (StrainAnalyzerEntity.timeToProcess / 22) - 0.15); }
 }

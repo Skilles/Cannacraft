@@ -4,19 +4,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.skilles.cannacraft.items.seedBag.SeedBag.IContents;
 import com.skilles.cannacraft.strain.Strain;
-import com.skilles.cannacraft.util.MiscUtil;
 import com.skilles.cannacraft.util.StrainUtil;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.collection.DefaultedList;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class SeedBagInventory implements IContents {
@@ -58,7 +54,7 @@ public class SeedBagInventory implements IContents {
     }
 
     protected void sort() {
-        if(this.contents.size() > 0) {
+        if (this.contents.size() > 0) {
             this.contents.sort(this.subSorter);
             this.firstStack = this.contents.get(0).initializeStack();
             this.firstStack = this.contents.get(this.contents.size() - 1).initializeStack();
@@ -89,7 +85,7 @@ public class SeedBagInventory implements IContents {
 
     @Override
     public ItemStack extractFirstSeed(int amount, boolean simulate) {
-        if(this.firstStack.isEmpty()) {
+        if (this.firstStack.isEmpty()) {
             return ItemStack.EMPTY;
         }
         ItemStack out = this.firstStack.copy();
@@ -135,7 +131,7 @@ public class SeedBagInventory implements IContents {
 
     @Override
     public ItemStack extractLastSeed(int amount, boolean simulate) {
-        if(this.lastStack.isEmpty()) {
+        if (this.lastStack.isEmpty()) {
             return ItemStack.EMPTY;
         }
         ItemStack out = this.lastStack.copy();
@@ -207,7 +203,7 @@ public class SeedBagInventory implements IContents {
         }
 
         public static Optional<Entry> readFromTag(NbtCompound tag) {
-            if(!tag.contains("ID")) {
+            if (!tag.contains("ID")) {
                 return Optional.empty();
             }
             Strain strain = StrainUtil.getStrain(0);

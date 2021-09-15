@@ -42,7 +42,7 @@ public class GeneratorScreen extends HandledScreen<GeneratorScreenHandler> {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         int i = this.x;
         int j = this.y;
-        if(mouseX >= i + 150 && mouseX < i + 168 && mouseY >= j + 8 && mouseY < j + 70) { // if hovering over power bar
+        if (mouseX >= i + 150 && mouseX < i + 168 && mouseY >= j + 8 && mouseY < j + 70) { // if hovering over power bar
             renderTooltip(matrices, new LiteralText("Energy: "+this.handler.powerStored()).formatted(Formatting.GOLD), x + 168, y + 20);
         }
         this.renderBackground(matrices);

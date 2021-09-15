@@ -18,19 +18,19 @@ public abstract class MiscRecipeMixin extends AbstractCookingRecipe {
 
     @Override
     public ItemStack craft(Inventory inventory) {
-        if(this.id.equals(id("weed_brownie"))) {
+        if (this.id.equals(id("weed_brownie"))) {
             int slotId = 0;
             ItemStack input = inventory.getStack(slotId).copy();
             ItemStack output = this.getOutput().copy();
-            if(input.hasNbt()) {
+            if (input.hasNbt()) {
                 output.setSubNbt("cannacraft:strain", input.getSubNbt("cannacraft:strain"));
                 return output;
             }
-        } else if(this.id.equals(id("weed_bundle_dry"))) {
+        } else if (this.id.equals(id("weed_bundle_dry"))) {
             int slotId = 0;
             ItemStack input = inventory.getStack(slotId).copy();
             ItemStack output = this.getOutput().copy();
-            if(input.hasNbt() && ModMisc.STRAIN.get(output).getStatus() == StatusTypes.DRY) {
+            if (input.hasNbt() && ModMisc.STRAIN.get(output).getStatus() == StatusTypes.DRY) {
                 output.setSubNbt("cannacraft:strain", input.getSubNbt("cannacraft:strain"));
                 ModMisc.STRAIN.get(output).setStatus(StatusTypes.DRY);
                 return output;

@@ -8,7 +8,9 @@ import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
 import com.skilles.cannacraft.registry.ModBlocks;
 import com.skilles.cannacraft.registry.ModItems;
 import com.skilles.cannacraft.registry.ModMisc;
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.FarmlandBlock;
 import net.minecraft.entity.ai.brain.BlockPosLookTarget;
 import net.minecraft.entity.ai.brain.MemoryModuleState;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
@@ -18,12 +20,10 @@ import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.village.VillagerProfession;
 import net.minecraft.world.GameRules;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,9 +51,9 @@ public class StonerFarmTask extends Task<VillagerEntity> {
             BlockPos.Mutable mutable = villagerEntity.getBlockPos().mutableCopy();
             this.targetPositions.clear();
 
-            for(int i = -1; i <= 1; ++i) {
-                for(int j = -1; j <= 1; ++j) {
-                    for(int k = -1; k <= 1; ++k) {
+            for (int i = -1; i <= 1; ++i) {
+                for (int j = -1; j <= 1; ++j) {
+                    for (int k = -1; k <= 1; ++k) {
                         mutable.set(villagerEntity.getX() + (double)i, villagerEntity.getY() + (double)j, villagerEntity.getZ() + (double)k);
                         if (this.isSuitableTarget(mutable, serverWorld)) {
                             this.targetPositions.add(new BlockPos(mutable));
@@ -110,7 +110,7 @@ public class StonerFarmTask extends Task<VillagerEntity> {
                 if (blockState.isAir() && block2 instanceof FarmlandBlock && hasWeedSeed(villagerEntity)) {
                     SimpleInventory simpleInventory = villagerEntity.getInventory();
 
-                    for(int i = 0; i < simpleInventory.size(); ++i) {
+                    for (int i = 0; i < simpleInventory.size(); ++i) {
                         ItemStack itemStack = simpleInventory.getStack(i);
                         boolean bl = false;
                         if (!itemStack.isEmpty() && itemStack.isOf(ModItems.WEED_SEED)) {

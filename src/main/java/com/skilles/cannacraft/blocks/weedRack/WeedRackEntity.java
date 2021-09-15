@@ -17,8 +17,11 @@ import net.minecraft.world.World;
 import static com.skilles.cannacraft.Cannacraft.log;
 
 public class WeedRackEntity extends BlockEntity implements Inventory, BlockEntityClientSerializable {
+
     private DefaultedList<ItemStack> inventory;
+
     public int dryingTime = 100;
+
     protected int processTime = 0;
 
     public WeedRackEntity(BlockPos pos, BlockState state) {
@@ -51,7 +54,7 @@ public class WeedRackEntity extends BlockEntity implements Inventory, BlockEntit
             if (processTime >= dryingTime) {
                 log("Done!");
                 processTime = 0;
-                if(!this.world.isClient) {
+                if (!this.world.isClient) {
                     NbtCompound itemTag = itemStack.getNbt();
                     itemTag.getCompound("cannacraft:strain").putFloat("Status", 0.5F);
                     itemStack.setNbt(itemTag);

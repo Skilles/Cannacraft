@@ -5,16 +5,12 @@ import com.skilles.cannacraft.config.ModConfig;
 import com.skilles.cannacraft.dna.genome.Genome;
 import com.skilles.cannacraft.dna.genome.gene.TraitGene;
 import com.skilles.cannacraft.registry.ModItems;
-import com.skilles.cannacraft.strain.Gene;
-import com.skilles.cannacraft.strain.GeneTypes;
 import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.strain.StrainInfo;
 import me.shedaniel.autoconfig.AutoConfig;
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -23,14 +19,7 @@ import java.util.List;
 
 public class WeedRegistry {
 
-    // TODO:
-    //  store all strain containing items in here and add common methods for retrieving strain info
-    //  store all strains in player's registry to allow for progression
-    //  start refactoring to remove unnecessary code
-
     private static ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
-
-
 
     // Anything that can have strain information
     public enum WeedTypes {
@@ -117,16 +106,8 @@ public class WeedRegistry {
     }
 
     // Get genes from item
-    @Deprecated
-    public static List<Gene> getGenes(ItemStack itemStack) {
-        List<Gene> output = new ArrayList<>();
-        NbtList nbtList = getStrainTag(itemStack).getList("Attributes", NbtType.COMPOUND);
-        nbtList.stream().map(nbtElement -> (NbtCompound) nbtElement).forEachOrdered(compound -> {
-            String name = compound.getString("Gene");
-            int level = compound.getInt("Level");
-            output.add(new Gene(GeneTypes.byName(name), level));
-        });
-        return output;
+    public static List<TraitGene> getGenes(ItemStack itemStack) {
+        return new ArrayList<>(DnaUtil.getGenome(itemStack).traitMap.values());
     }
 
     // Get item's result after processing
@@ -197,19 +178,5 @@ public class WeedRegistry {
     public static StrainInfo randomStrainInfo(boolean identified, boolean male) {
         Strain randStrain = randomStrain();
         return new StrainInfo(randStrain, randomThc(randStrain), identified, male, new ArrayList<>());
-    }
-
-    @Deprecated
-    public static ItemStack randomItem(WeedTypes type, boolean genes, boolean identified) {
-        ItemStack itemStack = type.item().getDefaultStack();
-        Strain strain = randomStrain();
-        NbtCompound strainTag = new NbtCompound();
-        strainTag.putInt("ID", strain.id());
-        strainTag.putInt("THC", randomThc(strain));
-        if(type.equals(WeedTypes.BUNDLE)) strainTag.putFloat("Status", 1.0F);
-        strainTag.put("Attributes", genes ? MiscUtil.toNbtList(MiscUtil.randGenes(strain)) : new NbtList());
-        strainTag.putBoolean("Identified", identified);
-        itemStack.setSubNbt("cannacraft:strain", strainTag);
-        return itemStack;
     }
 }

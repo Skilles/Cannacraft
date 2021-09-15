@@ -1,11 +1,9 @@
 package com.skilles.cannacraft.util;
 
 import com.google.common.collect.Lists;
-import com.skilles.cannacraft.strain.*;
-import net.fabricmc.fabric.api.util.NbtType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.Pair;
+import com.skilles.cannacraft.strain.ResourcePair;
+import com.skilles.cannacraft.strain.Strain;
+import com.skilles.cannacraft.strain.StrainMap;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -83,17 +81,17 @@ public class CrossUtil {
             addAll(nameOneFinal);
             addAll(nameTwoFinal);
         }};
-        if(nameOneFinal.contains("Unknown") || nameTwoFinal.contains("Unknown")) return "Unknown";
+        if (nameOneFinal.contains("Unknown") || nameTwoFinal.contains("Unknown")) return "Unknown";
 
 
         // Finds all combinations of names and returns a value if any are a known strain
         List<String> nameList = getStrainCombinations(nameOneFinal, nameTwoFinal);
         Optional<String> optional = nameList.stream().filter(strainList::containsKey).findAny();
-        if(optional.isPresent()) {
+        if (optional.isPresent()) {
             return optional.get();
         }
         // Early return if both names are one word
-        if(nameOneFinal.size() == 1 && nameTwoFinal.size() == 1){
+        if (nameOneFinal.size() == 1 && nameTwoFinal.size() == 1) {
             return nameOneFinal.get(0) + " " + nameTwoFinal.get(0);
         }
         // Creates a mutable array of all words
@@ -119,25 +117,25 @@ public class CrossUtil {
         String newName1;
         String newName2;
         // Checks if suffix was found, if true then suffix is one with highest priority
-        if(!tempSuffixMap.isEmpty()) {
+        if (!tempSuffixMap.isEmpty()) {
             newName2 = maxEntry(tempSuffixMap);
         } else {
             // If no suffix was not found, set suffix to last element in name list
             newName2 = names.get(names.size() - 1);
         }
         // Sets prefix to first element in name list
-        if(nameOne.isEmpty()) {
+        if (nameOne.isEmpty()) {
             newName1 = nameTwo.get(0);
-        } else if(nameTwo.isEmpty()) {
+        } else if (nameTwo.isEmpty()) {
             newName1 = nameOne.get(0);
         } else {
-            if(nameOneFinal.contains(newName2)) {
+            if (nameOneFinal.contains(newName2)) {
                 newName1 = nameTwo.get(0);
             } else {
                 newName1 = nameOne.get(0);
             }
         }
-        return newName1+ " " + newName2;
+        return newName1 + " " + newName2;
     }
 
     /**
@@ -149,16 +147,18 @@ public class CrossUtil {
      */
     public static Strain crossStrains(Strain female, Strain male, boolean register) {
         Strain crossedStrain;
-        if(female.isResource() && male.isResource()) {
+        if (female.isResource() && male.isResource()) {
             crossedStrain = crossResources(female, male);
         } else {
             return new Strain(crossNames(female.name(), male.name()), crossTypes(female.type(), male.type()), register);
         }
         return strainList.get(crossedStrain.name());
     }
+
     public static Strain crossStrains(Strain female, Strain male) {
         return crossStrains(female, male, false);
     }
+
     /**
      * Crosses two resource strains using predefined recipes
      * @param female strain of female
@@ -168,13 +168,14 @@ public class CrossUtil {
     public static Strain crossResources(Strain female, Strain male) {
         StrainUtil.StrainItems fItem = female.strainItem;
         StrainUtil.StrainItems mItem = male.strainItem;
-        for(ResourcePair pair : StrainUtil.resourcePairs) {
-            if((pair.strain1() == fItem || pair.strain1() == mItem) && (pair.strain2() == fItem || pair.strain2() == mItem))
+        for (ResourcePair pair : StrainUtil.resourcePairs) {
+            if ((pair.strain1() == fItem || pair.strain1() == mItem) && (pair.strain2() == fItem || pair.strain2() == mItem))
                 return pair.getOutputStrain();
         }
         if (MiscUtil.random().nextFloat() > 0.7F) return male;
         return female;
     }
+
     /**
      * This method eventually sorts the output list to only contain names that are not part of the suffix name
      * @param name name to filter
@@ -183,9 +184,9 @@ public class CrossUtil {
      * @return returns how many names were removed from the compound word (0 = simple word)
      */
     private static int filterName(List<String> name, Map<String, Integer> tempSuffixMap, List<String> names) {
-        if(name.size() > 1) {
+        if (name.size() > 1) {
             // Check if nameTwo has two prefixes and clears if it does
-            if(suffixesMap.containsKey(name.get(0)) && suffixesMap.containsKey(name.get(1))) {
+            if (suffixesMap.containsKey(name.get(0)) && suffixesMap.containsKey(name.get(1))) {
                 names.remove(name.get(0));
                 names.remove(name.get(1));
                 name.clear();
@@ -213,104 +214,19 @@ public class CrossUtil {
      * TODO: set type dynamically based on name
      */
     public static StrainMap.Type crossTypes(StrainMap.Type type1, StrainMap.Type type2) {
-        if(type2.equals(StrainMap.Type.UNKNOWN)) return StrainMap.Type.UNKNOWN;
-        switch(type1) {
+        if (type2.equals(StrainMap.Type.UNKNOWN)) return StrainMap.Type.UNKNOWN;
+        switch (type1) {
             case INDICA:
-                if(type2.equals(StrainMap.Type.SATIVA)) return StrainMap.Type.HYBRID;
+                if (type2.equals(StrainMap.Type.SATIVA)) return StrainMap.Type.HYBRID;
                 return StrainMap.Type.INDICA;
             case SATIVA:
-                if(type2.equals(StrainMap.Type.INDICA)) return StrainMap.Type.HYBRID;
+                if (type2.equals(StrainMap.Type.INDICA)) return StrainMap.Type.HYBRID;
                 return StrainMap.Type.SATIVA;
             case HYBRID:
-                if(type2.equals(StrainMap.Type.HYBRID)) return StrainMap.Type.HYBRID;
+                if (type2.equals(StrainMap.Type.HYBRID)) return StrainMap.Type.HYBRID;
                 return type2;
             default:
                 return StrainMap.Type.UNKNOWN;
         }
-    }
-    public static NbtList crossGenes(ItemStack stack1, ItemStack stack2) {
-        ArrayList<Gene> list1 = MiscUtil.fromNbtList(stack1.getSubNbt("cannacraft:strain").getList("Attributes", NbtType.COMPOUND));
-        ArrayList<Gene> list2 = MiscUtil.fromNbtList(stack2.getSubNbt("cannacraft:strain").getList("Attributes", NbtType.COMPOUND));
-        ArrayList<Gene> output = new ArrayList<>();
-        list1.forEach(gene1 -> {
-            Optional<Gene> gene2 = list2.stream().filter(j -> gene1.type() == j.type()).findFirst();
-            // Removes gene from list2 if it finds a match, otherwise adds it to the output
-            gene2.ifPresentOrElse( x -> {
-                    output.add(crossGenes(x, gene2.get()));
-                    list2.remove(gene2.get());
-            }, () -> output.add(gene1));
-        });
-        output.addAll(list2);
-        return MiscUtil.toNbtList(output);
-    }
-    @Deprecated
-    public static ItemStack crossItems(ItemStack stack1, ItemStack stack2, boolean register) {
-        Strain newStrain = CrossUtil.crossStrains(WeedRegistry.getStrain(stack1), WeedRegistry.getStrain(stack2), register);
-        int newThc = CrossUtil.crossThc(WeedRegistry.getThc(stack1), WeedRegistry.getThc(stack2));
-        NbtList newGenes = CrossUtil.crossGenes(stack1, stack2);
-        return WeedRegistry.strainToItem(newStrain, newThc, true, null, WeedRegistry.WeedTypes.fromStack(stack1), null);
-    }
-    protected static Gene crossGenes(Gene gene1, Gene gene2) {
-        int level1 = gene1.level();
-        int level2 = gene2.level();
-        /*switch (Math.abs(level2 - level1)) {
-            case 0:
-                break;
-            case 1:
-                break;
-            case 2:
-                break;
-            case 3:
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + Math.abs(level2 - level1));
-        }*/
-        return new Gene(gene1.type(), (level1 + level2) / 2);
-    }
-    // terrible code
-    private static Pair<GeneTypes, Integer> crossGenes(int level1, int level2, GeneTypes type) {
-        int levelDiff = Math.abs(level1 - level2);
-        int newLevel = 0;
-        Random random = new Random();
-
-        switch (levelDiff) {
-            case 0:
-                newLevel = level1;
-                break;
-            case 1:
-                int i = random.nextInt(2); // 0 - 1
-                newLevel = switch (i) {
-                    case 0 -> // 50%
-                            Integer.min(level1, level2);
-                    case 1 -> // 50%
-                            Integer.max(level1, level2);
-                    default -> newLevel;
-                };
-            case 2:
-                i = random.nextInt(4); // 0 - 3
-                if(i == 0) { // 0 25%
-                    newLevel = Integer.min(level1, level2);
-                    break;
-                } else if(i <= 2) { // 1 or 2 50%
-                    newLevel = Integer.sum(level1, level2)/2;
-                    break;
-                } else { // 3 25%
-                    newLevel = Integer.max(level1, level2);
-                    break;
-                }
-            case 3: // 1: 0, 2: 3
-                i = random.nextInt(4); // 4 cases
-                if(i < 2) { // 0 or 1 50%
-                    newLevel = Integer.min(level1, level2);
-                    break;
-                } else if(i == 2) { // 2 25%
-                    newLevel = Integer.sum(level1, level2)/2;
-                    break;
-                } else { // 3 25%
-                    newLevel = Integer.max(level1, level2);
-                    break;
-                }
-        }
-        return new Pair<>(type, newLevel);
     }
 }

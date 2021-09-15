@@ -30,6 +30,7 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class ModCommands {
+
     public static int setStrain(CommandContext<ServerCommandSource> ctx, int strain) throws CommandSyntaxException {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack itemStack = self.getMainHandStack();
@@ -96,7 +97,7 @@ public class ModCommands {
     public static int clearGenes(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack stack = self.getMainHandStack();
-        if(stack.hasNbt()) {
+        if (stack.hasNbt()) {
             NbtCompound tag = stack.getSubNbt("cannacraft:strain");
             tag.remove("Attributes");
         }
@@ -191,7 +192,7 @@ public class ModCommands {
                                 .then(argument("amount", IntegerArgumentType.integer())
                                     .executes(ctx -> {
                                         final ServerPlayerEntity self = ctx.getSource().getPlayer();
-                                        for(int i = 0; i < getInteger(ctx, "amount"); i++) {
+                                        for (int i = 0; i < getInteger(ctx, "amount"); i++) {
                                             self.giveItemStack(DnaUtil.genomeToItem(DnaUtil.randomGenome(), WeedTypes.fromString(getString(ctx, "type")), null, true));
                                         }
                                         self.sendSystemMessage(Text.of(getInteger(ctx, "amount") + " random seeds given"), Util.NIL_UUID);
