@@ -127,16 +127,17 @@ public class ItemStrainComponent extends ItemComponent implements StrainInterfac
     @Override
     public void identify() {
         if (!this.identified()) {
-            this.cachedStrainInfo = this.cachedStrainInfo.asIdentified();
+            this.cachedStrainInfo = this.getStrainInfo().asIdentified();
+            this.putBoolean("Identified", true);
         }
     }
 
     @Override
     public boolean identified() {
-        if (this.cachedStrainInfo == null) {
-            return false;
+        if (!this.hasTag("Identified")) {
+            this.putBoolean("Identified", false);
         }
-        return this.getStrainInfo().identified();
+        return this.getBoolean("Identified");
     }
 
     @Override

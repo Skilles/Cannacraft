@@ -3,6 +3,7 @@ package com.skilles.cannacraft.util;
 import com.google.common.collect.Lists;
 import com.skilles.cannacraft.strain.ResourcePair;
 import com.skilles.cannacraft.strain.Strain;
+import com.skilles.cannacraft.strain.StrainBuilder;
 import com.skilles.cannacraft.strain.StrainMap;
 import org.apache.commons.lang3.StringUtils;
 
@@ -150,7 +151,7 @@ public class CrossUtil {
         if (female.isResource() && male.isResource()) {
             crossedStrain = crossResources(female, male);
         } else {
-            return new Strain(crossNames(female.name(), male.name()), crossTypes(female.type(), male.type()), register);
+            return new StrainBuilder().name(crossNames(female.name(), male.name())).type(crossTypes(female.type(), male.type())).register().build();
         }
         return strainList.get(crossedStrain.name());
     }

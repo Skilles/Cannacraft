@@ -1,13 +1,11 @@
 package com.skilles.cannacraft.util;
 
 import com.skilles.cannacraft.blocks.weedCrop.WeedCropEntity;
-import com.skilles.cannacraft.config.ModConfig;
 import com.skilles.cannacraft.dna.genome.Genome;
 import com.skilles.cannacraft.dna.genome.gene.TraitGene;
 import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.strain.StrainInfo;
-import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -18,8 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class WeedRegistry {
-
-    private static ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
 
     // Anything that can have strain information
     public enum WeedTypes {
@@ -99,7 +95,7 @@ public class WeedRegistry {
     // Get subtag from item
     public static NbtCompound getStrainTag(ItemStack itemStack) {
         assert checkItem(itemStack);
-        return itemStack.getNbt().getCompound("cannacraft:strain");
+        return itemStack.getOrCreateSubNbt("cannacraft:strain");
     }
     public static NbtCompound getStrainTag(WeedCropEntity entity) {
         return entity.writeNbt(new NbtCompound()).getCompound("cannacraft:strain");

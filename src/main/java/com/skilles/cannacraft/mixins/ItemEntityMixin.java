@@ -1,7 +1,7 @@
 package com.skilles.cannacraft.mixins;
 
 import com.skilles.cannacraft.items.StrainItem;
-import com.skilles.cannacraft.strain.StrainInfo;
+import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.util.DnaUtil;
 import com.skilles.cannacraft.util.WeedRegistry;
 import net.minecraft.entity.ItemEntity;
@@ -27,9 +27,9 @@ public abstract class ItemEntityMixin {
 
     @Inject(at = @At("TAIL"), method = "<init>(Lnet/minecraft/world/World;DDDLnet/minecraft/item/ItemStack;)V")
     public void ItemEntity(World world, double x, double y, double z, ItemStack stack, CallbackInfo ci) {
-        if (stack.getItem() instanceof StrainItem) {
-            StrainInfo info = WeedRegistry.getStrainInfo(stack);
-            if (stack.hasNbt() && info.strain().id() == 0) {
+        if (stack.getItem() instanceof StrainItem || stack.isOf(ModContent.WEED_SEED)) {
+            // StrainInfo info = WeedRegistry.getStrainInfo(stack);
+            if (!WeedRegistry.getStrainTag(stack).contains("DNA")) {
                 log("Changing tag: " + stack.getNbt());
                 WeedRegistry.StatusTypes status = null;
                 if (WeedRegistry.WeedTypes.fromStack(stack).equals(WeedRegistry.WeedTypes.BUNDLE)) {

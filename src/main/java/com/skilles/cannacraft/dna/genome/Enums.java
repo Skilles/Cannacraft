@@ -10,7 +10,7 @@ import java.util.Map;
 
 import static net.minecraft.enchantment.Enchantment.Rarity;
 
-public class Enums {
+public final class Enums {
 
     public enum Code {
         AAA(0),

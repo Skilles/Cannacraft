@@ -60,7 +60,7 @@ public class BaseChromosome implements Comparable<BaseChromosome>, Serializable 
                 new InfoGene(InfoType.RESOURCE, 0)
             };
         } else {
-            return Arrays.stream(Phenotype.values)
+            return Arrays.stream(Phenotype.values())
                     .filter(geneType -> geneType.chromoType.equals(type))
                     .map(geneType -> new TraitGene(geneType, 0, geneType.recessive ? State.DOMINANT : State.RECESSIVE))
                     .toArray(BaseGene[]::new);

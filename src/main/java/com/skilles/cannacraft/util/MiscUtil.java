@@ -4,7 +4,6 @@ import com.skilles.cannacraft.blocks.ImplementedInventory;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCropEntity;
 import com.skilles.cannacraft.dna.genome.Genome;
 import com.skilles.cannacraft.dna.genome.gene.TraitGene;
-import com.skilles.cannacraft.misc.WeedToast;
 import com.skilles.cannacraft.registry.BlockEntities;
 import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.registry.ModMisc;
@@ -56,13 +55,11 @@ public final class MiscUtil {
 
     public static void appendTooltips(List<Text> tooltip, ItemStack stack, boolean shiftGenes) {
         NbtCompound tag = WeedRegistry.getStrainTag(stack);
-        Genome genome = ModMisc.STRAIN.get(stack).getGenome();
+        StrainInfo info = ModMisc.STRAIN.get(stack).getStrainInfo();
         boolean identified = tag.getBoolean("Identified");
-        StrainInfo info = DnaUtil.convertStrain(genome, identified);
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (!ModMisc.PLAYER.get(client.player).isDiscovered(info.strain())) {
-            client.getToastManager().add(new WeedToast(WeedToast.Type.DISCOVER, info.strain()));
-        }
+
+        assert identified == info.identified();
+
         String sex = info.male() ? "Male" : "Female";
         int id = info.strain().id();
         int thc = info.thc();

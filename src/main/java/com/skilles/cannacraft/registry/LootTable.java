@@ -1,15 +1,12 @@
 package com.skilles.cannacraft.registry;
 
 import com.google.common.collect.Lists;
-import com.skilles.cannacraft.util.DnaUtil;
 import net.fabricmc.fabric.api.loot.v1.FabricLootPoolBuilder;
 import net.fabricmc.fabric.api.loot.v1.FabricLootSupplierBuilder;
 import net.fabricmc.fabric.api.loot.v1.event.LootTableLoadingCallback;
 import net.minecraft.loot.condition.RandomChanceLootCondition;
 import net.minecraft.loot.entry.ItemEntry;
-import net.minecraft.loot.function.SetNbtLootFunction;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -27,13 +24,13 @@ public class LootTable {
     private static final List<LootTableInsert> INSERTS = Lists.newArrayList();
 
     private static FabricLootPoolBuilder lootPool() {
-        NbtCompound subTag = new NbtCompound();
+        /*NbtCompound subTag = new NbtCompound();
         NbtCompound baseTag = new NbtCompound();
-        subTag.putString("DNA", DnaUtil.randomGenome().toString());
-        baseTag.put("cannacraft:strain", subTag);
+        subTag.putString("DNA", "");
+        baseTag.put("cannacraft:strain", subTag);*/
         return FabricLootPoolBuilder.builder()
                 .rolls(ConstantLootNumberProvider.create(1))
-                .withCondition(RandomChanceLootCondition.builder(DROP_CHANCE).build()).withEntry(ItemEntry.builder(ModContent.WEED_SEED).apply(SetNbtLootFunction.builder(baseTag)).build());
+                .withCondition(RandomChanceLootCondition.builder(DROP_CHANCE).build()).withEntry(ItemEntry.builder(ModContent.WEED_SEED).build()); //.apply(SetNbtLootFunction.builder(baseTag)).build());
     }
 
     private static final FabricLootPoolBuilder lootPool = lootPool();

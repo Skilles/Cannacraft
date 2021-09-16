@@ -47,7 +47,6 @@ public class Network {
 
 
     public static void register() {
-
         // Discover strain
         ServerPlayNetworking.registerGlobalReceiver(DISCOVER_STRAIN, (server,  player, handler, buf, responseSender) -> {
             // Read packet data on the event loop

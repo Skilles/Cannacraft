@@ -124,12 +124,12 @@ public class DnaUtil {
         Random random = new Random();
         int MAX_GENES = 4;
         int j = 2;
+        EnumeratedDistribution<Phenotype> typeDistribution = new EnumeratedDistribution<>(Arrays.stream(Enums.Phenotype.values())
+                .map(g -> new Pair<>(g, (double) g.rarity.getWeight())).collect(Collectors.toList()));
         for (int i = 0; i < MAX_GENES; i++) {
             if (random.nextInt(j) == 0) {
-                Phenotype randType = new EnumeratedDistribution<>(Arrays.stream(Enums.Phenotype.values())
-                        .map(g -> new Pair<>(g, (double) g.rarity.getWeight())).collect(Collectors.toList()))
-                        .sample();
                 int randStrength = StrainUtil.normalDist(1, 1, 1);
+                Phenotype randType = typeDistribution.sample();
                 randomGenes.add(new TraitGene(randType, randStrength, randType.recessive ? State.RECESSIVE : State.DOMINANT));
                 j++;
             }

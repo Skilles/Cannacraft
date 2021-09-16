@@ -22,7 +22,7 @@ public class Strain {
     public StrainUtil.StrainItems strainItem;
     private final boolean resource;
 
-    public Strain(String name, Type type, boolean resource, boolean register) {
+    /*public Strain(String name, Type type, boolean resource, boolean register) {
         this.name = name;
         this.type = type;
         this.strainItem = StrainUtil.getStrainItem(this);
@@ -31,25 +31,47 @@ public class Strain {
         this.resource = resource;
         this.id = StrainUtil.indexOf(this, register);
         CLASS_COUNT++;
-    }
+    }*/
+
     public Strain(String name, Type type, Rarity rarity, boolean resource, boolean register) {
-        this(name, type, resource, register);
+        this.name = name;
+        this.type = type;
+        this.strainItem = StrainUtil.getStrainItem(this);
+        this.resource = resource;
+        this.id = StrainUtil.indexOf(this, register);
         this.rarity = rarity;
         this.thcMultiplier = StrainUtil.getThcMultiplier(this);
+        CLASS_COUNT++;
     }
-    public Strain(String name, Type type, boolean register) {
+
+    /*public Strain(String name, Type type, boolean register) {
         this(name, type, false, register);
     }
+
     public Strain(String name, Type type , Rarity rarity, boolean register) {
         this(name, type, false, register);
         this.rarity = rarity;
         this.thcMultiplier = StrainUtil.getThcMultiplier(this);
     }
+
+    public Strain(String name, Type type, Rarity rarity) {
+        this(name, type, rarity, false);
+    }
+
+    public Strain(String name, Type type) {
+        this(name, type, Rarity.COMMON, false);
+    }
+
+    public Strain(String name) {
+        this(name, Type.UNKNOWN, Rarity.COMMON, false);
+    }*/
+
     @ApiStatus.Experimental
     public Strain withId(int id) {
         this.id = id;
         return this;
     }
+
     public int id() { return id; }
 
     public String name() {
@@ -90,9 +112,9 @@ public class Strain {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null /*|| getClass() != o.getClass()*/) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         Strain strain = (Strain) o;
-        return this.isResource() ? this.strainItem.equals(strain.strainItem) : name.equals(strain.name);
+        return name.equals(strain.name);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.skilles.cannacraft.components;
 
+import com.skilles.cannacraft.Cannacraft;
 import com.skilles.cannacraft.misc.Network;
 import com.skilles.cannacraft.misc.WeedToast;
 import com.skilles.cannacraft.registry.ModMisc;
@@ -80,7 +81,7 @@ public class PlayerStrainComponent implements EntityInterface, ComponentV3, Auto
 
     @Override
     public void discoverStrain(Strain strain, @Nullable MinecraftClient client) {
-        if (!isDiscovered(strain)) {
+        if (!this.isDiscovered(strain)) {
             // Different behavior whether clientside or serverside
             if (client != null) { // Client -> server
                 // Sends a toast message to the client
@@ -92,6 +93,7 @@ public class PlayerStrainComponent implements EntityInterface, ComponentV3, Auto
             }
             // Need to also add to client Cannadex so no toast spamming
             this.cannadex.discoverStrain(strain);
+            Cannacraft.log("Discovered " + client == null ? "Server" : "Client");
         }
     }
 

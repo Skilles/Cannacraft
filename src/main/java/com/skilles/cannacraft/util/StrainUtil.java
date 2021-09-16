@@ -3,6 +3,7 @@ package com.skilles.cannacraft.util;
 import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.strain.ResourcePair;
 import com.skilles.cannacraft.strain.Strain;
+import com.skilles.cannacraft.strain.StrainBuilder;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -21,7 +22,7 @@ import static com.skilles.cannacraft.strain.StrainMap.*;
 
 public class StrainUtil {
 
-    static final Strain UNKNOWN_STRAIN = new Strain("Unknown", Type.UNKNOWN, true);
+    static final Strain UNKNOWN_STRAIN = new StrainBuilder().name("Unknown").type(Type.UNKNOWN).register().build();
 
     public static final int MIN_THC = 13;
 
@@ -118,7 +119,7 @@ public class StrainUtil {
 
     @Deprecated
     public static void addStrain(String name, Type type) {
-        addStrain(new Strain(name, type, false));
+        addStrain(new StrainBuilder().name(name).type(type).register().build());
     }
 
     public static void addStrain(Strain strain) {
@@ -214,35 +215,35 @@ public class StrainUtil {
      */
     public static Map<Integer, Strain> defaultStrains = Map.ofEntries(
             defaultStrain(0, UNKNOWN_STRAIN),
-            defaultStrain(1, new Strain("OG Kush", Type.HYBRID, true)),
-            defaultStrain(2, new Strain("Purple Punch", Type.INDICA, Rarity.UNCOMMON, true)),
-            defaultStrain(3, new Strain("Chem Trix", Type.SATIVA, Rarity.UNCOMMON, true)),
-            defaultStrain(4, new Strain("Blue Dream", Type.HYBRID, true)),
-            defaultStrain(5, new Strain("Bubba Kush", Type.INDICA, true)),
-            defaultStrain(6, new Strain("Grandaddy Purple", Type.INDICA, true)),
-            defaultStrain(7, new Strain("Green Crack", Type.SATIVA, true)),
-            defaultStrain(8, new Strain("Northern Lights", Type.INDICA, Rarity.UNCOMMON, true)),
-            defaultStrain(9, new Strain("Pineapple Express", Type.HYBRID, Rarity.RARE, true)),
-            defaultStrain(10, new Strain("Girl Scout Cookies", Type.HYBRID, true)),
-            defaultStrain(11, new Strain("Blueberry", Type.INDICA, Rarity.UNCOMMON, true))
+            defaultStrain(1, new StrainBuilder().name("OG Kush").type(Type.HYBRID).register().build()),
+            defaultStrain(2, new StrainBuilder().name("Purple Punch").type(Type.INDICA).rarity(Rarity.UNCOMMON).register().build()),
+            defaultStrain(3, new StrainBuilder().name("Chem Trix").type(Type.SATIVA).rarity(Rarity.UNCOMMON).register().build()),
+            defaultStrain(4, new StrainBuilder().name("Blue Dream").type(Type.HYBRID).register().build()),
+            defaultStrain(5, new StrainBuilder().name("Bubba Kush").type(Type.INDICA).register().build()),
+            defaultStrain(6, new StrainBuilder().name("Grandaddy Purple").type(Type.INDICA).register().build()),
+            defaultStrain(7, new StrainBuilder().name("Green Crack").type(Type.SATIVA).register().build()),
+            defaultStrain(8, new StrainBuilder().name("Northern Lights").type(Type.INDICA).rarity(Rarity.UNCOMMON).register().build()),
+            defaultStrain(9, new StrainBuilder().name("Pineapple Express").type(Type.HYBRID).rarity(Rarity.RARE).register().build()),
+            defaultStrain(10, new StrainBuilder().name("Girl Scout Cookies").type(Type.HYBRID).register().build()),
+            defaultStrain(11, new StrainBuilder().name("Blueberry").type(Type.INDICA).rarity(Rarity.UNCOMMON).register().build())
     );
 
     /**
      * Immutable map of resource strains
      */
     public static Map<Integer, Strain> defaultResourceStrains = Map.ofEntries(
-            defaultStrain(defaultStrains.size(), new Strain("Iron OG", Type.HYBRID, Rarity.UNCOMMON, true, true)),
-            defaultStrain(defaultStrains.size() + 1, new Strain("Diamond Kush", Type.INDICA, Rarity.RARE, true, true)),
-            defaultStrain(defaultStrains.size() + 2, new Strain("Lapis Dream", Type.SATIVA, Rarity.COMMON, true, true)),
-            defaultStrain(defaultStrains.size() + 3, new Strain("Alaskan Emerald", Type.HYBRID, Rarity.RARE, true, true)),
-            defaultStrain(defaultStrains.size() + 4, new Strain("Cherrystone", Type.INDICA, Rarity.UNCOMMON, true, true)),
-            defaultStrain(defaultStrains.size() + 5, new Strain("Copper Haze", Type.INDICA, Rarity.COMMON, true, true)),
-            defaultStrain(defaultStrains.size() + 6, new Strain("Coal Crack", Type.SATIVA, Rarity.COMMON, true, true)),
-            defaultStrain(defaultStrains.size() + 7, new Strain("Goldberry", Type.INDICA, Rarity.UNCOMMON, true, true)),
-            defaultStrain(defaultStrains.size() + 8, new Strain("Nether Lights", Type.INDICA, Rarity.EPIC, true, true))
+            defaultStrain(0, new StrainBuilder().name("Iron OG").type(Type.HYBRID).rarity(Rarity.UNCOMMON).resource().register().build()),
+            defaultStrain(1, new StrainBuilder().name("Diamond Kush").type(Type.INDICA).rarity(Rarity.RARE).resource().register().build()),
+            defaultStrain(2, new StrainBuilder().name("Lapis Dream").type(Type.SATIVA).rarity(Rarity.COMMON).resource().register().build()),
+            defaultStrain(3, new StrainBuilder().name("Alaskan Emerald").type(Type.HYBRID).rarity(Rarity.RARE).resource().register().build()),
+            defaultStrain(4, new StrainBuilder().name("Cherrystone").type(Type.INDICA).rarity(Rarity.UNCOMMON).resource().register().build()),
+            defaultStrain(5, new StrainBuilder().name("Copper Haze").type(Type.INDICA).rarity(Rarity.COMMON).resource().register().build()),
+            defaultStrain(6, new StrainBuilder().name("Coal Crack").type(Type.SATIVA).rarity(Rarity.COMMON).resource().register().build()),
+            defaultStrain(7, new StrainBuilder().name("Goldberry").type(Type.INDICA).rarity(Rarity.UNCOMMON).resource().register().build()),
+            defaultStrain(8, new StrainBuilder().name("Nether Lights").type(Type.INDICA).rarity(Rarity.EPIC).resource().register().build())
     );
 
-    private static AbstractMap.SimpleEntry<Integer, Strain> defaultStrain(int index, Strain strain) { return new AbstractMap.SimpleEntry<>(index, strain.withId(index)); }
+    private static Map.Entry<Integer, Strain> defaultStrain(int index, Strain strain) { return new AbstractMap.SimpleEntry<>(index, strain.withId(index)); }
 
     public static boolean isPresent(Strain strain, boolean resource) { return resource ? resourceStrainArray.containsValue(strain) :  strainArray.containsValue(strain); }
 
@@ -271,7 +272,7 @@ public class StrainUtil {
 
     public static List<Strain> getStrainPool() {
         List<Strain> output = new ArrayList<>(defaultStrains.values());
-        if (config.getCrop().resource) {
+        if (config == null || config.getCrop().resource) {
             output.addAll(defaultResourceStrains.values());
         }
         output.remove(UNKNOWN_STRAIN);
@@ -314,14 +315,15 @@ public class StrainUtil {
     }
 
     public static ResourcePair[] resourcePairs = new ResourcePair[]{
-            new ResourcePair(StrainItems.COAL, StrainItems.COPPER, StrainItems.IRON),
-            new ResourcePair(StrainItems.IRON, StrainItems.COPPER, StrainItems.GOLD),
-            new ResourcePair(StrainItems.IRON, StrainItems.GOLD, StrainItems.IRON),
-            new ResourcePair(StrainItems.GOLD, StrainItems.DIAMOND, StrainItems.BLAZE),
-            new ResourcePair(StrainItems.COAL, StrainItems.REDSTONE, StrainItems.COPPER),
-            new ResourcePair(StrainItems.EMERALD, StrainItems.LAPIS, StrainItems.DIAMOND),
-            new ResourcePair(StrainItems.DIAMOND, StrainItems.LAPIS, StrainItems.ENDER_PEARL),
-            new ResourcePair(StrainItems.ENDER_PEARL, StrainItems.DIAMOND, StrainItems.NETHERITE)};
+        new ResourcePair(StrainItems.COAL, StrainItems.COPPER, StrainItems.IRON),
+        new ResourcePair(StrainItems.IRON, StrainItems.COPPER, StrainItems.GOLD),
+        new ResourcePair(StrainItems.IRON, StrainItems.GOLD, StrainItems.IRON),
+        new ResourcePair(StrainItems.GOLD, StrainItems.DIAMOND, StrainItems.BLAZE),
+        new ResourcePair(StrainItems.COAL, StrainItems.REDSTONE, StrainItems.COPPER),
+        new ResourcePair(StrainItems.EMERALD, StrainItems.LAPIS, StrainItems.DIAMOND),
+        new ResourcePair(StrainItems.DIAMOND, StrainItems.LAPIS, StrainItems.ENDER_PEARL),
+        new ResourcePair(StrainItems.ENDER_PEARL, StrainItems.DIAMOND, StrainItems.NETHERITE)
+    };
 
     public enum StrainItems {
         DISTILLATE(ModContent.DISTILLATE),
@@ -339,6 +341,7 @@ public class StrainUtil {
         NETHERITE(Items.NETHERITE_SCRAP);
 
         public final Item item;
+
         StrainItems(Item item) {
             this.item = item;
         }

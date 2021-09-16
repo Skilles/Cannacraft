@@ -41,6 +41,7 @@ public class WeedSeed extends AliasedBlockItem {
         }
         return super.getName(stack);
     }
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
         StrainItem.debugAction(world, playerEntity, hand);
