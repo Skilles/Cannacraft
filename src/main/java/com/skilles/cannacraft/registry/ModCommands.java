@@ -34,7 +34,7 @@ public class ModCommands {
     public static int setStrain(CommandContext<ServerCommandSource> ctx, int strain) throws CommandSyntaxException {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack itemStack = self.getMainHandStack();
-        if (itemStack.getItem().equals(ModItems.WEED_SEED) || itemStack.getItem().equals(ModItems.WEED_BUNDLE)) {
+        if (itemStack.getItem().equals(ModContent.WEED_SEED) || itemStack.getItem().equals(ModContent.WEED_BUNDLE)) {
             ModMisc.STRAIN.get(itemStack).setStrain(strain);
             self.sendSystemMessage(Text.of("Strain set to: " + ModMisc.STRAIN.get(itemStack).getStrainInfo().strain()), Util.NIL_UUID);
         }
@@ -44,7 +44,7 @@ public class ModCommands {
     public static int setSex(CommandContext<ServerCommandSource> ctx, String gender) throws CommandSyntaxException {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack itemStack = self.getMainHandStack();
-        if (itemStack.getItem().equals(ModItems.WEED_SEED)) {
+        if (itemStack.getItem().equals(ModContent.WEED_SEED)) {
             //NbtCompound tag = itemStack.getOrCreateSubNbt("cannacraft:strain");
             if (gender.equalsIgnoreCase("male")) {
                 ModMisc.STRAIN.get(itemStack).setMale(true);
@@ -60,7 +60,7 @@ public class ModCommands {
     public static int identify(CommandContext<ServerCommandSource> ctx, int flag) throws CommandSyntaxException {
         final ServerPlayerEntity self = ctx.getSource().getPlayer();
         ItemStack handStack = self.getMainHandStack();
-        if (handStack.getItem().equals(ModItems.WEED_SEED) || handStack.getItem().equals(ModItems.WEED_BUNDLE)) {
+        if (handStack.getItem().equals(ModContent.WEED_SEED) || handStack.getItem().equals(ModContent.WEED_BUNDLE)) {
             if (flag == 0) {
                 ModMisc.STRAIN.get(handStack).identify();
                 self.sendSystemMessage(Text.of("Seed identified"), Util.NIL_UUID);
@@ -70,7 +70,7 @@ public class ModCommands {
                 int j = 0;
                 for (i = 0; self.getInventory().size() > i; i++) {
                     ItemStack itemStack = self.getInventory().getStack(i);
-                    if (itemStack != null && (itemStack.isOf(ModItems.WEED_SEED) || itemStack.isOf(ModItems.WEED_BUNDLE)) && !ModMisc.STRAIN.get(itemStack).identified()) {
+                    if (itemStack != null && (itemStack.isOf(ModContent.WEED_SEED) || itemStack.isOf(ModContent.WEED_BUNDLE)) && !ModMisc.STRAIN.get(itemStack).identified()) {
                         ModMisc.STRAIN.get(itemStack).identify();
                         j++;
                     }

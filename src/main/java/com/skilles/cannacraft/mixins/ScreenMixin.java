@@ -2,7 +2,7 @@ package com.skilles.cannacraft.mixins;
 
 import com.skilles.cannacraft.components.StrainInterface;
 import com.skilles.cannacraft.dna.genome.gene.TraitGene;
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.registry.ModMisc;
 import com.skilles.cannacraft.util.MiscUtil;
 import net.minecraft.client.MinecraftClient;
@@ -31,7 +31,7 @@ public abstract class ScreenMixin {
 
     @Inject(method = "getTooltipFromItem", at = @At(value = "RETURN", target = "Lnet/minecraft/client/gui/screen/Screen;getTooltipFromItem(Lnet/minecraft/item/ItemStack;)Ljava/util/List;"), cancellable = true)
     private void keyTooltip(ItemStack stack, CallbackInfoReturnable<List<Text>> cir) {
-        if (stack.isOf(ModItems.WEED_SEED) && stack.hasNbt()) {
+        if (stack.isOf(ModContent.WEED_SEED) && stack.hasNbt()) {
             NbtCompound tag = stack.getSubNbt("cannacraft:strain");
             if (!tag.contains("DNA")) {
                 cir.cancel();
@@ -48,7 +48,7 @@ public abstract class ScreenMixin {
                 List<Text> tooltip = cir.getReturnValue();
                 expandDna(dnaString, tooltip, client.options.guiScale);
             }
-        } else if (stack.isOf(ModItems.WEED_BUNDLE) && stack.hasNbt()) {
+        } else if (stack.isOf(ModContent.WEED_BUNDLE) && stack.hasNbt()) {
             NbtCompound tag = stack.getSubNbt("cannacraft:strain");
             List<Text> tooltip = cir.getReturnValue();
             tooltip.add(2, new LiteralText("Press ").append( new LiteralText("SHIFT ").formatted(Formatting.GOLD).append( new LiteralText("to view info").formatted(Formatting.WHITE))));

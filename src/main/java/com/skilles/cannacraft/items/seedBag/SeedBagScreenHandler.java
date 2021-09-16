@@ -1,6 +1,6 @@
 package com.skilles.cannacraft.items.seedBag;
 
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.registry.ModScreens;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -39,7 +39,7 @@ public class SeedBagScreenHandler extends ScreenHandler {
                 this.addSlot(new Slot(inventory, l + m * 9, 8 + l * 18, 17 + m * 18) {
                     public boolean canInsert(ItemStack stack) {
                         // Only allow tagged seeds
-                        return stack.getItem() == ModItems.WEED_SEED;
+                        return stack.getItem() == ModContent.WEED_SEED;
                     }
                 });
             }
@@ -69,7 +69,7 @@ public class SeedBagScreenHandler extends ScreenHandler {
 
     @Override
     public boolean canInsertIntoSlot(ItemStack stack, Slot slot) {
-        return stack.isOf(ModItems.WEED_SEED);
+        return stack.isOf(ModContent.WEED_SEED);
     }
 
     // Shift + Player Inv Slot

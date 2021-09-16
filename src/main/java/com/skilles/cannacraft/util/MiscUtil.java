@@ -5,8 +5,8 @@ import com.skilles.cannacraft.blocks.weedCrop.WeedCropEntity;
 import com.skilles.cannacraft.dna.genome.Genome;
 import com.skilles.cannacraft.dna.genome.gene.TraitGene;
 import com.skilles.cannacraft.misc.WeedToast;
-import com.skilles.cannacraft.registry.ModEntities;
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.BlockEntities;
+import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.registry.ModMisc;
 import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.strain.StrainInfo;
@@ -73,7 +73,7 @@ public final class MiscUtil {
             tooltip.add(new LiteralText("THC: ").formatted(Formatting.GRAY).append(new LiteralText(thc + "%").formatted(Formatting.DARK_GREEN)));
             Rarity rarity = info.strain().getRarity();
             tooltip.add(new LiteralText("Rarity: ").formatted(Formatting.GRAY).append(new LiteralText(StringUtils.capitalize(StringUtils.lowerCase(rarity.toString()))).formatted(rarity.formatting)));
-            if (stack.isOf(ModItems.WEED_SEED)) {
+            if (stack.isOf(ModContent.WEED_SEED)) {
                 tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText(sex).formatted(Formatting.DARK_GREEN)));
             }
             if (shiftGenes) {
@@ -85,7 +85,7 @@ public final class MiscUtil {
         } else {
             tooltip.add(new LiteralText("Strain: ").formatted(Formatting.GRAY).append(new LiteralText("Unidentified").formatted(Formatting.GREEN)));
             tooltip.add(new LiteralText("Type: ").formatted(Formatting.GRAY).append(new LiteralText("Unknown").formatted(Formatting.DARK_GREEN)));
-            if (stack.isOf(ModItems.WEED_SEED)) {
+            if (stack.isOf(ModContent.WEED_SEED)) {
                 tooltip.add(new LiteralText("Sex: ").formatted(Formatting.GRAY).append(new LiteralText("Unknown").formatted(Formatting.DARK_GREEN)));
             }
         }
@@ -101,10 +101,10 @@ public final class MiscUtil {
             if (world.getBlockEntity(pos) instanceof WeedCropEntity weedEntity) {
                 NbtCompound tag = weedEntity.writeNbt(new NbtCompound());
                 Genome genome = weedEntity.getGenome();
-                if (type.equals(ModItems.WEED_SEED) && !genome.isMale()) {
+                if (type.equals(ModContent.WEED_SEED) && !genome.isMale()) {
                     toDrop.setSubNbt("cannacraft:strain", trimTag(tag, type));
                     Block.dropStack(world, pos, toDrop);
-                } else if (brokenWithShears && type.equals(ModItems.WEED_BUNDLE)) {
+                } else if (brokenWithShears && type.equals(ModContent.WEED_BUNDLE)) {
                     toDrop.setSubNbt("cannacraft:strain", trimTag(tag, type));
                     Block.dropStack(world, pos, toDrop);
                 } else {
@@ -118,7 +118,7 @@ public final class MiscUtil {
         }
     }
     public static void dropStack(World world, BlockPos pos, Item type) {
-        dropStack(world, pos, type, type.equals(ModItems.WEED_SEED));
+        dropStack(world, pos, type, type.equals(ModContent.WEED_SEED));
     }
     public static void dropStack(WorldAccess world, BlockPos pos, Item type) {
         dropStack(world.getBlockEntity(pos).getWorld(), pos, type, true);
@@ -150,9 +150,9 @@ public final class MiscUtil {
         newTag.putBoolean("Identified", identified);
 
         if (type != null) {
-            if (type.equals(ModItems.WEED_BUNDLE)) {
+            if (type.equals(ModContent.WEED_BUNDLE)) {
                 newTag.putFloat("Status", 1F);
-            } else if (type.equals(ModItems.WEED_SEED)) {
+            } else if (type.equals(ModContent.WEED_SEED)) {
                 NbtList nbtList = tag.getList("Seed DNA", NbtElement.STRING_TYPE);
                 newTag.putString("DNA", nbtList.get(0).asString());
             }
@@ -210,21 +210,21 @@ public final class MiscUtil {
 
     public static void copyNbt(ServerWorld world, BlockPos originalPos, BlockPos copyToPos) {
         if (world.getBlockEntity(originalPos) != null && world.getBlockEntity(copyToPos) != null) {
-            world.getBlockEntity(copyToPos, ModEntities.WEED_CROP_ENTITY).get().readNbt(
-                    world.getBlockEntity(originalPos, ModEntities.WEED_CROP_ENTITY).get().writeNbt(new NbtCompound()));
+            world.getBlockEntity(copyToPos, BlockEntities.CROP).get().readNbt(
+                    world.getBlockEntity(originalPos, BlockEntities.CROP).get().writeNbt(new NbtCompound()));
             world.markDirty(copyToPos);
         }
     }
 
     public static DefaultedList<ItemStack> getItemsFromNbt(ItemStack stack) {
-        if (stack.isOf(ModItems.SEED_BAG) && stack.hasNbt()) {
+        if (stack.isOf(ModContent.SEED_BAG) && stack.hasNbt()) {
             NbtCompound tag = stack.getNbt();
             assert tag != null;
             NbtList nbtList = tag.getList("Items", NbtElement.LIST_TYPE);
             List<ItemStack> itemList = new ArrayList<>();
             for (NbtElement element : nbtList) {
                 NbtCompound compound = (NbtCompound) element;
-                ItemStack seedStack = ModItems.WEED_SEED.getDefaultStack();
+                ItemStack seedStack = ModContent.WEED_SEED.getDefaultStack();
                 NbtCompound bagTag = new NbtCompound();
                 bagTag.putInt("ID", compound.getInt("ID"));
                 bagTag.putInt("THC", compound.getInt("THC"));
@@ -242,13 +242,13 @@ public final class MiscUtil {
             NbtCompound tag = stack.getSubNbt("cannacraft:strain");
             StrainInfo info = ModMisc.STRAIN.get(stack).getStrainInfo();
             String name = tag.getBoolean("Identified") ? info.strain().name() : "Unidentified";
-            if (stack.isOf(ModItems.WEED_SEED)) {
+            if (stack.isOf(ModContent.WEED_SEED)) {
                 name += stack.getCount() > 1 ? " Seeds": " Seed";
-            } else if (stack.isOf(ModItems.WEED_BROWNIE)) {
+            } else if (stack.isOf(ModContent.BROWNIE)) {
                 name += stack.getCount() > 1 ? " Brownies": " Brownie";
-            } else if (stack.isOf(ModItems.WEED_DISTILLATE)) {
+            } else if (stack.isOf(ModContent.DISTILLATE)) {
                 name += " Distillate";
-            } else if (stack.isOf(ModItems.WEED_BUNDLE)) {
+            } else if (stack.isOf(ModContent.WEED_BUNDLE)) {
 
             }
             return Text.of(name);

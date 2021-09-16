@@ -1,8 +1,8 @@
 package com.skilles.cannacraft.blocks.machines.strainAnalyzer;
 
 import com.skilles.cannacraft.blocks.machines.MachineBlockEntity;
-import com.skilles.cannacraft.registry.ModEntities;
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.BlockEntities;
+import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.util.WeedRegistry;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.BlockState;
@@ -28,7 +28,7 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
     protected static final int timeToProcess = 175;
 
     public StrainAnalyzerEntity(BlockPos pos, BlockState state) {
-        super(ModEntities.STRAIN_ANALYZER_ENTITY, pos, state, DefaultedList.ofSize(2, ItemStack.EMPTY));
+        super(BlockEntities.ANALYZER, pos, state, DefaultedList.ofSize(2, ItemStack.EMPTY));
         this.propertyDelegate = new PropertyDelegate() {
             @Override
             public int get(int index) {
@@ -57,31 +57,30 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
     }
 
     public boolean canCraft(DefaultedList<ItemStack> inventory) {
-            ItemStack stack = inventory.get(1);
-            ItemStack output = inventory.get(0);
-            if (stack.equals(ItemStack.EMPTY)) return false;
-            if (output.equals(ItemStack.EMPTY)) return true;
-            if (WeedRegistry.checkItem(stack) && stack.getCount() >= 1 && stack.hasNbt() && !WeedRegistry.isIdentified(stack)) {
-                NbtCompound outputTag = output.copy().getSubNbt("cannacraft:strain");
-                NbtCompound subTag = stack.copy().getSubNbt("cannacraft:strain");
-                //  if unidentified and NBT aligns
-                return subTag.getInt("ID") == outputTag.getInt("ID") && subTag.getInt("THC") == outputTag.getInt("THC") && subTag.getList("Attributes", NbtType.COMPOUND) == outputTag.getList("Attributes", NbtType.COMPOUND);
-            }
+        ItemStack stack = inventory.get(1);
+        ItemStack output = inventory.get(0);
+        if (stack.equals(ItemStack.EMPTY)) return false;
+        if (output.equals(ItemStack.EMPTY)) return true;
+        if (WeedRegistry.checkItem(stack) && stack.getCount() >= 1 && stack.hasNbt() && !WeedRegistry.isIdentified(stack)) {
+            NbtCompound outputTag = output.copy().getSubNbt("cannacraft:strain");
+            NbtCompound subTag = stack.copy().getSubNbt("cannacraft:strain");
+            //  if unidentified and NBT aligns
+            return subTag.getInt("ID") == outputTag.getInt("ID") && subTag.getInt("THC") == outputTag.getInt("THC") && subTag.getList("Attributes", NbtType.COMPOUND) == outputTag.getList("Attributes", NbtType.COMPOUND);
+        }
         return false;
     }
 
     public int craft(DefaultedList<ItemStack> inventory) {
         ItemStack stack = inventory.get(1);
         ItemStack outputSlot = inventory.get(0);
-        ItemStack output = ModItems.WEED_SEED.getDefaultStack();
+        ItemStack output = ModContent.WEED_SEED.getDefaultStack();
 
         if (outputSlot.isEmpty()) {
             NbtCompound strainTag = stack.getSubNbt("cannacraft:strain").copy();
             strainTag.putBoolean("Identified", true);
             output.setSubNbt("cannacraft:strain", strainTag);
             inventory.set(0, output);
-        }
-        else if (outputSlot.isOf(output.getItem())) {
+        } else if (outputSlot.isOf(output.getItem())) {
             outputSlot.increment(1);
         }
         stack.decrement(1);
@@ -96,6 +95,6 @@ public class StrainAnalyzerEntity extends MachineBlockEntity {
 
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
-        return stack.isOf(ModItems.WEED_BUNDLE);
+        return stack.isOf(ModContent.WEED_BUNDLE);
     }
 }

@@ -1,6 +1,6 @@
 package com.skilles.cannacraft.mixins;
 
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.util.WeedRegistry;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
@@ -36,7 +36,7 @@ public abstract class ShapelessRecipeMixin {
             ItemStack output = this.getOutput().copy();
             if (input.hasNbt()) {
                 output.setSubNbt("cannacraft:strain", input.getSubNbt("cannacraft:strain"));
-                if (output.getItem() == ModItems.WEED_BUNDLE) {
+                if (output.getItem() == ModContent.WEED_BUNDLE) {
                     if (this.id.equals(id("weed_bundle_ground"))) {
                         if (WeedRegistry.getStatus(input) == WeedRegistry.StatusTypes.DRY) {
                             output.getSubNbt("cannacraft:strain").putFloat("Status", 0.0F);

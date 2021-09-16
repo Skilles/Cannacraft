@@ -1,6 +1,7 @@
 package com.skilles.cannacraft.items.seedBag;
 
 import com.google.common.collect.Lists;
+import com.skilles.cannacraft.Cannacraft;
 import com.skilles.cannacraft.blocks.ImplementedInventory;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
 import com.skilles.cannacraft.items.WeedSeed;
@@ -29,8 +30,8 @@ import java.util.Comparator;
 import java.util.List;
 
 public class SeedBag extends Item {
-    public SeedBag(Settings settings) {
-        super(settings);
+    public SeedBag() {
+        super(new Item.Settings().group(Cannacraft.ITEM_GROUP).maxCount(1).fireproof());
     }
     private static final TranslatableText NAME_DEACTIVATED = new TranslatableText("item.cannacraft.seed_bag");
 

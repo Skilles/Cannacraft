@@ -1,10 +1,7 @@
 package com.skilles.cannacraft.blocks.machines;
 
 import com.skilles.cannacraft.blocks.machines.strainAnalyzer.StrainAnalyzerEntity;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
@@ -28,16 +25,27 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
+import java.util.function.BiFunction;
 
-public abstract class MachineBlock extends BlockWithEntity {
+public class MachineBlock extends BlockWithEntity {
 
     public static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
 
     public static final BooleanProperty ACTIVE = BooleanProperty.of("active");
 
     public static ScreenHandler handler;
-    public MachineBlock(Settings settings) {
+
+    private BiFunction<BlockPos, BlockState, BlockEntity> blockEntityClass;
+
+    public MachineBlock(BiFunction<BlockPos, BlockState, BlockEntity> blockEntityClass) {
+        super(Block.Settings.of(Material.METAL).strength(2F, 2F));
+        this.blockEntityClass = blockEntityClass;
+        setDefaultState(getStateManager().getDefaultState().with(FACING, Direction.NORTH).with(ACTIVE, false));
+    }
+
+    public MachineBlock(Settings settings, BiFunction<BlockPos, BlockState, BlockEntity> blockEntityClass) {
         super(settings);
+        this.blockEntityClass = blockEntityClass;
         setDefaultState(getStateManager().getDefaultState().with(FACING, Direction.NORTH).with(ACTIVE, false));
     }
 
@@ -111,4 +119,14 @@ public abstract class MachineBlock extends BlockWithEntity {
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         builder.add(FACING, ACTIVE);
     }
+
+    @Nullable
+    @Override
+    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+        if (blockEntityClass == null) {
+            return null;
+        }
+        return blockEntityClass.apply(pos, state);
+    }
+
 }

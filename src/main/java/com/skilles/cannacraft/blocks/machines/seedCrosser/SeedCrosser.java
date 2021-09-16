@@ -1,7 +1,7 @@
 package com.skilles.cannacraft.blocks.machines.seedCrosser;
 
 import com.skilles.cannacraft.blocks.machines.MachineBlock;
-import com.skilles.cannacraft.registry.ModEntities;
+import com.skilles.cannacraft.registry.BlockEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -19,8 +19,8 @@ import java.util.List;
 
 public class SeedCrosser extends MachineBlock {
 
-    public SeedCrosser(Settings settings) {
-        super(settings);
+    public SeedCrosser() {
+        super(SeedCrosserEntity::new);
     }
 
     @Nullable
@@ -32,7 +32,7 @@ public class SeedCrosser extends MachineBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return checkType(type, ModEntities.SEED_CROSSER_ENTITY, SeedCrosserEntity::tick);
+        return checkType(type, BlockEntities.CROSSER, SeedCrosserEntity::tick);
     }
 
     @Override

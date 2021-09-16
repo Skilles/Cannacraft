@@ -1,7 +1,7 @@
 package com.skilles.cannacraft.blocks.machines.generator;
 
 import com.skilles.cannacraft.blocks.machines.MachineBlock;
-import com.skilles.cannacraft.registry.ModEntities;
+import com.skilles.cannacraft.registry.BlockEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -18,8 +18,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class Generator extends MachineBlock {
-    public Generator(Settings settings) {
-        super(settings);
+    public Generator() {
+        super(GeneratorEntity::new);
     }
 
     @Nullable
@@ -31,7 +31,7 @@ public class Generator extends MachineBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return checkType(type, ModEntities.GENERATOR_ENTITY, GeneratorEntity::tick);
+        return checkType(type, BlockEntities.GENERATOR, GeneratorEntity::tick);
     }
 
     @Override

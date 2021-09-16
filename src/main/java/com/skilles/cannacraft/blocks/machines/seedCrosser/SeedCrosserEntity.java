@@ -1,8 +1,8 @@
 package com.skilles.cannacraft.blocks.machines.seedCrosser;
 
 import com.skilles.cannacraft.blocks.machines.MachineBlockEntity;
-import com.skilles.cannacraft.registry.ModEntities;
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.BlockEntities;
+import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.util.CrossUtil;
 import com.skilles.cannacraft.util.DnaUtil;
@@ -39,7 +39,7 @@ public class SeedCrosserEntity extends MachineBlockEntity {
     protected static final int timeToProcess = 175;
 
     public SeedCrosserEntity(BlockPos pos, BlockState state) {
-        super(ModEntities.SEED_CROSSER_ENTITY, pos, state, DefaultedList.ofSize(3, ItemStack.EMPTY));
+        super(BlockEntities.CROSSER, pos, state, DefaultedList.ofSize(3, ItemStack.EMPTY));
         //this.inventory = DefaultedList.ofSize(3, ItemStack.EMPTY);
         this.propertyDelegate = new PropertyDelegate() {
             @Override
@@ -140,6 +140,6 @@ public class SeedCrosserEntity extends MachineBlockEntity {
 
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
-        return stack.isOf(ModItems.WEED_SEED);
+        return stack.isOf(ModContent.WEED_SEED);
     }
 }

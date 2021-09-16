@@ -1,6 +1,6 @@
 package com.skilles.cannacraft.util;
 
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.strain.ResourcePair;
 import com.skilles.cannacraft.strain.Strain;
 import net.minecraft.client.resource.language.I18n;
@@ -324,7 +324,7 @@ public class StrainUtil {
             new ResourcePair(StrainItems.ENDER_PEARL, StrainItems.DIAMOND, StrainItems.NETHERITE)};
 
     public enum StrainItems {
-        DISTILLATE(ModItems.WEED_DISTILLATE),
+        DISTILLATE(ModContent.DISTILLATE),
         COAL(Items.COAL),
         COPPER(Items.RAW_COPPER),
         IRON(Items.IRON_NUGGET),

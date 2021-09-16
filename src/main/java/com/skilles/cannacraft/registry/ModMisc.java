@@ -44,16 +44,29 @@ import net.minecraft.world.poi.PointOfInterestType;
 import static com.skilles.cannacraft.Cannacraft.id;
 
 public class ModMisc implements ItemComponentInitializer, EntityComponentInitializer {
+
     public static final ComponentKey<StrainInterface> STRAIN = ComponentRegistryV3.INSTANCE.getOrCreate(id("strain"), StrainInterface.class);
+
     public static final ComponentKey<EntityInterface> PLAYER = ComponentRegistryV3.INSTANCE.getOrCreate(id("player"), EntityInterface.class);
-    //public static final ConfiguredFeature<?, ?> WEED_CROP_FEATURE_CONFIGURED = WeedCropFeature.RANDOM_PATCH.configure((new net.minecraft.world.gen.feature.RandomPatchFeatureConfig.Builder(new SimpleBlockStateProvider(ModBlocks.WEED_CROP.getDefaultState()), new DoublePlantPlacer())).tries(64).cannotProject().build()).decorate(Decorator.SPREAD_32_ABOVE.configure(DecoratorConfig.DEFAULT));
+
+    private static final DataPool.Builder<BlockState> WEED_CROP_POOL;
+
+    private static final RandomPatchFeatureConfig WEED_CROP_CONFIG;
+
+    public static final ConfiguredFeature<?, ?> WEED_CROP_FEATURE;
+
+    private static final BlockState WEED_CROP_STATE = ModContent.WEED_CROP.getDefaultState();
+
+    //public static final ConfiguredFeature<?, ?> WEED_CROP_FEATURE_CONFIGURED = WeedCropFeature.RANDOM_PATCH.configure((new net.minecraft.world.gen.feature.RandomPatchFeatureConfig.Builder(new SimpleBlockStateProvider(ModContent.WEED_CROP.getDefaultState()), new DoublePlantPlacer())).tries(64).cannotProject().build()).decorate(Decorator.SPREAD_32_ABOVE.configure(DecoratorConfig.DEFAULT));
+
     @Override
     public void registerItemComponentFactories(ItemComponentFactoryRegistry registry) {
-        registry.register(ModItems.WEED_SEED, STRAIN, ItemStrainComponent::new);
-        registry.register(ModItems.WEED_BUNDLE, STRAIN, ItemStrainComponent::new);
-        registry.register(ModItems.WEED_DISTILLATE, STRAIN, ItemStrainComponent::new);
-        registry.register(ModItems.WEED_BROWNIE, STRAIN, ItemStrainComponent::new);
+        registry.register(ModContent.WEED_SEED, STRAIN, ItemStrainComponent::new);
+        registry.register(ModContent.WEED_BUNDLE, STRAIN, ItemStrainComponent::new);
+        registry.register(ModContent.DISTILLATE, STRAIN, ItemStrainComponent::new);
+        registry.register(ModContent.BROWNIE, STRAIN, ItemStrainComponent::new);
     }
+
     @Override
     public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
         registry.registerForPlayers(PLAYER, PlayerStrainComponent::new, RespawnCopyStrategy.ALWAYS_COPY);
@@ -68,18 +81,6 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
         Registry.register(Registry.STATUS_EFFECT, id("high"), HIGH);
     }
 
-    private static final DataPool.Builder<BlockState> WEED_CROP_POOL;
-    private static final RandomPatchFeatureConfig WEED_CROP_CONFIG;
-    public static final ConfiguredFeature<?, ?> WEED_CROP_FEATURE;
-    private static final BlockState WEED_CROP_STATE = ModBlocks.WEED_CROP.getDefaultState();
-
-    static {
-        WEED_CROP_POOL = new DataPool.Builder<BlockState>().add(WEED_CROP_STATE.with(WeedCrop.AGE, 1), 1).add(WEED_CROP_STATE.with(WeedCrop.AGE, 3), 2).add(WEED_CROP_STATE.with(WeedCrop.AGE, 5), 2).add(WEED_CROP_STATE.with(WeedCrop.AGE, 7), 1);
-        WEED_CROP_CONFIG = (new RandomPatchFeatureConfig.Builder(new WeightedBlockStateProvider(WEED_CROP_POOL), SimpleBlockPlacer.INSTANCE)).tries(64).needsWater().build();
-        //WEED_CROP_CONFIG = (new net.minecraft.world.gen.feature.RandomPatchFeatureConfig.Builder(new SimpleBlockStateProvider(ModBlocks.STRAIN_ANALYZER.getDefaultState()), SimpleBlockPlacer.INSTANCE)).tries(32).build();
-        WEED_CROP_FEATURE = Feature.RANDOM_PATCH.configure(WEED_CROP_CONFIG).decorate(Decorator.HEIGHTMAP_SPREAD_DOUBLE.configure(new HeightmapDecoratorConfig(Heightmap.Type.MOTION_BLOCKING)).spreadHorizontally().repeat(5));
-    }
-
     private static void registerConfiguredFeature() {
         Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, id("weed_crop_feature"), WEED_CROP_FEATURE);
     }
@@ -89,18 +90,23 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
                 .ifPresent(key -> BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(),
                         GenerationStep.Feature.VEGETAL_DECORATION, key));
     }
+
     private static void registerModelPredicates() {
-        FabricModelPredicateProviderRegistry.register(ModItems.WEED_JOINT, new Identifier("lit"), (itemStack, clientWorld, livingEntity, seed) -> itemStack.hasNbt() ? itemStack.getNbt().getBoolean("Lit") ? 1.0F : 0.0F : 0.0F);
-        FabricModelPredicateProviderRegistry.register(ModItems.WEED_BUNDLE, new Identifier("count"), (itemStack, clientWorld, livingEntity, seed) -> BundleUtil.getTexture(itemStack));
-        FabricModelPredicateProviderRegistry.register(ModItems.WEED_BUNDLE, new Identifier("status"), (itemStack, clientWorld, livingEntity, seed) -> itemStack.hasNbt() ? itemStack.getSubNbt("cannacraft:strain").getFloat("Status") : 1.0F); // WET is default
+        FabricModelPredicateProviderRegistry.register(ModContent.JOINT, new Identifier("lit"), (itemStack, clientWorld, livingEntity, seed) -> itemStack.hasNbt() ? itemStack.getNbt().getBoolean("Lit") ? 1.0F : 0.0F : 0.0F);
+        FabricModelPredicateProviderRegistry.register(ModContent.WEED_BUNDLE, new Identifier("count"), (itemStack, clientWorld, livingEntity, seed) -> BundleUtil.getTexture(itemStack));
+        FabricModelPredicateProviderRegistry.register(ModContent.WEED_BUNDLE, new Identifier("status"), (itemStack, clientWorld, livingEntity, seed) -> itemStack.hasNbt() ? itemStack.getSubNbt("cannacraft:strain").getFloat("Status") : 1.0F); // WET is default
     }
+
     private static void registerRenderers() {
-        BlockEntityRendererRegistry.register(ModEntities.WEED_RACK_ENTITY, WeedRackEntityRenderer::new);
+        BlockEntityRendererRegistry.register(BlockEntities.RACK, WeedRackEntityRenderer::new);
     }
-    public static final VillagerProfession STONER = VillagerProfessionBuilder.create().id(new Identifier("stoner")).workstation(PointOfInterestType.FARMER).harvestableItems(ModItems.WEED_SEED).secondaryJobSites(Blocks.FARMLAND).workSound(SoundEvents.ENTITY_VILLAGER_WORK_FARMER).build();
+
+    public static final VillagerProfession STONER = VillagerProfessionBuilder.create().id(new Identifier("stoner")).workstation(PointOfInterestType.FARMER).harvestableItems(ModContent.WEED_SEED).secondaryJobSites(Blocks.FARMLAND).workSound(SoundEvents.ENTITY_VILLAGER_WORK_FARMER).build();
+
     private static void registerVillagers() {
         Registry.register(Registry.VILLAGER_PROFESSION, id("stoner"), STONER);
     }
+
     public static void registerMisc() {
         registerConfiguredFeature();
         registerBiomeModifications();
@@ -109,5 +115,12 @@ public class ModMisc implements ItemComponentInitializer, EntityComponentInitial
         registerVillagers();
         registerRenderers();
         Network.register();
+    }
+
+    static {
+        WEED_CROP_POOL = new DataPool.Builder<BlockState>().add(WEED_CROP_STATE.with(WeedCrop.AGE, 1), 1).add(WEED_CROP_STATE.with(WeedCrop.AGE, 3), 2).add(WEED_CROP_STATE.with(WeedCrop.AGE, 5), 2).add(WEED_CROP_STATE.with(WeedCrop.AGE, 7), 1);
+        WEED_CROP_CONFIG = (new RandomPatchFeatureConfig.Builder(new WeightedBlockStateProvider(WEED_CROP_POOL), SimpleBlockPlacer.INSTANCE)).tries(64).needsWater().build();
+        //WEED_CROP_CONFIG = (new net.minecraft.world.gen.feature.RandomPatchFeatureConfig.Builder(new SimpleBlockStateProvider(ModContent.STRAIN_ANALYZER.getDefaultState()), SimpleBlockPlacer.INSTANCE)).tries(32).build();
+        WEED_CROP_FEATURE = Feature.RANDOM_PATCH.configure(WEED_CROP_CONFIG).decorate(Decorator.HEIGHTMAP_SPREAD_DOUBLE.configure(new HeightmapDecoratorConfig(Heightmap.Type.MOTION_BLOCKING)).spreadHorizontally().repeat(5));
     }
 }

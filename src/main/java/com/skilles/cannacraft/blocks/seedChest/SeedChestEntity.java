@@ -1,8 +1,8 @@
 package com.skilles.cannacraft.blocks.seedChest;
 
 import com.skilles.cannacraft.blocks.ImplementedInventory;
-import com.skilles.cannacraft.registry.ModEntities;
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.BlockEntities;
+import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.util.StrainUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -24,11 +24,11 @@ public class SeedChestEntity extends BlockEntity implements NamedScreenHandlerFa
     private final DefaultedList<ItemStack> inventory = DefaultedList.ofSize(36, ItemStack.EMPTY);
 
     /*public SeedChestEntity(BlockEntityType<? extends BlockEntity> type, BlockPos pos, BlockState state) {
-        super(ModEntities.SEED_CHEST_ENTITY, pos, state);
+        super(ModBEntities.SEED_CHEST_ENTITY, pos, state);
     }*/
 
     public SeedChestEntity(BlockPos pos, BlockState state) {
-        super(ModEntities.SEED_CHEST_ENTITY, pos, state);
+        super(BlockEntities.SEED_CHEST, pos, state);
     }
 
 
@@ -73,7 +73,7 @@ public class SeedChestEntity extends BlockEntity implements NamedScreenHandlerFa
         ImplementedInventory.super.setStack(slot, stack);
         if (!inventory.isEmpty()) {
             Collections.sort(inventory, (o1, o2) -> {
-                if (o1.isOf(ModItems.WEED_SEED) && o2.isOf(ModItems.WEED_SEED)) {
+                if (o1.isOf(ModContent.WEED_SEED) && o2.isOf(ModContent.WEED_SEED)) {
                     NbtCompound tag1 = o1.getSubNbt("cannacraft:strain");
                     NbtCompound tag2 = o2.getSubNbt("cannacraft:strain");
                     String name1 = StrainUtil.getStrain(tag1).name();

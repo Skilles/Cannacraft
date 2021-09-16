@@ -1,7 +1,7 @@
 package com.skilles.cannacraft.blocks.seedChest;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.ModContent;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -29,7 +29,7 @@ public class SeedChestScreen extends HandledScreen<SeedChestScreenHandler> {
         drawTexture(matrices, x, y, 0, 0, backgroundWidth, backgroundHeight);
 
         Inventory inventory = this.handler.getInventory();
-        drawCenteredText(matrices, this.textRenderer, "Seeds: "+inventory.count(ModItems.WEED_SEED), x+30, 65, 255);
+        drawCenteredText(matrices, this.textRenderer, "Seeds: "+inventory.count(ModContent.WEED_SEED), x+30, 65, 255);
     }
 
     @Override

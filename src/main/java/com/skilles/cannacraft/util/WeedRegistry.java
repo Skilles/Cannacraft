@@ -4,7 +4,7 @@ import com.skilles.cannacraft.blocks.weedCrop.WeedCropEntity;
 import com.skilles.cannacraft.config.ModConfig;
 import com.skilles.cannacraft.dna.genome.Genome;
 import com.skilles.cannacraft.dna.genome.gene.TraitGene;
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.strain.StrainInfo;
 import me.shedaniel.autoconfig.AutoConfig;
@@ -23,12 +23,12 @@ public class WeedRegistry {
 
     // Anything that can have strain information
     public enum WeedTypes {
-        BUNDLE(ModItems.WEED_BUNDLE),
-        DISTILLATE(ModItems.WEED_DISTILLATE),
-        BROWNIE(ModItems.WEED_BROWNIE),
-        BROWNIE_MIX(ModItems.BROWNIE_MIX),
-        JOINT(ModItems.WEED_JOINT),
-        SEED(ModItems.WEED_SEED);
+        BUNDLE(ModContent.WEED_BUNDLE),
+        DISTILLATE(ModContent.DISTILLATE),
+        BROWNIE(ModContent.BROWNIE),
+        BROWNIE_MIX(ModContent.BROWNIE_MIX),
+        JOINT(ModContent.JOINT),
+        SEED(ModContent.WEED_SEED);
 
         private final Item weedItem;
 

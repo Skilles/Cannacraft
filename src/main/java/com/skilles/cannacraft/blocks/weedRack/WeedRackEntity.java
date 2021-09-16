@@ -1,7 +1,7 @@
 package com.skilles.cannacraft.blocks.weedRack;
 
-import com.skilles.cannacraft.registry.ModEntities;
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.BlockEntities;
+import com.skilles.cannacraft.registry.ModContent;
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -25,7 +25,7 @@ public class WeedRackEntity extends BlockEntity implements Inventory, BlockEntit
     protected int processTime = 0;
 
     public WeedRackEntity(BlockPos pos, BlockState state) {
-        super(ModEntities.WEED_RACK_ENTITY, pos, state);
+        super(BlockEntities.RACK, pos, state);
         this.inventory = DefaultedList.ofSize(1, ItemStack.EMPTY);
     }
 
@@ -49,7 +49,7 @@ public class WeedRackEntity extends BlockEntity implements Inventory, BlockEntit
 
     private void update() {
         ItemStack itemStack = this.getStack(0);
-        if (!isEmpty() && itemStack.isOf(ModItems.WEED_BUNDLE) && itemStack.hasNbt() && itemStack.getNbt().getCompound("cannacraft:strain").getFloat("Status") == 1.0F) {
+        if (!isEmpty() && itemStack.isOf(ModContent.WEED_BUNDLE) && itemStack.hasNbt() && itemStack.getNbt().getCompound("cannacraft:strain").getFloat("Status") == 1.0F) {
             ++processTime;
             if (processTime >= dryingTime) {
                 log("Done!");

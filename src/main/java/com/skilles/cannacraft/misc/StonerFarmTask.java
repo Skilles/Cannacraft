@@ -5,8 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.skilles.cannacraft.Cannacraft;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
-import com.skilles.cannacraft.registry.ModBlocks;
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.registry.ModMisc;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -95,7 +94,7 @@ public class StonerFarmTask extends Task<VillagerEntity> {
         this.nextResponseTime = l + 40L;
     }
     private boolean hasWeedSeed(VillagerEntity villagerEntity) {
-        return villagerEntity.getInventory().containsAny(ImmutableSet.of(ModItems.WEED_SEED));
+        return villagerEntity.getInventory().containsAny(ImmutableSet.of(ModContent.WEED_SEED));
     }
     protected void keepRunning(ServerWorld serverWorld, VillagerEntity villagerEntity, long l) {
         if (this.currentTarget == null || this.currentTarget.isWithinDistance(villagerEntity.getPos(), 1.0D)) {
@@ -113,8 +112,8 @@ public class StonerFarmTask extends Task<VillagerEntity> {
                     for (int i = 0; i < simpleInventory.size(); ++i) {
                         ItemStack itemStack = simpleInventory.getStack(i);
                         boolean bl = false;
-                        if (!itemStack.isEmpty() && itemStack.isOf(ModItems.WEED_SEED)) {
-                            serverWorld.setBlockState(this.currentTarget, ModBlocks.WEED_CROP.getDefaultState(), 3);
+                        if (!itemStack.isEmpty() && itemStack.isOf(ModContent.WEED_SEED)) {
+                            serverWorld.setBlockState(this.currentTarget, ModContent.WEED_CROP.getDefaultState(), 3);
                             bl = true;
 
                         }

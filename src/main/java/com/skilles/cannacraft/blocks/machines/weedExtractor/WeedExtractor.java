@@ -1,7 +1,7 @@
 package com.skilles.cannacraft.blocks.machines.weedExtractor;
 
 import com.skilles.cannacraft.blocks.machines.MachineBlock;
-import com.skilles.cannacraft.registry.ModEntities;
+import com.skilles.cannacraft.registry.BlockEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -19,8 +19,8 @@ import java.util.List;
 
 public class WeedExtractor extends MachineBlock {
 
-    public WeedExtractor(Settings settings) {
-        super(settings);
+    public WeedExtractor() {
+        super(WeedExtractorEntity::new);
     }
 
     @Nullable
@@ -32,11 +32,11 @@ public class WeedExtractor extends MachineBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return checkType(type, ModEntities.WEED_EXTRACTOR_ENTITY, WeedExtractorEntity::tick);
+        return checkType(type, BlockEntities.EXTRACTOR, WeedExtractorEntity::tick);
     }
 
     @Override
     public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options) {
-        tooltip.add(Text.of("Analyzes unidentified seeds").shallowCopy().formatted(Formatting.GOLD));
+        tooltip.add(Text.of("Extracts an item from a strain").shallowCopy().formatted(Formatting.GOLD));
     }
 }

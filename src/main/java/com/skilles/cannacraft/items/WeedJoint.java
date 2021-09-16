@@ -1,7 +1,8 @@
 package com.skilles.cannacraft.items;
 
+import com.skilles.cannacraft.Cannacraft;
 import com.skilles.cannacraft.CannacraftClient;
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.util.HighUtil;
 import com.skilles.cannacraft.util.MiscUtil;
 import com.skilles.cannacraft.util.WeedRegistry;
@@ -13,6 +14,7 @@ import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BowItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -38,8 +40,8 @@ import java.util.function.Predicate;
 
 public class WeedJoint extends BowItem {
 
-    public WeedJoint(Settings settings) {
-        super(settings);
+    public WeedJoint() {
+        super(new Item.Settings().group(Cannacraft.ITEM_GROUP).maxDamage(5));
     }
 
     @Override
@@ -47,7 +49,7 @@ public class WeedJoint extends BowItem {
         ItemStack itemStack = user.getStackInHand(hand);
         ItemStack offhandStack = user.getOffHandStack();
         NbtCompound tag = itemStack.getOrCreateNbt();
-        if (offhandStack.isOf(Items.FLINT_AND_STEEL) || user.getMainHandStack().isOf(Items.FLINT_AND_STEEL) || offhandStack.isOf(ModItems.WEED_LIGHTER) || user.getMainHandStack().isOf(ModItems.WEED_LIGHTER)) {
+        if (offhandStack.isOf(Items.FLINT_AND_STEEL) || user.getMainHandStack().isOf(Items.FLINT_AND_STEEL) || offhandStack.isOf(ModContent.LIGHTER) || user.getMainHandStack().isOf(ModContent.LIGHTER)) {
             tag.putBoolean("Lit", true);
             user.getInventory().insertStack(user.getOffHandStack());
             user.getOffHandStack().decrement(1);

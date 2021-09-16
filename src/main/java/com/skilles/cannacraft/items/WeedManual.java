@@ -1,5 +1,6 @@
 package com.skilles.cannacraft.items;
 
+import com.skilles.cannacraft.Cannacraft;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCropEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.item.TooltipContext;
@@ -23,8 +24,8 @@ import static com.skilles.cannacraft.Cannacraft.id;
 import static com.skilles.cannacraft.Cannacraft.log;
 
 public class WeedManual extends Item {
-    public WeedManual(Settings settings) {
-        super(settings);
+    public WeedManual() {
+        super(new Item.Settings().group(Cannacraft.ITEM_GROUP).maxCount(1).fireproof());
     }
 
     @Override

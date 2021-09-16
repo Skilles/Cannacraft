@@ -1,14 +1,17 @@
 package com.skilles.cannacraft.items;
 
+import com.skilles.cannacraft.Cannacraft;
 import com.skilles.cannacraft.strain.StrainMap;
 import com.skilles.cannacraft.util.BundleUtil;
 import com.skilles.cannacraft.util.StrainUtil;
+import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Rarity;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.StringUtils;
@@ -17,8 +20,8 @@ import java.util.List;
 
 public class WeedBundle extends StrainItem {
 
-    public WeedBundle(Settings settings) {
-        super(settings);
+    public WeedBundle() {
+        super(new FabricItemSettings().group(Cannacraft.ITEM_GROUP).maxCount(128).rarity(Rarity.UNCOMMON));
     }
 
     @Override

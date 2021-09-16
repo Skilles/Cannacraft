@@ -1,8 +1,8 @@
 package com.skilles.cannacraft.blocks.machines.weedExtractor;
 
 import com.skilles.cannacraft.blocks.machines.MachineBlockEntity;
-import com.skilles.cannacraft.registry.ModEntities;
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.BlockEntities;
+import com.skilles.cannacraft.registry.ModContent;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -25,7 +25,7 @@ public class WeedExtractorEntity extends MachineBlockEntity {
     protected static final int timeToProcess = 175;
 
     public WeedExtractorEntity(BlockPos pos, BlockState state) {
-        super(ModEntities.WEED_EXTRACTOR_ENTITY, pos, state, DefaultedList.ofSize(2, ItemStack.EMPTY));
+        super(BlockEntities.EXTRACTOR, pos, state, DefaultedList.ofSize(2, ItemStack.EMPTY));
         this.propertyDelegate = new PropertyDelegate() {
             @Override
             public int get(int index) {
@@ -56,7 +56,7 @@ public class WeedExtractorEntity extends MachineBlockEntity {
             ItemStack stack = inventory.get(1);
             ItemStack output = inventory.get(0);
             if (stack.equals(ItemStack.EMPTY)) return false;
-                if (stack.isOf(ModItems.WEED_BUNDLE) && stack.getCount() > 0 && stack.hasNbt() && getStatus(stack) == StatusTypes.WET) {
+                if (stack.isOf(ModContent.WEED_BUNDLE) && stack.getCount() > 0 && stack.hasNbt() && getStatus(stack) == StatusTypes.WET) {
                     if (output.equals(ItemStack.EMPTY)) return true;
                     return getOutput(stack).isItemEqual(output);
             }
@@ -81,6 +81,6 @@ public class WeedExtractorEntity extends MachineBlockEntity {
     }
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
-        return stack.isOf(ModItems.WEED_BUNDLE);
+        return stack.isOf(ModContent.WEED_BUNDLE);
     }
 }

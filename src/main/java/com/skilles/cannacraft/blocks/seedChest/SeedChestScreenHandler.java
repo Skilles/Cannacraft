@@ -1,6 +1,6 @@
 package com.skilles.cannacraft.blocks.seedChest;
 
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.registry.ModScreens;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -39,7 +39,7 @@ public class SeedChestScreenHandler extends ScreenHandler {
                 this.addSlot(new Slot(inventory, l + m * 9, 8 + l * 18, 17 + m * 18) {
                     public boolean canInsert(ItemStack stack) {
                         // Only allow tagged seeds
-                        return stack.getItem() == ModItems.WEED_SEED && stack.hasNbt() && stack.getOrCreateSubNbt("cannacraft:strain").getBoolean("Identified");
+                        return stack.getItem() == ModContent.WEED_SEED && stack.hasNbt() && stack.getOrCreateSubNbt("cannacraft:strain").getBoolean("Identified");
                     }
                 });
             }

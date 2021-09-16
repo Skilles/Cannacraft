@@ -1,7 +1,7 @@
 package com.skilles.cannacraft.blocks.machines.strainAnalyzer;
 
 import com.skilles.cannacraft.blocks.machines.MachineBlock;
-import com.skilles.cannacraft.registry.ModEntities;
+import com.skilles.cannacraft.registry.BlockEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -19,8 +19,8 @@ import java.util.List;
 
 public class StrainAnalyzer extends MachineBlock {
 
-    public StrainAnalyzer(Settings settings) {
-        super(settings);
+    public StrainAnalyzer() {
+        super(StrainAnalyzerEntity::new);
     }
 
     @Nullable
@@ -30,7 +30,7 @@ public class StrainAnalyzer extends MachineBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return checkType(type, ModEntities.STRAIN_ANALYZER_ENTITY, StrainAnalyzerEntity::tick);
+        return checkType(type, BlockEntities.ANALYZER, StrainAnalyzerEntity::tick);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.skilles.cannacraft.blocks.seedChest;
 
+import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.enums.ChestType;
@@ -29,8 +30,9 @@ public class SeedChest extends BlockWithEntity {
     public static final DirectionProperty FACING;
     public static final EnumProperty<ChestType> CHEST_TYPE;
 
-    public SeedChest(Settings settings) {
-        super(settings);
+    public SeedChest() {
+        super(FabricBlockSettings
+                .copyOf(Blocks.CHEST));
         this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.NORTH));
     }
 

@@ -1,8 +1,9 @@
 package com.skilles.cannacraft.blocks.weedBong;
 
 import com.skilles.cannacraft.items.WeedJoint;
-import com.skilles.cannacraft.registry.ModEntities;
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.BlockEntities;
+import com.skilles.cannacraft.registry.ModContent;
+import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -31,8 +32,8 @@ public class WeedBong extends BlockWithEntity {
     public static final DirectionProperty FACING;
 
 
-    public WeedBong(Settings settings) {
-        super(settings.nonOpaque());
+    public WeedBong() {
+        super(FabricBlockSettings.copyOf(Blocks.GLASS).nonOpaque());
         this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.NORTH));
     }
 
@@ -80,7 +81,7 @@ public class WeedBong extends BlockWithEntity {
                 log("Lit the bong");
                 return ActionResult.SUCCESS;
             }
-        } else if (handStack.isOf(ModItems.WEED_BUNDLE) && getStatus(handStack).equals(StatusTypes.GROUND)) {
+        } else if (handStack.isOf(ModContent.WEED_BUNDLE) && getStatus(handStack).equals(StatusTypes.GROUND)) {
             bongEntity.packedInfo = getStrainInfo(handStack);
             bongEntity.packed = true;
             handStack.decrement(1);
@@ -120,7 +121,7 @@ public class WeedBong extends BlockWithEntity {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return checkType(type, ModEntities.WEED_BONG_ENTITY, WeedBongEntity::tick);
+        return checkType(type, BlockEntities.BONG, WeedBongEntity::tick);
     }
 
     @Nullable

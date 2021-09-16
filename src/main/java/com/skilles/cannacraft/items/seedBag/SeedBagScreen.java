@@ -1,7 +1,7 @@
 package com.skilles.cannacraft.items.seedBag;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.ModContent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -31,7 +31,7 @@ public class SeedBagScreen extends HandledScreen<SeedBagScreenHandler> {
         drawTexture(matrices, x, y, 0, 0, backgroundWidth, backgroundHeight);
 
         Inventory inventory = this.handler.getInventory();
-        drawCenteredText(matrices, this.textRenderer, "Seeds: "+inventory.count(ModItems.WEED_SEED), x+30, 65, 255);
+        drawCenteredText(matrices, this.textRenderer, "Seeds: "+inventory.count(ModContent.WEED_SEED), x+30, 65, 255);
     }
 
     @Override

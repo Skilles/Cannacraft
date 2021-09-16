@@ -1,7 +1,7 @@
 package com.skilles.cannacraft.blocks.machines.generator;
 
 import com.skilles.cannacraft.blocks.machines.MachineBlockEntity;
-import com.skilles.cannacraft.registry.ModEntities;
+import com.skilles.cannacraft.registry.BlockEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
@@ -38,7 +38,7 @@ public class GeneratorEntity extends MachineBlockEntity {
     List<BlockEntity> adjLeachers = new ArrayList<>();
 
     public GeneratorEntity(BlockPos pos, BlockState state) {
-        super(ModEntities.GENERATOR_ENTITY, pos, state, DefaultedList.ofSize(1, ItemStack.EMPTY));
+        super(BlockEntities.GENERATOR, pos, state, DefaultedList.ofSize(1, ItemStack.EMPTY));
         this.propertyDelegate = new PropertyDelegate() {
             public int get(int index) {
                 return switch (index) {

@@ -5,7 +5,7 @@ import com.skilles.cannacraft.config.ModConfig;
 import com.skilles.cannacraft.dna.genome.Genome;
 import com.skilles.cannacraft.dna.genome.Meiosis;
 import com.skilles.cannacraft.dna.genome.gene.TraitGene;
-import com.skilles.cannacraft.registry.ModEntities;
+import com.skilles.cannacraft.registry.BlockEntities;
 import com.skilles.cannacraft.strain.Strain;
 import com.skilles.cannacraft.strain.StrainInfo;
 import com.skilles.cannacraft.util.DnaUtil;
@@ -38,7 +38,7 @@ import static com.skilles.cannacraft.dna.genome.Enums.Phenotype;
 public class WeedCropEntity extends BlockEntity implements BlockEntityClientSerializable {
 
     public WeedCropEntity(BlockPos pos, BlockState state) {
-        super(ModEntities.WEED_CROP_ENTITY, pos, state);
+        super(BlockEntities.CROP, pos, state);
         config = CannacraftClient.config;
         try {
             config.validatePostLoad();

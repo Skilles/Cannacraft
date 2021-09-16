@@ -1,10 +1,10 @@
 package com.skilles.cannacraft.blocks.weedCrop;
 
-import com.skilles.cannacraft.registry.ModBlocks;
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.util.DnaUtil;
 import com.skilles.cannacraft.util.MiscUtil;
 import com.skilles.cannacraft.util.WeedRegistry;
+import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -15,6 +15,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.IntProperty;
@@ -68,8 +69,8 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
             Block.createCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D),
     };
 
-    public WeedCrop(Settings settings) {
-        super(settings);
+    public WeedCrop() {
+        super(FabricBlockSettings.of(Material.PLANT).noCollision().ticksRandomly().breakInstantly().sounds(BlockSoundGroup.GRASS));
         this.setDefaultState(withMaxAge(STAGE_ONE_MAX).with(AGE, 0).with(BREEDING, false));
     }
 
@@ -89,7 +90,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         if (pos.down().equals(neighborPos) && neighborState.isOf(Blocks.AIR))
             return Blocks.AIR.getDefaultState();
         if (pos.down().equals(neighborPos) && neighborState.isOf(Blocks.DIRT))
-            MiscUtil.dropStack(world, pos, ModItems.WEED_SEED);
+            MiscUtil.dropStack(world, pos, ModContent.WEED_SEED);
         return !state.canPlaceAt(world, pos) && neighborState.isOf(Blocks.DIRT) ? Blocks.AIR.getDefaultState() : state;
     }
 
@@ -130,7 +131,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
             if (world.getBlockState(pos.up()).isOf(this)) { // if block above is stage 2
                 BlockState aboveState = world.getBlockState(pos.up());
                 if (isMature(aboveState)) {// if stage 2 is fully grown
-                    MiscUtil.dropStack(world, pos, ModItems.WEED_BUNDLE);
+                    MiscUtil.dropStack(world, pos, ModContent.WEED_BUNDLE);
                 } else { // apply growth to stage 2
                     this.applyGrowth(world, pos.up(), aboveState);
                 }
@@ -197,7 +198,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
 
     @Override
     public ItemStack getPickStack(BlockView world, BlockPos pos, BlockState state) {
-        ItemStack newStack = new ItemStack(ModItems.WEED_SEED);
+        ItemStack newStack = new ItemStack(ModContent.WEED_SEED);
         NbtCompound tag = world.getBlockEntity(pos).writeNbt(new NbtCompound());
         if (tag != null) {
             newStack.setSubNbt("cannacraft:strain", trimTag(tag));
@@ -227,15 +228,15 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         dropSeeds(world, pos, brokenWithShears);
         /*if (isBloomed(state)) {
             if (!((WeedCropEntity) world.getBlockEntity(pos)).isMale)
-            MiscUtil.dropStack(world, pos, ModItems.WEED_BUNDLE, brokenWithShears);
+            MiscUtil.dropStack(world, pos, ModContent.WEED_BUNDLE, brokenWithShears);
         }*/
-        for (i = 1; world.getBlockState(pos.up(i)).isOf(ModBlocks.WEED_CROP); i++) {
+        for (i = 1; world.getBlockState(pos.up(i)).isOf(ModContent.WEED_CROP); i++) {
             BlockState aboveState = world.getBlockState(pos.up(i));
             WeedCropEntity aboveEntity = (WeedCropEntity) world.getBlockEntity(pos.up(i));
             if (isBloomed(aboveState)) {
                 dropSeeds(world, pos.up(i), brokenWithShears);
                 if (!aboveEntity.isMale()) {
-                    MiscUtil.dropStack(world, pos.up(i), ModItems.WEED_BUNDLE, brokenWithShears);
+                    MiscUtil.dropStack(world, pos.up(i), ModContent.WEED_BUNDLE, brokenWithShears);
                 }
 
                 //world.breakBlock(pos.up(i), false, player);
@@ -247,7 +248,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         WeedCropEntity entity = (WeedCropEntity) world.getBlockEntity(pos);
         final int geneAmount = entity.seedGenomes().size();
         for (int j = 0; j < geneAmount; j++) {
-            MiscUtil.dropStack(world, pos, ModItems.WEED_SEED, brokenWithShears);
+            MiscUtil.dropStack(world, pos, ModContent.WEED_SEED, brokenWithShears);
             entity.seedGenomes().remove(0);
             entity.markDirty();
         }
@@ -424,7 +425,7 @@ public class WeedCrop extends PlantBlock implements BlockEntityProvider, Fertili
         BlockPos blockPos = pos.down();
         int k;
         if (!world.getBlockState(blockPos).isOf(Blocks.FARMLAND) && !world.getBlockState(blockPos).isOf(Blocks.GRASS_BLOCK)) {
-            for (k = 0; world.getBlockState(pos.down(k)).isOf(ModBlocks.WEED_CROP); ++k) { // i = how many stages
+            for (k = 0; world.getBlockState(pos.down(k)).isOf(ModContent.WEED_CROP); ++k) { // i = how many stages
             }
             blockPos = blockPos.down(k - 1);
         }

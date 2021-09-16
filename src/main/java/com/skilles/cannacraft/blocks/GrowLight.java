@@ -1,6 +1,7 @@
 package com.skilles.cannacraft.blocks;
 
 import com.skilles.cannacraft.blocks.weedCrop.WeedCropEntity;
+import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.server.world.ServerWorld;
@@ -20,8 +21,8 @@ public class GrowLight extends Block {
     public static final BooleanProperty LIT;
     private static final int RANGE = 2;
 
-    public GrowLight(Settings settings) {
-        super(settings);
+    public GrowLight() {
+        super(FabricBlockSettings.copyOf(Blocks.REDSTONE_LAMP));
         this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.NORTH));
         this.setDefaultState(this.stateManager.getDefaultState().with(LIT, false));
     }

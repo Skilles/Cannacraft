@@ -1,7 +1,7 @@
 package com.skilles.cannacraft.strain;
 
 
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.ModContent;
 import com.skilles.cannacraft.util.StrainUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -77,7 +77,7 @@ public class Strain {
     public boolean isResource() { return this.resource; }
 
     public ItemStack toSeedStack() {
-        return ModItems.WEED_SEED.getDefaultStack();
+        return ModContent.WEED_SEED.getDefaultStack();
     }
 
     public void init() {

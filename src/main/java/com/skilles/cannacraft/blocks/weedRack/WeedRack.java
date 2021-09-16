@@ -1,7 +1,8 @@
 package com.skilles.cannacraft.blocks.weedRack;
 
-import com.skilles.cannacraft.registry.ModEntities;
-import com.skilles.cannacraft.registry.ModItems;
+import com.skilles.cannacraft.registry.BlockEntities;
+import com.skilles.cannacraft.registry.ModContent;
+import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -27,8 +28,8 @@ public class WeedRack extends BlockWithEntity {
 
     public static final DirectionProperty FACING;
 
-    public WeedRack(Settings settings) {
-        super(settings);
+    public WeedRack() {
+        super(FabricBlockSettings.copyOf(Blocks.OAK_PLANKS));
         this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.SOUTH));
     }
 
@@ -47,7 +48,7 @@ public class WeedRack extends BlockWithEntity {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return checkType(type, ModEntities.WEED_RACK_ENTITY, WeedRackEntity::tick);
+        return checkType(type, BlockEntities.RACK, WeedRackEntity::tick);
     }
 
     @Override
@@ -71,7 +72,7 @@ public class WeedRack extends BlockWithEntity {
         } else {
             // Hang item on rack
             ItemStack heldItem = player.getMainHandStack();
-            if (!heldItem.isEmpty() && heldItem.isOf(ModItems.WEED_BUNDLE) && heldItem.hasNbt()) {
+            if (!heldItem.isEmpty() && heldItem.isOf(ModContent.WEED_BUNDLE) && heldItem.hasNbt()) {
                 if (!world.isClient && heldItem.getNbt().getCompound("cannacraft:strain").getFloat("Status") == 1.0f) {
                     if (player.isCreative()) dryingRackEntity.setStack(0, heldItem.copy());
                     else dryingRackEntity.setStack(0, heldItem.split(4));

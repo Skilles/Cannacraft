@@ -1,6 +1,6 @@
 package com.skilles.cannacraft.blocks.weedBong;
 
-import com.skilles.cannacraft.registry.ModEntities;
+import com.skilles.cannacraft.registry.BlockEntities;
 import com.skilles.cannacraft.strain.StrainInfo;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -15,7 +15,7 @@ import static com.skilles.cannacraft.Cannacraft.log;
 public class WeedBongEntity extends BlockEntity {
 
     public WeedBongEntity(BlockPos pos, BlockState state) {
-        super(ModEntities.WEED_BONG_ENTITY, pos, state);
+        super(BlockEntities.BONG, pos, state);
     }
 
     int timer = 0;

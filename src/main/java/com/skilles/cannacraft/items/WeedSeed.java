@@ -1,5 +1,6 @@
 package com.skilles.cannacraft.items;
 
+import com.skilles.cannacraft.Cannacraft;
 import com.skilles.cannacraft.blocks.machines.MachineBlock;
 import com.skilles.cannacraft.blocks.machines.MachineBlockEntity;
 import com.skilles.cannacraft.blocks.weedCrop.WeedCrop;
@@ -12,6 +13,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AliasedBlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.NbtCompound;
@@ -27,8 +29,8 @@ import static com.skilles.cannacraft.Cannacraft.log;
 
 public class WeedSeed extends AliasedBlockItem {
 
-    public WeedSeed(Block block, Settings settings) {
-        super(block, settings);
+    public WeedSeed(Block block) {
+        super(block, new Item.Settings().group(Cannacraft.ITEM_GROUP));
     }
 
 
